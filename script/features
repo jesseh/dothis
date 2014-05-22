@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-./manage.py harvest "$@" --port=8081
+coverage run --source=campaigns manage.py harvest "$@" --port=8081
+coverage report
+coverage annotate
+

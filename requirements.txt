@@ -2,6 +2,7 @@ Django==1.7b4
 WebOb==1.4
 WebTest==2.0.15
 beautifulsoup4==4.3.2
+coverage==3.7.1
 django-webtest==1.7.7
 extras==0.0.3
 fuzzywuzzy==0.2

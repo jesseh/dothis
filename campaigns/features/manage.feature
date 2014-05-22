@@ -11,25 +11,19 @@ Feature: Administering Campaigns
   volunteer -> ( contact info, capabilities)
 
 
-  coordinator can create a campaign with duties and required capabilities
+  x coordinator can create a campaign 
+  x a campaing has duties 
+  x admin can setup up volunteers
+  o coordinator can see the assigned and unassigned duties for a given campaign.
+  o volunteer can go to system see potential duties
+  o volunteer can assign themself to many duties
 
-  coordinator can see the assigned and unassigned duties for a given campaign.
+  o a duty has required capabilities
 
-  admin can setup up volunteers
-
-  admin can manage volunteer capabilities
+  o admin can manage volunteer capabilities
 
 
-  volunteer can go to system
-  see potential duties
-  and assign themself to many duties
-
-  Scenario: Adding a Campaign
-    Given a admin user is logged in
-    When he creates a campaign called "Gate Security"
-    Then he sees that the campaign "Gate Security" was created
-
-  Scenario: Assigning Duties to a campaign
+  Scenario: Creating a capaign with duties
     Given a coordinator is logged in
     When he creates a campaign called "Summer camp" with duties:
       | Name      |
