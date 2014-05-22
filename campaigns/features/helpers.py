@@ -1,12 +1,20 @@
+from __future__ import print_function
+
 from django.contrib.auth.models import User
+from django.core import management
 from django.core.wsgi import get_wsgi_application
 from lettuce import world
 from nose.tools import assert_in
 from webtest import TestApp
 
 
-def prepare_browser():
+def setup_session():
     world.browser = TestApp(get_wsgi_application())
+    management.call_command('flush', interactive=False)
+
+
+def teardown_session():
+    pass
 
 
 def create_the_admin_user():
@@ -22,7 +30,13 @@ def create_the_admin_user():
         return user
 
 
-def login_as_the_admin(user=create_the_admin_user()):
+def show():
+    page().showbrowser()
+
+
+def login_as_the_admin(user=None):
+    if user is None:
+        user = create_the_admin_user()
     visit('/admin/login/')
     form()['username'] = 'johntheadmin'
     form()['password'] = 'johnpassword'
