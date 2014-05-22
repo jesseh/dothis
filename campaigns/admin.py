@@ -1,5 +1,5 @@
 from django.contrib import admin
-from campaigns.models import Campaign, Duty
+from campaigns.models import Campaign, Duty, Volunteer
 
 
 class DutyInline(admin.StackedInline):
@@ -10,3 +10,8 @@ class CampaignAdmin(admin.ModelAdmin):
     list_display = ('name',)
     inlines = (DutyInline,)
 admin.site.register(Campaign, CampaignAdmin)
+
+
+class VolunteerAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+admin.site.register(Volunteer, VolunteerAdmin)

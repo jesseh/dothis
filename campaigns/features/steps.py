@@ -25,7 +25,7 @@ def given_a_admin_user_is_logged_in(step):
 
 @step(u'^When he creates a campaign called "([^"]*)"$')
 def when_he_creates_a_campaign_called_group1(step, campaign_name):
-    visit('/admin/campaigns')
+    visit('/admin/campaigns/campaign/')
     click(description='Add')
     form()['name'] = campaign_name
     submit()
@@ -44,7 +44,7 @@ def then_he_sees_that_the_campaign_was_created(step, campaign_name):
 @step(u'^When he creates a campaign called "([^"]*)" with duties:$')
 def when_he_creates_a_campaign_called_group1_with_duties(step, campaign_name):
     duty_names = [h['Name'] for h in step.hashes]
-    visit('/admin/campaigns')
+    visit('/admin/campaigns/campaign/')
     click(description='Add')
     form()['name'] = campaign_name
     for idx, name in enumerate(duty_names):
@@ -60,3 +60,16 @@ def then_he_sees_the_group1_campaign_with_the_duties(step, campaign_name):
     visit('/admin/campaigns/campaign/%s/' % campaign.id)
     for name in duty_names:
         assert_in(name, body())
+
+
+@step(u'^When he creates a volunteer called "([^"]*)"$')
+def when_he_creates_a_volunteer_called_group1(step, volunteer_name):
+    visit('/admin/campaigns/volunteer/')
+    click('Add')
+    form()['name'] = volunteer_name
+    submit()
+
+
+@step(u'^Then he sees that the volunteer "([^"]*)" was created$')
+def then_he_sees_that_the_volunteer_group1_was_created(step, volunteer_name):
+    assert_in(volunteer_name, body())

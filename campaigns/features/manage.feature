@@ -39,3 +39,8 @@ Feature: Administering Campaigns
       | Name      |
       | counselor |
       | cook      |
+
+  Scenario: Adding a Volunteer
+    Given a admin user is logged in
+    When he creates a volunteer called "Steve Stevenson"
+    Then he sees that the volunteer "Steve Stevenson" was created
