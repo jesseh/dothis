@@ -51,6 +51,5 @@ def when_he_creates_a_campaign_called_group1(step, campaign_name):
 @step(u'Then he sees that the campaign "([^"]*)" was created')
 def then_he_sees_that_the_campaign_was_created(step, campaign_name):
     body = world.last_response.body
-    print(body)
     assert_in(campaign_name, body)
 
