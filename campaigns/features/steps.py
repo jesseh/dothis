@@ -23,19 +23,9 @@ def given_a_admin_user_is_logged_in(step):
     login_as_the_admin()
 
 
-@step(u'^When he creates a campaign called "([^"]*)"$')
-def when_he_creates_a_campaign_called_group1(step, campaign_name):
-    create_campaign(campaign_name)
-
-
 @step(u'^Given a coordinator is logged in$')
 def given_a_coordinator_is_logged_in(step):
     login_as_the_admin()
-
-
-@step(u'^Then he sees that the campaign "([^"]*)" was created$')
-def then_he_sees_that_the_campaign_was_created(step, campaign_name):
-    assert_in(campaign_name, body())
 
 
 @step(u'^When he creates a campaign called "([^"]*)" with duties:$')

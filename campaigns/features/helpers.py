@@ -24,10 +24,6 @@ def the(model_name, **kwargs):
     return model.objects.get(**kwargs)
 
 
-def show():
-    page().showbrowser()
-
-
 def page():
     return world.last_response
 

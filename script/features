@@ -7,9 +7,9 @@ coverage annotate
 echo
 echo "Unused steps"
 echo "------------"
-find . -name "*steps.py,cover" | xargs grep -B3 '^!'
+find . -name "*steps.py,cover" | xargs grep -n -H -B2 '^!' | sed 's/,cover[-:]/:/'
 
 echo
 echo "Unused helpers"
 echo "------------"
-find . -name "*helpers*,cover" | xargs grep -B2 '^!'
+find . -name "*helpers*,cover" | xargs grep -n -H -B1 '^!' | sed 's/,cover[-:]/:/'
