@@ -14,10 +14,3 @@ class Duty(models.Model):
 
     def __unicode__(self):
         return self.name
-
-
-class Volunteer(models.Model):
-    name = models.CharField(max_length=200)
-
-    def __unicode__(self):
-        return self.name

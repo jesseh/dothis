@@ -1,0 +1,17 @@
+# encoding: utf8
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('campaigns', '0002_volunteer'),
+    ]
+
+    operations = [
+        migrations.DeleteModel(
+            name='Volunteer',
+        ),
+    ]

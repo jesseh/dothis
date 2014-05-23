@@ -27,13 +27,6 @@ def create_campaign(campaign_name, duty_names=[]):
     submit()
 
 
-def create_volunteer(volunteer_name):
-    visit('/admin/campaigns/volunteer/')
-    click('Add')
-    form()['name'] = volunteer_name
-    submit()
-
-
 def assert_campaign_has_duties(campaign, duty_names):
     visit('/admin/campaigns/campaign/%s/' % campaign.id)
     for name in duty_names:
