@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-coverage run --source=campaigns manage.py harvest "$@" --port=8081
+# Fail fast
+set -e
+
+coverage run --source=campaigns,dothis,volunteers manage.py harvest "$@" --port=8081
 coverage report
 coverage annotate
 

@@ -3,9 +3,9 @@
 from lettuce import step, before, after
 from nose.tools import assert_in
 
-from helpers import (setup_session, teardown_session, login_as_the_admin, body,
-                     create_volunteer, create_campaign,
-                     assert_campaign_has_duties, the)
+from helpers import (setup_session, teardown_session, create_volunteer,
+                     create_campaign, assert_campaign_has_duties)
+from dothis.features.helpers import login_as_the_admin, the, body
 
 
 @before.each_scenario
