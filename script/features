@@ -4,3 +4,12 @@ coverage run --source=campaigns manage.py harvest "$@" --port=8081
 coverage report
 coverage annotate
 
+echo
+echo "Unused steps"
+echo "------------"
+find . -name "*steps.py,cover" | xargs grep -B3 '^!'
+
+echo
+echo "Unused helpers"
+echo "------------"
+find . -name "*helpers*,cover" | xargs grep -B2 '^!'
