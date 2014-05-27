@@ -15,3 +15,8 @@ admin.site.register(Campaign, CampaignAdmin)
 class VolunteerAdmin(admin.ModelAdmin):
     list_display = ('name',)
 admin.site.register(Volunteer, VolunteerAdmin)
+
+
+class DutyAdmin(admin.ModelAdmin):
+    model = Duty
+admin.site.register(Duty, DutyAdmin)
