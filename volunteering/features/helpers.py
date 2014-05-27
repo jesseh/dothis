@@ -19,7 +19,7 @@ def teardown_session():
 
 
 def create_campaign(campaign_name, duty_names=[]):
-    visit('/admin/campaigns/campaign/')
+    visit('/admin/volunteering/campaign/')
     click(description='Add')
     form()['name'] = campaign_name
     for idx, name in enumerate(duty_names):
@@ -28,6 +28,13 @@ def create_campaign(campaign_name, duty_names=[]):
 
 
 def assert_campaign_has_duties(campaign, duty_names):
-    visit('/admin/campaigns/campaign/%s/' % campaign.id)
+    visit('/admin/volunteering/campaign/%s/' % campaign.id)
     for name in duty_names:
         assert_in(name, body())
+
+
+def create_volunteer(volunteer_name):
+    visit('/admin/volunteering/volunteer/')
+    click('Add')
+    form()['name'] = volunteer_name
+    submit()

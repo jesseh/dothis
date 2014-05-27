@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from lettuce import step, before, after
+from nose.tools import assert_in
 
-from helpers import (setup_session, teardown_session, create_campaign,
-                     assert_campaign_has_duties)
-from dothis.features.helpers import login_as_the_admin, the
+from helpers import (setup_session, teardown_session, create_volunteer,
+                     create_campaign, assert_campaign_has_duties)
+from dothis.features.helpers import login_as_the_admin, the, body
 
 
 @before.each_scenario
@@ -38,3 +39,23 @@ def then_he_sees_the_group1_campaign_with_the_duties(step, campaign_name):
     duty_names = [h['Name'] for h in step.hashes]
     campaign = the('Campaign', name=campaign_name)
     assert_campaign_has_duties(campaign, duty_names)
+
+
+@step(u'^When he creates a volunteer called "([^"]*)"$')
+def when_he_creates_a_volunteer_called_group1(step, volunteer_name):
+    create_volunteer(volunteer_name)
+
+
+@step(u'^Then he sees that the volunteer "([^"]*)" was created$')
+def then_he_sees_that_the_volunteer_group1_was_created(step, volunteer_name):
+    assert_in(volunteer_name, body())
+
+
+@step(u'When a volunteer views her plan')
+def when_a_volunteer_views_her_plan(step):
+    assert False, 'This step must be implemented'
+
+
+@step(u'Then she sees the available duties for which she could volunteer')
+def then_she_sees_the_available_duties_for_which_she_could_volunteer(step):
+    assert False, 'This step must be implemented'

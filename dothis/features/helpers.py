@@ -4,11 +4,11 @@ from django.contrib.auth.models import User
 from lettuce import world
 from nose.tools import assert_in
 
-import campaigns
+import volunteering
 
 
 def the(model_name, **kwargs):
-    model = getattr(campaigns.models, model_name)
+    model = getattr(volunteering.models, model_name)
     return model.objects.get(**kwargs)
 
 
