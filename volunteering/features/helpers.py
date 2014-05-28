@@ -38,3 +38,10 @@ def create_volunteer(volunteer_name):
     click('Add')
     form()['name'] = volunteer_name
     submit()
+
+
+def create_duty(duty_name):
+    visit('/admin/volunteering/duty/')
+    click('Add')
+    form()['name'] = duty_name
+    submit()
