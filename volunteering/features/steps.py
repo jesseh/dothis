@@ -3,7 +3,8 @@
 from lettuce import step, before, after
 
 from helpers import (setup_session, teardown_session, create_volunteer,
-                     create_duty, create_campaign, assert_campaign_has_duties)
+                     create_duty, create_campaign, assert_campaign_has_duties,
+                     view_volunteer_plan)
 from dothis.features.helpers import login_as_the_admin, the, assert_was_created
 
 
@@ -53,7 +54,8 @@ def then_he_sees_that_the_volunteer_group1_was_created(step, volunteer_name):
 
 @step(u'When a volunteer views her plan')
 def when_a_volunteer_views_her_plan(step):
-    assert False, 'This step must be implemented'
+    create_volunteer("Sam Samson")
+    view_volunteer_plan("Sam Samson")
 
 
 @step(u'Then she sees the available duties for which she could volunteer')

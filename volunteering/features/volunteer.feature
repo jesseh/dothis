@@ -9,6 +9,7 @@ Feature: Volunteering
     Then he sees that the volunteer "Steve Stevenson" was created
 
   Scenario: Viewing the plan for a volunteer
+    Given a admin user is logged in
     When a volunteer views her plan
     Then she sees the available duties for which she could volunteer
     # And she sees the duties for which she has volunteered
