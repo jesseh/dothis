@@ -35,7 +35,7 @@ Feature: Administering Campaigns
       | cook      |
 
 
-  Scenario: Adding a Volunteer
+  Scenario: Adding a duty
     Given a admin user is logged in
-    When he creates a duty called "Security"
-    Then he sees that the duty "Security" was created
+    When he creates a duty called "Security" in the "July" campaign
+    Then he sees that the duty "Security" was created in the "July" campaign

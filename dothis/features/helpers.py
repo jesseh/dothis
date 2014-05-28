@@ -1,8 +1,10 @@
 from __future__ import print_function
 
+import re
+
 from django.contrib.auth.models import User
 from lettuce import world
-from nose.tools import assert_in
+from nose.tools import assert_in, assert_true
 
 import volunteering
 
@@ -38,6 +40,18 @@ def submit():
 
 def body():
     return page().body
+
+
+def page_path():
+    return page().request.path
+
+
+def assert_was_created(name, invalid_path_regex='/add/'):
+    assert_in(name, body(), "%s was not created (name not present)" % name)
+    is_path_valid = not re.search(invalid_path_regex, page_path())
+    assert_true(is_path_valid,
+                "%s was not created (path '%s' should not match '%s')"
+                % (name, page_path(), invalid_path_regex))
 
 
 def create_the_admin_user():

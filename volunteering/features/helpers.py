@@ -6,7 +6,7 @@ from lettuce import world
 from nose.tools import assert_in
 from webtest import TestApp
 
-from dothis.features.helpers import (visit, click, form, submit, body)
+from dothis.features.helpers import visit, click, form, submit, body
 
 
 def setup_session():
@@ -40,8 +40,9 @@ def create_volunteer(volunteer_name):
     submit()
 
 
-def create_duty(duty_name):
+def create_duty(duty_name, campaign_name):
     visit('/admin/volunteering/duty/')
     click('Add')
     form()['name'] = duty_name
+    form().select('campaign', text=campaign_name)
     submit()
