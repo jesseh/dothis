@@ -49,5 +49,13 @@ def create_duty(duty_name, campaign_name):
 
 
 def view_volunteer_plan(volunteer_name):
+    create_campaign('Summer camp', ['counselor', 'cook'])
+
     volunteer = the('Volunteer', name=volunteer_name)
     visit("/admin/volunteering/volunteer/%s/" % volunteer.id)
+
+
+def assert_volunteer_has_available_duties(volunteer, duty_names):
+    visit('/admin/volunteering/volunteer/%s/' % volunteer.id)
+    for name in duty_names:
+        assert_in(name, body())

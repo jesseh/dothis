@@ -4,7 +4,8 @@ from lettuce import step, before, after
 
 from helpers import (setup_session, teardown_session, create_volunteer,
                      create_duty, create_campaign, assert_campaign_has_duties,
-                     view_volunteer_plan)
+                     view_volunteer_plan,
+                     assert_volunteer_has_available_duties)
 from dothis.features.helpers import login_as_the_admin, the, assert_was_created
 
 
@@ -52,18 +53,7 @@ def then_he_sees_that_the_volunteer_group1_was_created(step, volunteer_name):
     assert_was_created(volunteer_name)
 
 
-@step(u'When a volunteer views her plan')
-def when_a_volunteer_views_her_plan(step):
-    create_volunteer("Sam Samson")
-    view_volunteer_plan("Sam Samson")
-
-
-@step(u'Then she sees the available duties for which she could volunteer')
-def then_she_sees_the_available_duties_for_which_she_could_volunteer(step):
-    assert False, 'This step must be implemented'
-
-
-@step(u'When he creates a duty called "([^"]*)" in the "([^"]*)" campaign')
+@step(u'^When he creates a duty called "([^"]*)" in the "([^"]*)" campaign$')
 def when_he_creates_a_duty_called_group1_in_the_group2_campaign(step,
                                                                 duty_name,
                                                                 campaign_name):
@@ -71,7 +61,27 @@ def when_he_creates_a_duty_called_group1_in_the_group2_campaign(step,
     create_duty(duty_name, campaign_name)
 
 
-@step(u'Then he sees that the duty "([^"]*)" was created in the "([^"]*)" campaign')
-def then_he_sees_that_the_duty_group1_was_created_in_the_group2_campaign(step, duty_name, campaign_name):
+@step(u'^Then he sees that the duty "([^"]*)" was ' +
+      u'created in the "([^"]*)" campaign$')
+def then_the_duty_g1_created_in_g2_campaign(step, duty_name, campaign_name):
     assert_was_created(campaign_name)
     assert_was_created(duty_name)
+
+
+@step(u'^Given a campaign called "([^"]*)" with duties:$')
+def given_a_campaign_called_group1_with_duties(step, campaign_name):
+    duty_names = [h['Name'] for h in step.hashes]
+    create_campaign(campaign_name, duty_names)
+
+
+@step(u'^When a volunteer views her plan$')
+def when_a_volunteer_views_her_plan(step):
+    create_volunteer("Sam Samson")
+    view_volunteer_plan("Sam Samson")
+
+
+@step(u'^Then she sees the available duties for which she could volunteer:$')
+def then_she_sees_the_available_duties_for_which_she_could_volunteer(step):
+    volunteer = the('Volunteer', name="Sam Samson")
+    duty_names = [h['Name'] for h in step.hashes]
+    assert_volunteer_has_available_duties(volunteer, duty_names)

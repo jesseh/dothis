@@ -7,16 +7,18 @@ class DutyInline(admin.StackedInline):
 
 
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    inlines = (DutyInline,)
+    list_display = ['name']
+    inlines = [DutyInline]
 admin.site.register(Campaign, CampaignAdmin)
 
 
 class VolunteerAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ['name']
+    readonly_fields = ['assignable_duties']
+    fields = ['name', 'assignable_duties']
 admin.site.register(Volunteer, VolunteerAdmin)
 
 
 class DutyAdmin(admin.ModelAdmin):
-    list_display = ('name', 'campaign')
+    list_display = ('name', 'campaign', 'assigned_to')
 admin.site.register(Duty, DutyAdmin)

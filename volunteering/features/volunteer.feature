@@ -10,6 +10,13 @@ Feature: Volunteering
 
   Scenario: Viewing the plan for a volunteer
     Given a admin user is logged in
+    Given a campaign called "Summer camp" with duties:
+      | Name      |
+      | counselor |
+      | cook      |
     When a volunteer views her plan
-    Then she sees the available duties for which she could volunteer
+    Then she sees the available duties for which she could volunteer:
+      | Name      |
+      | counselor |
+      | cook      |
     # And she sees the duties for which she has volunteered
