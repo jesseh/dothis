@@ -3,7 +3,7 @@ from __future__ import print_function
 from django.core import management
 from django.core.wsgi import get_wsgi_application
 from lettuce import world
-from nose.tools import assert_in
+from nose.tools import assert_in, assert_equal, assert_not_in
 from webtest import TestApp
 
 from dothis.features.helpers import visit, click, form, submit, body, the
@@ -59,3 +59,25 @@ def assert_volunteer_has_available_duties(volunteer, duty_names):
     visit('/admin/volunteering/volunteer/%s/' % volunteer.id)
     for name in duty_names:
         assert_in(name, body())
+
+
+def assert_volunteer_is_assigned_duties(volunteer, duty_names):
+    assert_equal(set(duty_names),
+                 set(volunteer.duty_set.values_list('name', flat=True)))
+
+
+def assert_volunteer_sees_assigned_duties(volunteer, duty_names):
+    visit('/admin/volunteering/volunteer/%s/' % volunteer.id)
+    for name in duty_names:
+        assert_in(name, body())
+
+
+def assert_volunteer_is_not_assigned_duties(volunteer, duty_names):
+    assert_not_in(set(duty_names),
+                  set(volunteer.duty_set.values_list('name', flat=True)))
+
+
+def assert_volunteer_does_not_see_duties(volunteer, duty_names):
+    visit('/admin/volunteering/volunteer/%s/' % volunteer.id)
+    for name in duty_names:
+        assert_not_in(name, body())

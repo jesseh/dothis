@@ -14,9 +14,25 @@ Feature: Volunteering
       | Name      |
       | counselor |
       | cook      |
-    When a volunteer views her plan
-    Then she sees the available duties for which she could volunteer:
+      | security  |
+      | greeter   |
+      | usher     |
+    Given some duties are assigned to the volunteer:
       | Name      |
       | counselor |
       | cook      |
-    # And she sees the duties for which she has volunteered
+    Given some duties are assigned to another volunteer:
+      | Name      |
+      | security  |
+    When the volunteer views her plan
+    Then she sees the available duties for which she could volunteer to be assigned:
+      | Name      |
+      | greeter   |
+      | usher     |
+    And she sees the duties assigned to her:
+      | Name      |
+      | counselor |
+      | cook      |
+    And she does not sees the duties assigned to others:
+      | Name      |
+      | security  |

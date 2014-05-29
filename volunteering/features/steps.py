@@ -5,7 +5,11 @@ from lettuce import step, before, after
 from helpers import (setup_session, teardown_session, create_volunteer,
                      create_duty, create_campaign, assert_campaign_has_duties,
                      view_volunteer_plan,
-                     assert_volunteer_has_available_duties)
+                     assert_volunteer_has_available_duties,
+                     assert_volunteer_is_assigned_duties,
+                     assert_volunteer_sees_assigned_duties,
+                     assert_volunteer_is_not_assigned_duties,
+                     assert_volunteer_does_not_see_duties)
 from dothis.features.helpers import login_as_the_admin, the, assert_was_created
 
 
@@ -74,14 +78,52 @@ def given_a_campaign_called_group1_with_duties(step, campaign_name):
     create_campaign(campaign_name, duty_names)
 
 
-@step(u'^When a volunteer views her plan$')
-def when_a_volunteer_views_her_plan(step):
+@step(u'^Given some duties are assigned to the volunteer:$')
+def given_some_duties_are_assigned_to_the_volunteer(step):
     create_volunteer("Sam Samson")
+    volunteer = the('Volunteer', name="Sam Samson")
+    duty_names = [h['Name'] for h in step.hashes]
+    for duty_name in duty_names:
+        duty = the('Duty', name=duty_name)
+        duty.assigned_to = volunteer
+        duty.save()
+
+
+@step(u'^Given some duties are assigned to another volunteer:$')
+def given_some_duties_are_assigned_to_another_volunteer(step):
+    create_volunteer("Other Volunteer")
+    volunteer = the('Volunteer', name="Other Volunteer")
+    duty_names = [h['Name'] for h in step.hashes]
+    for duty_name in duty_names:
+        duty = the('Duty', name=duty_name)
+        duty.assigned_to = volunteer
+        duty.save()
+
+
+@step(u'^When the volunteer views her plan$')
+def when_the_volunteer_views_her_plan(step):
     view_volunteer_plan("Sam Samson")
 
 
-@step(u'^Then she sees the available duties for which she could volunteer:$')
-def then_she_sees_the_available_duties_for_which_she_could_volunteer(step):
+@step(u'^Then she sees the available duties for which she could volunteer ' +
+      u'to be assigned:$')
+def then_she_sees_the_available_duties_for_which_she_could_be_assigned(step):
     volunteer = the('Volunteer', name="Sam Samson")
     duty_names = [h['Name'] for h in step.hashes]
     assert_volunteer_has_available_duties(volunteer, duty_names)
+
+
+@step(u'^And she sees the duties assigned to her:$')
+def and_she_sees_the_duties_assigned_to_her(step):
+    volunteer = the('Volunteer', name="Sam Samson")
+    duty_names = [h['Name'] for h in step.hashes]
+    assert_volunteer_is_assigned_duties(volunteer, duty_names)
+    assert_volunteer_sees_assigned_duties(volunteer, duty_names)
+
+
+@step(u'^And she does not sees the duties assigned to others:$')
+def and_she_does_not_sees_the_duties_assigned_to_others(step):
+    volunteer = the('Volunteer', name="Sam Samson")
+    duty_names = [h['Name'] for h in step.hashes]
+    assert_volunteer_is_not_assigned_duties(volunteer, duty_names)
+    assert_volunteer_does_not_see_duties(volunteer, duty_names)

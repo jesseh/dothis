@@ -14,15 +14,17 @@ class Volunteer(models.Model):
     def __unicode__(self):
         return self.name
 
-    def assignable_duties(self):
-        duty_names = (d.name for d in Duty.unassigned_objects.all())
+    def assignable_duty_names(self):
+        return ", ".join(d.name for d in Duty.objects.unassigned())
+
+    def assigned_duty_names(self):
+        duty_names = (d.name for d in self.duty_set.all())
         return ", ".join(duty_names)
 
 
-class UnassignedDutyManager(models.Manager):
-    def get_queryset(self):
-        return super(UnassignedDutyManager,
-                     self).get_queryset().filter(assigned_to=None)
+class DutyManager(models.Manager):
+    def unassigned(self):
+        return self.get_queryset().filter(assigned_to=None)
 
 
 class Duty(models.Model):
@@ -30,8 +32,7 @@ class Duty(models.Model):
     campaign = models.ForeignKey(Campaign)
     assigned_to = models.ForeignKey(Volunteer, null=True, blank=True)
 
-    objects = models.Manager()
-    unassigned_objects = UnassignedDutyManager()
+    objects = DutyManager()
 
     def __unicode__(self):
         return self.name

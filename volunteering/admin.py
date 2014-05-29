@@ -4,6 +4,7 @@ from models import Campaign, Duty, Volunteer
 
 class DutyInline(admin.StackedInline):
     model = Duty
+    extra = 10
 
 
 class CampaignAdmin(admin.ModelAdmin):
@@ -14,8 +15,8 @@ admin.site.register(Campaign, CampaignAdmin)
 
 class VolunteerAdmin(admin.ModelAdmin):
     list_display = ['name']
-    readonly_fields = ['assignable_duties']
-    fields = ['name', 'assignable_duties']
+    readonly_fields = ['assignable_duty_names', 'assigned_duty_names']
+    fields = ['name', 'assignable_duty_names', 'assigned_duty_names']
 admin.site.register(Volunteer, VolunteerAdmin)
 
 
