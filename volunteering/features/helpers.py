@@ -40,6 +40,13 @@ def create_volunteer(volunteer_name):
     submit()
 
 
+def create_label(label_name):
+    visit('/admin/volunteering/label/')
+    click('Add')
+    form()['name'] = label_name
+    submit()
+
+
 def create_duty(duty_name, campaign_name):
     visit('/admin/volunteering/duty/')
     click('Add')
