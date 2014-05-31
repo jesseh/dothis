@@ -21,3 +21,7 @@ testtools==0.9.35
 waitress==0.8.9
 wsgiref==0.1.2
 django-taggit==0.12
+psycopg2==2.5.3
+gunicorn==18.0
+dj-database-url==0.3.0
+-e git+https://github.com/kennethreitz/dj-static.git@e79582483a976c76511244b3f236f7c68991e1ae#egg=dj-static

@@ -3,3 +3,5 @@
 *.ropeproject
 *,cover
 .coverage
+venv
+staticfiles
