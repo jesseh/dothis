@@ -1,4 +1,6 @@
 -e ../django-trunk/
+-e
+git+https://github.com/django/django.git@95cf17244c086cb31eef86bdb0db57a0b5d05e38#egg=django
 WebOb==1.4
 WebTest==2.0.15
 beautifulsoup4==4.3.2
