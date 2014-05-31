@@ -3,7 +3,7 @@
 from lettuce import step, before, after
 
 from helpers import (setup_session, teardown_session, create_volunteer,
-                     create_label, create_duty, create_campaign,
+                     create_tag, create_duty, create_campaign,
                      assert_campaign_has_duties, view_volunteer_plan,
                      assert_volunteer_has_available_duties,
                      assert_volunteer_is_assigned_duties,
@@ -129,11 +129,11 @@ def and_she_does_not_sees_the_duties_assigned_to_others(step):
     assert_volunteer_does_not_see_duties(volunteer, duty_names)
 
 
-@step(u'When she creates a label called "([^"]*)"')
-def when_she_creates_a_label_called_group1(step, label_name):
-    create_label(label_name)
+@step(u'When she creates a tag called "([^"]*)"')
+def when_she_creates_a_tag_called_group1(step, tag_name):
+    create_tag(tag_name)
 
 
-@step(u'Then she sees the "([^"]*)" label')
-def then_she_sees_the_group1_label(step, label_name):
-    assert_was_created(label_name)
+@step(u'Then she sees the "([^"]*)" tag')
+def then_she_sees_the_group1_tag(step, tag_name):
+    assert_was_created(tag_name)

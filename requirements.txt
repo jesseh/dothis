@@ -20,3 +20,4 @@ testscenarios==0.4
 testtools==0.9.35
 waitress==0.8.9
 wsgiref==0.1.2
+django-taggit==0.12

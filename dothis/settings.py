@@ -36,8 +36,13 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'volunteering',
+
+    # External
+    'taggit',
     'lettuce.django',
+
+    # Internal
+    'volunteering',
 )
 
 MIDDLEWARE_CLASSES = (

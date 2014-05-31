@@ -2,6 +2,7 @@ from __future__ import print_function
 
 from django.core import management
 from django.core.wsgi import get_wsgi_application
+from django.template.defaultfilters import slugify
 from lettuce import world
 from nose.tools import assert_in, assert_equal, assert_not_in
 from webtest import TestApp
@@ -40,10 +41,11 @@ def create_volunteer(volunteer_name):
     submit()
 
 
-def create_label(label_name):
-    visit('/admin/volunteering/label/')
+def create_tag(tag_name):
+    visit('/admin/taggit/tag/')
     click('Add')
-    form()['name'] = label_name
+    form()['name'] = tag_name
+    form()['slug'] = slugify(tag_name)
     submit()
 
 

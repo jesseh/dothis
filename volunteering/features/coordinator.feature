@@ -41,7 +41,7 @@ Feature: Administering Campaigns
     Then he sees that the duty "Security" was created in the "July" campaign
 
 
-  Scenario: Creating a label
+  Scenario: Creating a tag
     Given a coordinator is logged in
-    When she creates a label called "Trained for security"
-    Then she sees the "Trained for security" label
+    When she creates a tag called "Trained for security"
+    Then she sees the "Trained for security" tag

@@ -1,5 +1,7 @@
 from django.db import models
 
+from taggit.managers import TaggableManager
+
 
 class Campaign(models.Model):
     name = models.CharField(max_length=200)
@@ -33,10 +35,7 @@ class Duty(models.Model):
     assigned_to = models.ForeignKey(Volunteer, null=True, blank=True)
 
     objects = DutyManager()
+    tags = TaggableManager(blank=True)
 
     def __unicode__(self):
         return self.name
-
-
-class Label(models.Model):
-    name = models.CharField(max_length=200)
