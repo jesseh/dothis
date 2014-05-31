@@ -19,19 +19,21 @@ def teardown_session():
     pass
 
 
-def create_campaign(campaign_name, duty_names=[]):
+def create_campaign(campaign_name, duties=[]):
     visit('/admin/volunteering/campaign/')
     click(description='Add')
     form()['name'] = campaign_name
-    for idx, name in enumerate(duty_names):
-        form()['duty_set-%s-name' % idx] = name
+    for idx, duty in enumerate(duties):
+        form()['duty_set-%s-name' % idx] = duty['Name']
+        form()['duty_set-%s-tags' % idx] = duty['Tags']
     submit()
 
 
-def assert_campaign_has_duties(campaign, duty_names):
+def assert_campaign_has_duties(campaign, duties):
     visit('/admin/volunteering/campaign/%s/' % campaign.id)
-    for name in duty_names:
-        assert_in(name, body())
+    for duty in duties:
+        assert_in(duty['Name'], body())
+        assert_in(duty['Tags'].replace('"', ''), body())
 
 
 def create_volunteer(volunteer_name):
@@ -58,7 +60,8 @@ def create_duty(duty_name, campaign_name):
 
 
 def view_volunteer_plan(volunteer_name):
-    create_campaign('Summer camp', ['counselor', 'cook'])
+    create_campaign('Summer camp', [{'Name': 'counselor', 'Tags': ''},
+                                    {'Name': 'cook',      'Tags': ''}])
 
     volunteer = the('Volunteer', name=volunteer_name)
     visit("/admin/volunteering/volunteer/%s/" % volunteer.id)

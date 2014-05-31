@@ -25,14 +25,14 @@ Feature: Administering Campaigns
 
   Scenario: Creating a capaign with duties
     Given a coordinator is logged in
-    When he creates a campaign called "Summer camp" with duties:
-      | Name      |
-      | counselor |
-      | cook      |
-    Then he sees the "Summer camp" campaign with the duties:
-      | Name      |
-      | counselor |
-      | cook      |
+    When he creates a campaign called "Summer camp" with duties and tags:
+      | Name      | Tags              |
+      | counselor | youth             |
+      | cook      | "kitchen trained" |
+    Then he sees the "Summer camp" campaign with the duties and tags:
+      | Name      | Tags              |
+      | counselor | youth             |
+      | cook      | "kitchen trained" |
 
 
   Scenario: Adding a duty

@@ -11,28 +11,28 @@ Feature: Volunteering
   Scenario: Viewing the plan for a volunteer
     Given a admin user is logged in
     Given a campaign called "Summer camp" with duties:
-      | Name      |
-      | counselor |
-      | cook      |
-      | security  |
-      | greeter   |
-      | usher     |
+      | Name      | Tags |
+      | counselor |      |
+      | cook      |      |
+      | security  |      |
+      | greeter   |      |
+      | usher     |      |
     Given some duties are assigned to the volunteer:
-      | Name      |
-      | counselor |
-      | cook      |
+      | Name      | Tags |
+      | counselor |      |
+      | cook      |      |
     Given some duties are assigned to another volunteer:
-      | Name      |
-      | security  |
+      | Name     | Tags |
+      | security |      |
     When the volunteer views her plan
     Then she sees the available duties for which she could volunteer to be assigned:
-      | Name      |
-      | greeter   |
-      | usher     |
+      | Name    | Tags |
+      | greeter |      |
+      | usher   |      |
     And she sees the duties assigned to her:
-      | Name      |
-      | counselor |
-      | cook      |
+      | Name      | Tags |
+      | counselor |      |
+      | cook      |      |
     And she does not sees the duties assigned to others:
-      | Name      |
-      | security  |
+      | Name     | Tags |
+      | security |      |

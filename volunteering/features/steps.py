@@ -33,18 +33,16 @@ def given_a_coordinator_is_logged_in(step):
     login_as_the_admin()
 
 
-@step(u'^When he creates a campaign called "([^"]*)" with duties:$')
-def when_he_creates_a_campaign_called_group1_with_duties(step, campaign_name):
-    duty_names = [h['Name'] for h in step.hashes]
-    create_campaign(campaign_name, duty_names)
+@step(u'When he creates a campaign called "([^"]*)" with duties and tags:')
+def when_he_creates_a_campaign_with_duties_and_tags(step, campaign_name):
+    create_campaign(campaign_name, step.hashes)
 
 
-@step(u'^Then he sees the "([^"]*)" campaign with the duties:$')
-def then_he_sees_the_group1_campaign_with_the_duties(step, campaign_name):
+@step(u'Then he sees the "([^"]*)" campaign with the duties and tags:')
+def then_he_sees_the_campaign_with_the_duties_and_tags(step, campaign_name):
     assert_was_created(campaign_name)
-    duty_names = [h['Name'] for h in step.hashes]
     campaign = the('Campaign', name=campaign_name)
-    assert_campaign_has_duties(campaign, duty_names)
+    assert_campaign_has_duties(campaign, step.hashes)
 
 
 @step(u'^When he creates a volunteer called "([^"]*)"$')
@@ -74,8 +72,7 @@ def then_the_duty_g1_created_in_g2_campaign(step, duty_name, campaign_name):
 
 @step(u'^Given a campaign called "([^"]*)" with duties:$')
 def given_a_campaign_called_group1_with_duties(step, campaign_name):
-    duty_names = [h['Name'] for h in step.hashes]
-    create_campaign(campaign_name, duty_names)
+    create_campaign(campaign_name, step.hashes)
 
 
 @step(u'^Given some duties are assigned to the volunteer:$')
