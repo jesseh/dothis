@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     # External
     'taggit',
     'lettuce.django',
+    'django_extensions',
 
     # Internal
     'volunteering',
@@ -76,8 +77,7 @@ USE_TZ = True
 LETTUCE_USE_TEST_DATABASE = True
 
 # Parse database configuration from $DATABASE_URL
-default_database_url = 'sqlite://' + os.path.join(BASE_DIR, 'db.sqlite3')
-print("JESSE default_database_url: %s" % default_database_url)
+default_database_url = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
 DATABASES = {
     'default': dj_database_url.config(default=default_database_url)
 }
@@ -96,3 +96,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
+
+CSVIMPORT_MODELS = ['volunteering.Volunteer']
