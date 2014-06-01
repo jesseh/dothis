@@ -40,8 +40,10 @@ INSTALLED_APPS = (
     'taggit',
     'lettuce.django',
     'django_extensions',
+    'foundation',
 
     # Internal
+    'dothis',
     'volunteering',
 )
 
@@ -72,6 +74,8 @@ USE_L10N = True
 
 USE_TZ = True
 
+TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader')
 
 # Lettuce settings
 LETTUCE_USE_TEST_DATABASE = True
