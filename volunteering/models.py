@@ -16,6 +16,8 @@ class Volunteer(models.Model):
                                    unique=True)
     phone_number = models.CharField(max_length=200, null=True, blank=True)
 
+    tags = TaggableManager(blank=True)
+
     def __unicode__(self):
         return self.name
 
