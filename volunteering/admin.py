@@ -16,7 +16,9 @@ admin.site.register(Campaign, CampaignAdmin)
 class VolunteerAdmin(admin.ModelAdmin):
     list_display = ['name', 'phone_number', 'external_id']
     readonly_fields = ['assignable_duty_names', 'assigned_duty_names']
-    fields = ['name', 'assignable_duty_names', 'assigned_duty_names', 'tags']
+    fields = ['name', 'phone_number', 'external_id', 'assignable_duty_names',
+              'assigned_duty_names', 'tags']
+    search_fields = ['name', 'external_id']
 admin.site.register(Volunteer, VolunteerAdmin)
 
 
