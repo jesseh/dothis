@@ -12,6 +12,9 @@ class Campaign(models.Model):
 
 class Volunteer(models.Model):
     name = models.CharField(max_length=200)
+    external_id = models.CharField(max_length=200, null=True, blank=True,
+                                   unique=True)
+    phone_number = models.CharField(max_length=200, null=True, blank=True)
 
     def __unicode__(self):
         return self.name
