@@ -79,6 +79,9 @@ TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader',
 
 # Lettuce settings
 LETTUCE_USE_TEST_DATABASE = True
+LETTUCE_APPS = (
+    'volunteering',
+)
 
 # Parse database configuration from $DATABASE_URL
 default_database_url = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
