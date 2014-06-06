@@ -28,6 +28,11 @@ class Volunteer(models.Model):
         duty_names = (d.name for d in self.duty_set.all())
         return ", ".join(duty_names)
 
+    def save(self, *args, **kwargs):
+        if self.external_id == "":
+            self.external_id = None
+        super(Volunteer, self).save(*args, **kwargs)
+
 
 class DutyManager(models.Manager):
     def unassigned(self):

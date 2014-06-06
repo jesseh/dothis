@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+# Debug
+# set -x
+
 # Fail fast
-set -e
+# set -e
 
 coverage run --source=dothis,volunteering manage.py harvest "$@" --port=8081
 coverage report
