@@ -75,6 +75,21 @@ def given_a_campaign_called_group1_with_duties(step, campaign_name):
     create_campaign(campaign_name, step.hashes)
 
 
+@step(u'^Given a campaign with a First Aid duty$')
+def given_a_campaign_with_a_first_aid_duty(step):
+    campaign_name = "test campaign"
+    duty_name = "first aid"
+
+    login_as_the_admin()
+    create_campaign(campaign_name)
+    create_duty(duty_name, campaign_name)
+
+
+@step(u'^And a doctor who is qualified for the First Aid duty$')
+def and_a_doctor_who_is_qualified_for_the_first_aid_duty(step):
+    create_volunteer("Sam Samson")
+
+
 @step(u'^Given some duties are assigned to the volunteer:$')
 def given_some_duties_are_assigned_to_the_volunteer(step):
     create_volunteer("Sam Samson")
