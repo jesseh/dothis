@@ -25,12 +25,12 @@ Feature: Administering Campaigns
 
   Scenario: Creating a capaign with duties
     Given a coordinator is logged in
-    When he creates a campaign called "Summer camp" with duties and tags:
-      | Name      | Tags              |
+    When he creates a campaign called "Summer camp" with duties and attributes:
+      | Name      | Attributes              |
       | counselor | youth             |
       | cook      | "kitchen trained" |
-    Then he sees the "Summer camp" campaign with the duties and tags:
-      | Name      | Tags              |
+    Then he sees the "Summer camp" campaign with the duties and attributes:
+      | Name      | Attributes              |
       | counselor | youth             |
       | cook      | "kitchen trained" |
 
@@ -41,7 +41,7 @@ Feature: Administering Campaigns
     Then he sees that the duty "Security" was created in the "July" campaign
 
 
-  Scenario: Creating a tag
+  Scenario: Creating a attribute
     Given a coordinator is logged in
-    When she creates a tag called "Trained for security"
-    Then she sees the "Trained for security" tag
+    When she creates a attribute called "Trained for security"
+    Then she sees the "Trained for security" attribute

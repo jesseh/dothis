@@ -2,7 +2,6 @@ from __future__ import print_function
 
 from django.core import management
 from django.core.wsgi import get_wsgi_application
-from django.template.defaultfilters import slugify
 from lettuce import world
 from nose.tools import assert_in, assert_equal, assert_not_in
 from webtest import TestApp
@@ -25,7 +24,7 @@ def create_campaign(campaign_name, duties=[]):
     form()['name'] = campaign_name
     for idx, duty in enumerate(duties):
         form()['duty_set-%s-name' % idx] = duty['Name']
-        form()['duty_set-%s-tags' % idx] = duty['Tags']
+        form()['duty_set-%s-attributes' % idx] = duty['Attributes']
     submit()
 
 
@@ -33,35 +32,39 @@ def assert_campaign_has_duties(campaign, duties):
     visit('/admin/volunteering/campaign/%s/' % campaign.id)
     for duty in duties:
         assert_in(duty['Name'], body())
-        assert_in(duty['Tags'].replace('"', ''), body())
+        assert_in(duty['Attributes'].replace('"', ''), body())
 
 
-def create_volunteer(volunteer_name):
+def create_volunteer(volunteer_name, attribute_names=[]):
     visit('/admin/volunteering/volunteer/')
     click('Add')
     form()['name'] = volunteer_name
+    for attribute_name in attribute_names:
+        form().select_multiple('attributes', texts=attribute_names)
     submit()
 
 
-def create_tag(tag_name):
-    visit('/admin/taggit/tag/')
+def create_attribute(attribute_name):
+    visit('/admin/volunteering/attribute/')
     click('Add')
-    form()['name'] = tag_name
-    form()['slug'] = slugify(tag_name)
+    form()['name'] = attribute_name
     submit()
 
 
-def create_duty(duty_name, campaign_name):
+def create_duty(duty_name, campaign_name, attribute_names=[]):
     visit('/admin/volunteering/duty/')
     click('Add')
-    form()['name'] = duty_name
-    form().select('campaign', text=campaign_name)
+    f = form()
+    f['name'] = duty_name
+    f.select('campaign', text=campaign_name)
+    for attribute_name in attribute_names:
+        f.select_multiple('attributes', texts=attribute_names)
     submit()
 
 
 def view_volunteer_plan(volunteer_name):
-    create_campaign('Summer camp', [{'Name': 'counselor', 'Tags': ''},
-                                    {'Name': 'cook',      'Tags': ''}])
+    create_campaign('Summer camp', [{'Name': 'counselor', 'Attributes': ''},
+                                    {'Name': 'cook',      'Attributes': ''}])
 
     volunteer = the('Volunteer', name=volunteer_name)
     visit("/admin/volunteering/volunteer/%s/" % volunteer.id)

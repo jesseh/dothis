@@ -3,7 +3,7 @@
 from lettuce import step, before, after
 
 from helpers import (setup_session, teardown_session, create_volunteer,
-                     create_tag, create_duty, create_campaign,
+                     create_attribute, create_duty, create_campaign,
                      assert_campaign_has_duties, view_volunteer_plan,
                      assert_volunteer_has_available_duties,
                      assert_volunteer_is_assigned_duties,
@@ -33,13 +33,16 @@ def given_a_coordinator_is_logged_in(step):
     login_as_the_admin()
 
 
-@step(u'When he creates a campaign called "([^"]*)" with duties and tags:')
-def when_he_creates_a_campaign_with_duties_and_tags(step, campaign_name):
+@step(u'When he creates a campaign called "([^"]*)" \
+      with duties and attributes:')
+def when_he_creates_a_campaign_with_duties_and_attributes(step, campaign_name):
     create_campaign(campaign_name, step.hashes)
 
 
-@step(u'Then he sees the "([^"]*)" campaign with the duties and tags:')
-def then_he_sees_the_campaign_with_the_duties_and_tags(step, campaign_name):
+@step(u'Then he sees the "([^"]*)" campaign \
+      with the duties and attributes:')
+def then_he_sees_the_campaign_with_the_duties_and_attributes(step,
+                                                             campaign_name):
     assert_was_created(campaign_name)
     campaign = the('Campaign', name=campaign_name)
     assert_campaign_has_duties(campaign, step.hashes)
@@ -79,15 +82,18 @@ def given_a_campaign_called_group1_with_duties(step, campaign_name):
 def given_a_campaign_with_a_first_aid_duty(step):
     campaign_name = "test campaign"
     duty_name = "first aid"
+    attribute_name = "doctor"
 
     login_as_the_admin()
     create_campaign(campaign_name)
-    create_duty(duty_name, campaign_name)
+    create_attribute(attribute_name)
+    create_duty(duty_name, campaign_name, [attribute_name])
 
 
 @step(u'^And a doctor who is qualified for the First Aid duty$')
 def and_a_doctor_who_is_qualified_for_the_first_aid_duty(step):
-    create_volunteer("Sam Samson")
+    attribute_name = "doctor"
+    create_volunteer("Sam Samson", [attribute_name])
 
 
 @step(u'^Given some duties are assigned to the volunteer:$')
@@ -141,11 +147,13 @@ def and_she_does_not_sees_the_duties_assigned_to_others(step):
     assert_volunteer_does_not_see_duties(volunteer, duty_names)
 
 
-@step(u'When she creates a tag called "([^"]*)"')
-def when_she_creates_a_tag_called_group1(step, tag_name):
-    create_tag(tag_name)
+@step(u'^When she creates a attribute called "([^"]*)"$')
+def when_she_creates_a_attribute_called_group1(step, attribute_name):
+    create_attribute(attribute_name)
 
 
-@step(u'Then she sees the "([^"]*)" tag')
-def then_she_sees_the_group1_tag(step, tag_name):
-    assert_was_created(tag_name)
+@step(u'^Then she sees the "([^"]*)" attribute$')
+def then_she_sees_the_group1_attribute(step, attribute_name):
+    assert_was_created(attribute_name)
+
+

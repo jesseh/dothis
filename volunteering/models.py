@@ -23,11 +23,10 @@ class Campaign(models.Model):
 class Volunteer(models.Model):
 
     name = models.CharField(max_length=200)
-    external_id = models.CharField(max_length=200, null=True, blank=True,
-                                   unique=True)
+    external_id = models.CharField(max_length=200, null=True, blank=True)
     phone_number = models.CharField(max_length=200, null=True, blank=True)
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
-    obscure_slug = models.CharField(max_length=10, unique=True)
+    obscure_slug = models.CharField(max_length=10, unique=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -67,7 +66,7 @@ class Duty(models.Model):
     name = models.CharField(max_length=200)
     campaign = models.ForeignKey(Campaign)
     assigned_to = models.ForeignKey(Volunteer, null=True, blank=True)
-    attributes = models.ManyToManyField(Attribute)
+    attributes = models.ManyToManyField(Attribute, null=True, blank=True)
 
     objects = DutyManager()
 
