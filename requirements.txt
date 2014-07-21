@@ -20,7 +20,6 @@ testscenarios==0.4
 testtools==0.9.35
 waitress==0.8.9
 wsgiref==0.1.2
-django-taggit==0.12
 psycopg2==2.5.3
 gunicorn==18.0
 dj-database-url==0.3.0

@@ -37,7 +37,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     # External
-    'taggit',
     'lettuce.django',
     'django_extensions',
     'foundation',

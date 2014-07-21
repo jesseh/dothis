@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><testsuite name="nosetests" tests="1" errors="1" failures="0" skip="0"><testcase classname="nose.failure.Failure" name="runTest" time="0.000"><error type="django.core.exceptions.ImproperlyConfigured" message="Requested setting DEFAULT_INDEX_TABLESPACE, but settings are not configured. You must either define the environment variable DJANGO_SETTINGS_MODULE or call settings.configure() before accessing settings."><![CDATA[Traceback (most recent call last):
+  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/unittest/case.py", line 331, in run
+    testMethod()
+  File "/Users/jesseheitler/.virtualenvs/dothis/lib/python2.7/site-packages/nose/loader.py", line 414, in loadTestsFromName
+    addr.filename, addr.module)
+  File "/Users/jesseheitler/.virtualenvs/dothis/lib/python2.7/site-packages/nose/importer.py", line 47, in importFromPath
+    return self.importFromDir(dir_path, fqname)
+  File "/Users/jesseheitler/.virtualenvs/dothis/lib/python2.7/site-packages/nose/importer.py", line 94, in importFromDir
+    mod = load_module(part_fqname, fh, filename, desc)
+  File "/Users/jesseheitler/dev/dothis/volunteering/tests/test_attributes.py", line 3, in <module>
+    from volunteering.models import Attribute
+  File "/Users/jesseheitler/dev/dothis/volunteering/models.py", line 3, in <module>
+    from taggit.managers import TaggableManager
+  File "/Users/jesseheitler/.virtualenvs/dothis/lib/python2.7/site-packages/taggit/managers.py", line 6, in <module>
+    from django.contrib.contenttypes.fields import GenericRelation
+  File "/Users/jesseheitler/.virtualenvs/dothis/src/django/django/contrib/contenttypes/fields.py", line 14, in <module>
+    from django.contrib.contenttypes.models import ContentType
+  File "/Users/jesseheitler/.virtualenvs/dothis/src/django/django/contrib/contenttypes/models.py", line 131, in <module>
+    class ContentType(models.Model):
+  File "/Users/jesseheitler/.virtualenvs/dothis/src/django/django/contrib/contenttypes/models.py", line 132, in ContentType
+    name = models.CharField(max_length=100)
+  File "/Users/jesseheitler/.virtualenvs/dothis/src/django/django/db/models/fields/__init__.py", line 1007, in __init__
+    super(CharField, self).__init__(*args, **kwargs)
+  File "/Users/jesseheitler/.virtualenvs/dothis/src/django/django/db/models/fields/__init__.py", line 144, in __init__
+    self.db_tablespace = db_tablespace or settings.DEFAULT_INDEX_TABLESPACE
+  File "/Users/jesseheitler/.virtualenvs/dothis/src/django/django/conf/__init__.py", line 46, in __getattr__
+    self._setup(name)
+  File "/Users/jesseheitler/.virtualenvs/dothis/src/django/django/conf/__init__.py", line 40, in _setup
+    % (desc, ENVIRONMENT_VARIABLE))
+ImproperlyConfigured: Requested setting DEFAULT_INDEX_TABLESPACE, but settings are not configured. You must either define the environment variable DJANGO_SETTINGS_MODULE or call settings.configure() before accessing settings.
+]]></error></testcase></testsuite>
