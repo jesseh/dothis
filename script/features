@@ -6,6 +6,8 @@
 # Fail fast
 set -e
 
+./manage.py test
+
 coverage run --source=dothis,volunteering manage.py harvest "$@" --port=8081
 coverage report
 coverage annotate

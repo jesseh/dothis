@@ -15,6 +15,7 @@ class Attribute(models.Model):
 
 class Campaign(models.Model):
     name = models.CharField(max_length=200)
+    slug = models.SlugField()
 
     def __unicode__(self):
         return self.name
@@ -64,6 +65,7 @@ class DutyManager(models.Manager):
 
 class Duty(models.Model):
     name = models.CharField(max_length=200)
+    slug = models.SlugField()
     campaign = models.ForeignKey(Campaign)
     assigned_to = models.ForeignKey(Volunteer, null=True, blank=True)
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)

@@ -40,3 +40,13 @@ class TestDuty(unittest.TestCase):
         d = Duty.objects.create(name='a duty', campaign=c)
         d.attributes.create(name='attr')
         self.assertEqual('attr', d.attributes.all()[0].name)
+
+    def testHasSlug(self):
+        d = Duty(slug='a slug')
+        self.assertEqual('a slug', d.slug)
+
+
+class TestCampaign(unittest.TestCase):
+    def testHasSlug(self):
+        c = Campaign(slug='a slug')
+        self.assertEqual('a slug', c.slug)

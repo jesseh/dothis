@@ -2,6 +2,9 @@ from __future__ import print_function
 
 from django.core import management
 from django.core.wsgi import get_wsgi_application
+from django.utils.encoding import smart_text
+from django.utils.text import slugify as unicode_slugify
+
 from lettuce import world
 from nose.tools import assert_in, assert_equal, assert_not_in
 from webtest import TestApp
@@ -22,8 +25,10 @@ def create_campaign(campaign_name, duties=[]):
     visit('/admin/volunteering/campaign/')
     click(description='Add')
     form()['name'] = campaign_name
+    form()['slug'] = slugify(campaign_name)
     for idx, duty in enumerate(duties):
         form()['duty_set-%s-name' % idx] = duty['Name']
+        form()['duty_set-%s-slug' % idx] = slugify(duty['Name'])
         form()['duty_set-%s-attributes' % idx] = duty['Attributes']
     submit()
 
@@ -56,6 +61,7 @@ def create_duty(duty_name, campaign_name, attribute_names=[]):
     click('Add')
     f = form()
     f['name'] = duty_name
+    f['slug'] = slugify(duty_name)
     f.select('campaign', text=campaign_name)
     for attribute_name in attribute_names:
         f.select_multiple('attributes', texts=attribute_names)
@@ -63,11 +69,17 @@ def create_duty(duty_name, campaign_name, attribute_names=[]):
 
 
 def view_volunteer_plan(volunteer_name):
-    create_campaign('Summer camp', [{'Name': 'counselor', 'Attributes': ''},
-                                    {'Name': 'cook',      'Attributes': ''}])
-
     volunteer = the('Volunteer', name=volunteer_name)
-    visit("/admin/volunteering/volunteer/%s/" % volunteer.id)
+    visit("/volunteering/%s/" % volunteer.obscure_slug)
+
+
+def volunteer_for_duty(volunteer_name, campaign_name, duty_name):
+    volunteer = the('Volunteer', name=volunteer_name)
+    campaign = the('Campaign', name=campaign_name)
+    duty = the('Duty', name=duty_name)
+    visit("/volunteering/%s/%s/%s/" % (volunteer.obscure_slug, campaign.slug,
+                                       duty.slug))
+    submit()
 
 
 def assert_volunteer_has_available_duties(volunteer, duty_names):
@@ -96,3 +108,7 @@ def assert_volunteer_does_not_see_duties(volunteer, duty_names):
     visit('/admin/volunteering/volunteer/%s/' % volunteer.id)
     for name in duty_names:
         assert_not_in(name, body())
+
+
+def slugify(string):
+    return unicode_slugify(smart_text(string))

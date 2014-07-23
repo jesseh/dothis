@@ -4,7 +4,8 @@ from lettuce import step, before, after
 
 from helpers import (setup_session, teardown_session, create_volunteer,
                      create_attribute, create_duty, create_campaign,
-                     assert_campaign_has_duties, view_volunteer_plan,
+                     volunteer_for_duty, view_volunteer_plan,
+                     assert_campaign_has_duties,
                      assert_volunteer_has_available_duties,
                      assert_volunteer_is_assigned_duties,
                      assert_volunteer_sees_assigned_duties,
@@ -120,7 +121,9 @@ def given_some_duties_are_assigned_to_another_volunteer(step):
 
 @step(u'^When the volunteer views her plan$')
 def when_the_volunteer_views_her_plan(step):
-    view_volunteer_plan("Sam Samson")
+    create_campaign(u'Summer camp', [{'Name': 'counselor', 'Attributes': ''},
+                                     {'Name': 'cook',      'Attributes': ''}])
+    view_volunteer_plan(u"Sam Samson")
 
 
 @step(u'^Then she sees the available duties for which she could volunteer ' +
@@ -157,3 +160,6 @@ def then_she_sees_the_group1_attribute(step, attribute_name):
     assert_was_created(attribute_name)
 
 
+@step(u'^When the doctor volunteers for the First Aid duty$')
+def when_the_doctor_volunteers_for_the_first_aid_duty(step):
+    volunteer_for_duty(u"Sam Samson", u"test campaign", u"first aid")
