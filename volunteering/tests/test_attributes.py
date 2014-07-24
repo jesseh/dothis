@@ -20,18 +20,18 @@ class TestVolunteer(unittest.TestCase):
         v.attributes.create(name='attr2')
         self.assertEqual('attr2', v.attributes.all()[0].name)
 
-    def testHasAUniqueObscureSlugThatHas8PlusOneChars(self):
+    def testHasAUniqueSlugThatHas8PlusOneChars(self):
         v = Volunteer.objects.create(name='tester')
-        self.assertEqual(9, len(v.obscure_slug))
+        self.assertEqual(9, len(v.slug))
 
-    def testHasObscureSlugWithDashInTheMiddle(self):
+    def testHasSlugWithDashInTheMiddle(self):
         v = Volunteer.objects.create(name='tester')
-        self.assertEqual('-', v.obscure_slug[4])
+        self.assertEqual('-', v.slug[4])
 
-    def testTheObscureSlugIsUnique(self):
+    def testTheSlugIsUnique(self):
         v1 = Volunteer.objects.create(name='tester')
         v2 = Volunteer.objects.create(name='tester2')
-        self.assertNotEqual(v1.obscure_slug, v2.obscure_slug)
+        self.assertNotEqual(v1.slug, v2.slug)
 
 
 class TestDuty(unittest.TestCase):

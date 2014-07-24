@@ -121,9 +121,9 @@ def given_some_duties_are_assigned_to_another_volunteer(step):
 
 @step(u'^When the volunteer views her plan$')
 def when_the_volunteer_views_her_plan(step):
-    create_campaign(u'Summer camp', [{'Name': 'counselor', 'Attributes': ''},
-                                     {'Name': 'cook',      'Attributes': ''}])
-    view_volunteer_plan(u"Sam Samson")
+    create_campaign('Summer camp', [{'Name': 'counselor', 'Attributes': ''},
+                                    {'Name': 'cook',      'Attributes': ''}])
+    view_volunteer_plan("Sam Samson")
 
 
 @step(u'^Then she sees the available duties for which she could volunteer ' +
@@ -162,4 +162,4 @@ def then_she_sees_the_group1_attribute(step, attribute_name):
 
 @step(u'^When the doctor volunteers for the First Aid duty$')
 def when_the_doctor_volunteers_for_the_first_aid_duty(step):
-    volunteer_for_duty(u"Sam Samson", u"test campaign", u"first aid")
+    volunteer_for_duty("Sam Samson", "test campaign", "first aid")

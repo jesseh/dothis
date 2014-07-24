@@ -70,14 +70,14 @@ def create_duty(duty_name, campaign_name, attribute_names=[]):
 
 def view_volunteer_plan(volunteer_name):
     volunteer = the('Volunteer', name=volunteer_name)
-    visit("/volunteering/%s/" % volunteer.obscure_slug)
+    visit("/volunteering/%s/" % volunteer.slug)
 
 
 def volunteer_for_duty(volunteer_name, campaign_name, duty_name):
     volunteer = the('Volunteer', name=volunteer_name)
     campaign = the('Campaign', name=campaign_name)
     duty = the('Duty', name=duty_name)
-    visit("/volunteering/%s/%s/%s/" % (volunteer.obscure_slug, campaign.slug,
+    visit("/volunteering/%s/%s/%s/" % (volunteer.slug, campaign.slug,
                                        duty.slug))
     submit()
 

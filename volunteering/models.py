@@ -2,8 +2,8 @@ import random
 
 from django.db import models
 
-OBSCURE_SLUG_LENGTH = 8
-OBSCURE_SLUG_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'
+SLUG_LENGTH = 8
+SLUG_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'
 
 
 class Attribute(models.Model):
@@ -27,25 +27,25 @@ class Volunteer(models.Model):
     external_id = models.CharField(max_length=200, null=True, blank=True)
     phone_number = models.CharField(max_length=200, null=True, blank=True)
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
-    obscure_slug = models.CharField(max_length=10, unique=True, blank=True)
+    slug = models.CharField(max_length=10, unique=True, blank=True)
 
     def __unicode__(self):
         return self.name
 
-    def generate_obscure_slug(self):
-        length = OBSCURE_SLUG_LENGTH + 1
+    def generate_slug(self):
+        length = SLUG_LENGTH + 1
         while True:
-            slug_chars = [random.choice(OBSCURE_SLUG_ALPHABET)
+            slug_chars = [random.choice(SLUG_ALPHABET)
                           for i in xrange(length)]
             slug_chars[4] = '-'
             slug = "".join(slug_chars)
-            if not Volunteer.objects.filter(obscure_slug=slug).exists():
+            if not Volunteer.objects.filter(slug=slug).exists():
                 break
         return slug
 
     def save(self, *args, **kwargs):
-        if self.obscure_slug is None or self.obscure_slug == '':
-            self.obscure_slug = self.generate_obscure_slug()
+        if self.slug is None or self.slug == '':
+            self.slug = self.generate_slug()
         if self.external_id == '':
             self.external_id is None
         super(Volunteer, self).save(*args, **kwargs)
