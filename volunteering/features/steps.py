@@ -136,10 +136,10 @@ def then_she_sees_the_available_duties_for_which_she_could_be_assigned(step):
 
 @step(u'^And she sees the duties assigned to her:$')
 def and_she_sees_the_duties_assigned_to_her(step):
-    volunteer = the('Volunteer', name="Sam Samson")
+    volunteer_name = "Sam Samson"
     duty_names = [h['Name'] for h in step.hashes]
-    assert_volunteer_is_assigned_duties(volunteer, duty_names)
-    assert_volunteer_sees_assigned_duties(volunteer, duty_names)
+    assert_volunteer_is_assigned_duties(volunteer_name, duty_names)
+    assert_volunteer_sees_assigned_duties(volunteer_name, duty_names)
 
 
 @step(u'^And she does not sees the duties assigned to others:$')
@@ -163,3 +163,9 @@ def then_she_sees_the_group1_attribute(step, attribute_name):
 @step(u'^When the doctor volunteers for the First Aid duty$')
 def when_the_doctor_volunteers_for_the_first_aid_duty(step):
     volunteer_for_duty("Sam Samson", "test campaign", "first aid")
+
+
+@step(u'^Then the doctor is assigned the First Aid duty$')
+def then_the_doctor_is_assigned_the_first_aid_duty(step):
+    # assert_volunteer_is_assigned_duties("Sam Samson"
+    assert False, 'This step must be implemented'

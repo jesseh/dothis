@@ -88,12 +88,14 @@ def assert_volunteer_has_available_duties(volunteer, duty_names):
         assert_in(name, body())
 
 
-def assert_volunteer_is_assigned_duties(volunteer, duty_names):
+def assert_volunteer_is_assigned_duties(volunteer_name, duty_names):
+    volunteer = the('Volunteer', name="Sam Samson")
     assert_equal(set(duty_names),
                  set(volunteer.duty_set.values_list('name', flat=True)))
 
 
-def assert_volunteer_sees_assigned_duties(volunteer, duty_names):
+def assert_volunteer_sees_assigned_duties(volunteer_name, duty_names):
+    volunteer = the('Volunteer', name="Sam Samson")
     visit('/admin/volunteering/volunteer/%s/' % volunteer.id)
     for name in duty_names:
         assert_in(name, body())
