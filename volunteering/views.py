@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView
 
-from volunteering.models import Volunteer
+from volunteering.models import Volunteer, Campaign
 
 
 def importer(request):
@@ -38,9 +38,11 @@ def _get_or_create_volunteer(line):
 
 
 class SummaryView(TemplateView):
+
     template_name = 'volunteering/summary.html'
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(HomePageView, self).get_context_data(**kwargs)
-    #     context['latest_articles'] = Article.objects.all()[:5]
-    #     return context
+    def get_context_data(self, **kwargs):
+        context = super(SummaryView, self).get_context_data(**kwargs)
+        context['campaigns'] = Campaign.objects.all()
+        context['volunteer'] = Volunteer.objects.get(slug=kwargs['volunteer_slug'])
+        return context
