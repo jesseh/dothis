@@ -40,7 +40,7 @@ Feature: Volunteering
   Scenario: A volunteer can volunteer for a duty
     Given a campaign with a First Aid duty
     And a doctor who is qualified for the First Aid duty
-    When the doctor volunteers for the First Aid duty
+    When the doctor volunteers for the previously unassigned First Aid duty
     Then the doctor is assigned the First Aid duty
 
   Scenario: A volunteer cannot volunteer for a duty she cannot perform

@@ -88,11 +88,9 @@ def assert_volunteer_is_assigned_duties(volunteer_name, duty_names):
 
 
 def assert_volunteer_is_assigned_duty(volunteer_name, campaign_name, duty_name):
-    volunteer = the('Volunteer', name=volunteer_name)
-    campaign = the('Campaign', name=campaign_name)
-    duty = the('Duty', name=duty_name)
-    visit('/volunteering/%s/%s/%s/' % (volunteer.slug, campaign.slug, duty.slug))
-    assert_in("Assigned to %s" % volunteer.name, body())
+    visit_volunteer_duty(volunteer_name, campaign_name, duty_name)
+    assert_in("You have volunteered", body())
+
 
 
 def assert_volunteer_sees_assigned_duties(volunteer_name, duty_names):
@@ -106,6 +104,16 @@ def assert_volunteer_is_not_assigned_duties(volunteer, duty_names):
     assert_not_in(set(duty_names),
                   set(volunteer.duty_set.values_list('name', flat=True)))
 
+
+def assert_duty_not_assigned_to_volunteer(volunteer_name, campaign_name, duty_name):
+    visit_volunteer_duty(volunteer_name, campaign_name, duty_name)
+    assert_not_in("You have volunteered", body())
+
+def visit_volunteer_duty(volunteer_name, campaign_name, duty_name):
+    volunteer = the('Volunteer', name=volunteer_name)
+    campaign = the('Campaign', name=campaign_name)
+    duty = the('Duty', name=duty_name)
+    visit('/volunteering/%s/%s/%s/' % (volunteer.slug, campaign.slug, duty.slug))
 
 def assert_volunteer_does_not_see_duties(volunteer, duty_names):
     visit('/admin/volunteering/volunteer/%s/' % volunteer.id)

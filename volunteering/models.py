@@ -57,6 +57,9 @@ class Volunteer(models.Model):
         duty_names = (d.name for d in self.duty_set.all())
         return ", ".join(duty_names)
 
+    def has_claimed(self, duty):
+        return duty in self.duty_set.all()
+
 
 class DutyManager(models.Manager):
     def unassigned(self):

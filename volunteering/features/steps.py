@@ -9,6 +9,7 @@ from helpers import (setup_session, teardown_session, create_volunteer,
                      assert_volunteer_is_assigned_duties,
                      assert_volunteer_sees_assigned_duties,
                      assert_volunteer_is_not_assigned_duties,
+                     assert_duty_not_assigned_to_volunteer,
                      assert_volunteer_does_not_see_duties,
                      assert_volunteer_is_assigned_duty)
 from dothis.features.helpers import login_as_the_admin, the, assert_was_created
@@ -145,8 +146,9 @@ def then_she_sees_the_group1_attribute(step, attribute_name):
     assert_was_created(attribute_name)
 
 
-@step(u'^When the doctor volunteers for the First Aid duty$')
+@step(u'^When the doctor volunteers for the previously unassigned First Aid duty$')
 def when_the_doctor_volunteers_for_the_first_aid_duty(step):
+    assert_duty_not_assigned_to_volunteer("Sam Samson", "test campaign", "first aid")
     volunteer_for_duty("Sam Samson", "test campaign", "first aid")
 
 

@@ -33,6 +33,20 @@ class TestVolunteer(unittest.TestCase):
         v2 = Volunteer.objects.create(name='tester2')
         self.assertNotEqual(v1.slug, v2.slug)
 
+    def testHasClaimed_IsFalseWhenFalse(self):
+        volunteer = Volunteer.objects.create(name='tester')
+        campaign = Campaign.objects.create(slug="a campaign")
+        duty = Duty.objects.create(name="A duty", campaign=campaign)
+        self.assertFalse(volunteer.has_claimed(duty))
+
+    def testHasClaimed_IsTrueWhenTrue(self):
+        volunteer = Volunteer.objects.create(name='tester')
+        campaign = Campaign.objects.create(slug="a campaign")
+        duty = Duty.objects.create(name="A duty", campaign=campaign)
+        volunteer.duty_set.add(duty)
+        self.assertTrue(volunteer.has_claimed(duty))
+
+
 
 class TestDuty(unittest.TestCase):
     def testSettingAnAttribute(self):

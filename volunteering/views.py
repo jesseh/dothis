@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView
 
-from volunteering.models import Volunteer, Campaign
+from volunteering.models import Campaign, Duty, Volunteer
 
 
 def importer(request):
@@ -53,6 +53,18 @@ class DutyView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DutyView, self).get_context_data(**kwargs)
-        # context['campaigns'] = Campaign.objects.all()
-        # context['volunteer'] = Volunteer.objects.get(slug=kwargs['volunteer_slug'])
+
+        volunteer = Volunteer.objects.get(slug=kwargs['volunteer_slug'])
+        duty = Duty.objects.get(slug=kwargs['duty_slug'])
+
+        context['volunteer'] = volunteer
+        context['duty'] = duty
+        context['is_claimed'] = volunteer.has_claimed(duty)
         return context
+
+    def post(self, request, *args, **kwargs):
+        volunteer = Volunteer.objects.get(slug=kwargs['volunteer_slug'])
+        duty = Duty.objects.get(slug=kwargs['duty_slug'])
+
+        volunteer.duty_set.add(duty)
+        return redirect(request.path, permanent=False)

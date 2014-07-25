@@ -11,11 +11,13 @@
     <div class="row">
       <div class="large-12 columns">
         <h1>An opportunity to volunteer at NNLS</h1>
-        <p>Assigned to Sam Samson</p>
+        {% if is_claimed %}
+            <p>You have volunteered for this! Thanks.</p>
+        {% endif %}
       </div>
     </div>
 
-    <form action="#" method="get">
+    <form action="#" method="post">
         {% csrf_token %}
         <input type="submit" class="small button" value="Claim this opportunity"></input>
     </form>
