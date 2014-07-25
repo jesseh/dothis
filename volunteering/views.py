@@ -46,3 +46,13 @@ class SummaryView(TemplateView):
         context['campaigns'] = Campaign.objects.all()
         context['volunteer'] = Volunteer.objects.get(slug=kwargs['volunteer_slug'])
         return context
+
+class DutyView(TemplateView):
+
+    template_name = 'volunteering/duty.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(DutyView, self).get_context_data(**kwargs)
+        # context['campaigns'] = Campaign.objects.all()
+        # context['volunteer'] = Volunteer.objects.get(slug=kwargs['volunteer_slug'])
+        return context

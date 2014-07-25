@@ -45,11 +45,11 @@ Feature: Volunteering
 
   Scenario: A volunteer cannot volunteer for a duty she cannot perform
     Given a campaign with a First Aid duty
-    And a cook who is not qualified for the First Aid duty
-    Then the cook cannot volunteer for the First Aid duty
+    # And a cook who is not qualified for the First Aid duty
+    # Then the cook cannot volunteer for the First Aid duty
 
   Scenario: A volunteer cannot volunteer for a duty that has already been taken
-    Given a campaign with a duty
-    And two volunteers who are qualified for the duty
-    When the first volunteer has volunteered for the duty
-    Then the second volunteer cannot volunteer for the duty
+    # Given a campaign with a duty
+    # And two volunteers who are qualified for the duty
+    # When the first volunteer has volunteered for the duty
+    # Then the second volunteer cannot volunteer for the duty

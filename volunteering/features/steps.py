@@ -5,12 +5,12 @@ from lettuce import step, before, after
 from helpers import (setup_session, teardown_session, create_volunteer,
                      create_attribute, create_duty, create_campaign,
                      volunteer_for_duty, view_volunteer_plan,
-                     assert_campaign_has_duties,
                      assert_volunteer_has_available_duties,
                      assert_volunteer_is_assigned_duties,
                      assert_volunteer_sees_assigned_duties,
                      assert_volunteer_is_not_assigned_duties,
-                     assert_volunteer_does_not_see_duties)
+                     assert_volunteer_does_not_see_duties,
+                     assert_volunteer_is_assigned_duty)
 from dothis.features.helpers import login_as_the_admin, the, assert_was_created
 
 
@@ -32,21 +32,6 @@ def given_a_admin_user_is_logged_in(step):
 @step(u'^Given a coordinator is logged in$')
 def given_a_coordinator_is_logged_in(step):
     login_as_the_admin()
-
-
-@step(u'When he creates a campaign called "([^"]*)" \
-      with duties and attributes:')
-def when_he_creates_a_campaign_with_duties_and_attributes(step, campaign_name):
-    create_campaign(campaign_name, step.hashes)
-
-
-@step(u'Then he sees the "([^"]*)" campaign \
-      with the duties and attributes:')
-def then_he_sees_the_campaign_with_the_duties_and_attributes(step,
-                                                             campaign_name):
-    assert_was_created(campaign_name)
-    campaign = the('Campaign', name=campaign_name)
-    assert_campaign_has_duties(campaign, step.hashes)
 
 
 @step(u'^When he creates a volunteer called "([^"]*)"$')
@@ -167,5 +152,4 @@ def when_the_doctor_volunteers_for_the_first_aid_duty(step):
 
 @step(u'^Then the doctor is assigned the First Aid duty$')
 def then_the_doctor_is_assigned_the_first_aid_duty(step):
-    # assert_volunteer_is_assigned_duties("Sam Samson"
-    assert False, 'This step must be implemented'
+    assert_volunteer_is_assigned_duty("Sam Samson", "test campaign", "first aid")

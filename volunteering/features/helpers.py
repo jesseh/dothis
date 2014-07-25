@@ -33,13 +33,6 @@ def create_campaign(campaign_name, duties=[]):
     submit()
 
 
-def assert_campaign_has_duties(campaign, duties):
-    visit('/admin/volunteering/campaign/%s/' % campaign.id)
-    for duty in duties:
-        assert_in(duty['Name'], body())
-        assert_in(duty['Attributes'].replace('"', ''), body())
-
-
 def create_volunteer(volunteer_name, attribute_names=[]):
     visit('/admin/volunteering/volunteer/')
     click('Add')
@@ -92,6 +85,14 @@ def assert_volunteer_is_assigned_duties(volunteer_name, duty_names):
     volunteer = the('Volunteer', name="Sam Samson")
     assert_equal(set(duty_names),
                  set(volunteer.duty_set.values_list('name', flat=True)))
+
+
+def assert_volunteer_is_assigned_duty(volunteer_name, campaign_name, duty_name):
+    volunteer = the('Volunteer', name=volunteer_name)
+    campaign = the('Campaign', name=campaign_name)
+    duty = the('Duty', name=duty_name)
+    visit('/volunteering/%s/%s/%s/' % (volunteer.slug, campaign.slug, duty.slug))
+    assert_in("Assigned to %s" % volunteer.name, body())
 
 
 def assert_volunteer_sees_assigned_duties(volunteer_name, duty_names):
