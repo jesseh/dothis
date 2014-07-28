@@ -5,6 +5,7 @@ from models import Attribute, Campaign, Duty, Volunteer
 class DutyInline(admin.StackedInline):
     model = Duty
     extra = 10
+    prepopulated_fields = {"slug": ("name",)}
 
 
 class AttributeAdmin(admin.ModelAdmin):

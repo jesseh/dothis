@@ -1,6 +1,7 @@
 import random
 
 from django.db import models
+from django.core.urlresolvers import reverse
 
 SLUG_LENGTH = 8
 SLUG_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'
@@ -31,6 +32,10 @@ class Volunteer(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('volunteering:summary',
+                       kwargs={'volunteer_slug': self.slug})
 
     def generate_slug(self):
         length = SLUG_LENGTH + 1
