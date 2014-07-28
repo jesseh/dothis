@@ -9,7 +9,8 @@ from lettuce import world
 from nose.tools import assert_in, assert_equal, assert_not_in
 from webtest import TestApp
 
-from dothis.features.helpers import visit, click, form, submit, body, the
+from dothis.features.helpers import (visit, click, form, submit, body, the,
+                                     show_browser)
 
 
 def setup_session():
@@ -22,6 +23,7 @@ def teardown_session():
 
 
 def create_campaign(campaign_name, duties=[]):
+    show_browser(True) # for test coverage report
     visit('/admin/volunteering/campaign/')
     click(description='Add')
     form()['name'] = campaign_name

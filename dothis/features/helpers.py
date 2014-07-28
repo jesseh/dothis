@@ -67,8 +67,8 @@ def create_the_admin_user():
         return user
 
 
-def show_browser():
-    page().showbrowser()
+def show_browser(skip=False):
+    skip or page().showbrowser()
 
 
 def login_as_the_admin(user=None):
