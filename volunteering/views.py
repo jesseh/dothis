@@ -3,6 +3,8 @@ from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView
 
+from django_extensions.db.models import ActivatorModel
+
 from volunteering.models import (Assignment, Campaign, CampaignDuty, Duty,
                                  Volunteer)
 
@@ -51,12 +53,14 @@ class SummaryView(TemplateView):
         volunteer = Volunteer.objects.get(slug=volunteer_slug)
         context['volunteer'] = volunteer
         context['assigned'] = Assignment.objects.filter(
-            volunteer__slug=volunteer_slug)
+            volunteer__slug=volunteer_slug).filter(
+            campaign_duty__campaign__status=ActivatorModel.ACTIVE_STATUS)
         context['assignable'] = CampaignDuty.objects.filter(
             assignment__isnull=True).filter(
-                Q(duty__attributes__volunteer=volunteer) |
-                Q(duty__attributes__isnull=True)
-            )
+                campaign__status=ActivatorModel.ACTIVE_STATUS).filter(
+                    Q(duty__attributes__volunteer=volunteer) |
+                    Q(duty__attributes__isnull=True)
+                )
         return context
 
 

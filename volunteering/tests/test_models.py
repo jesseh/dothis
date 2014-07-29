@@ -67,6 +67,15 @@ class TestCampaign(unittest.TestCase):
         c = Campaign(slug='a slug')
         self.assertEqual('a slug', c.slug)
 
+    def testIsActiveInitially(self):
+        c = Campaign(slug='a slug')
+        self.assertEqual(1, c.status)
+
+    def testDeactivate(self):
+        c = Campaign(slug='a slug')
+        c.deactivate()
+        self.assertEqual(0, c.status)
+
 
 class TestCampaignDuty(unittest.TestCase):
     def setUp(self):

@@ -2,8 +2,9 @@ import random
 
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.utils.timezone import now as datetime_now
 
-from django_extensions.db.models import TimeStampedModel
+from django_extensions.db.models import ActivatorModel, TimeStampedModel
 
 SLUG_LENGTH = 8
 SLUG_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'
@@ -16,12 +17,16 @@ class Attribute(models.Model):
         return self.name
 
 
-class Campaign(models.Model):
+class Campaign(ActivatorModel, TimeStampedModel):
     name = models.CharField(max_length=200)
     slug = models.SlugField()
 
     def __unicode__(self):
         return self.name
+
+    def deactivate(self):
+        self.status = ActivatorModel.INACTIVE_STATUS
+        self.deactivate_date = datetime_now()
 
 
 class Volunteer(models.Model):
