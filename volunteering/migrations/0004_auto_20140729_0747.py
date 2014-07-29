@@ -7,13 +7,12 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('volunteering', '0006_auto_20140723_1735'),
+        ('volunteering', '0003_auto_20140728_2232'),
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='volunteer',
-            old_name='obscure_slug',
-            new_name='slug',
+        migrations.AlterUniqueTogether(
+            name='assignment',
+            unique_together=set([(b'volunteer', b'campaign_duty')]),
         ),
     ]

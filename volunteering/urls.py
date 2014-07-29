@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, url
 from django.views.generic import TemplateView
 
-from views import SummaryView, DutyView
+from views import SummaryView, AssignmentView
 
 CAMPAIGN_SLUG = "(?P<campaign_slug>[-\w]+)"
 DUTY_SLUG = "(?P<duty_slug>[-\w]+)"
@@ -10,8 +10,9 @@ VOLUNTEER_SLUG = "(?P<volunteer_slug>\w\w\w\w-\w\w\w\w)"
 urlpatterns = patterns('',
     url(r'^%s/$' % VOLUNTEER_SLUG, SummaryView.as_view(), name='summary'),
 
-    url(r'^%s/%s/%s/$' % (VOLUNTEER_SLUG, CAMPAIGN_SLUG, DUTY_SLUG), DutyView.as_view(),
-        name='duty'),
+    url(r'^%s/%s/%s/$' % (VOLUNTEER_SLUG, CAMPAIGN_SLUG, DUTY_SLUG),
+        AssignmentView.as_view(),
+        name='assignment'),
 
     url(r'^import/$', 'volunteering.views.importer', name='import'),
 

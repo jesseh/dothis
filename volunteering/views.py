@@ -1,8 +1,10 @@
 from django.contrib import messages
+from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView
 
-from volunteering.models import Campaign, Duty, Volunteer
+from volunteering.models import (Assignment, Campaign, CampaignDuty, Duty,
+                                 Volunteer)
 
 
 def importer(request):
@@ -42,29 +44,47 @@ class SummaryView(TemplateView):
     template_name = 'volunteering/summary.html'
 
     def get_context_data(self, **kwargs):
+        volunteer_slug = kwargs['volunteer_slug']
+
         context = super(SummaryView, self).get_context_data(**kwargs)
-        context['campaigns'] = Campaign.objects.all()
-        context['volunteer'] = Volunteer.objects.get(slug=kwargs['volunteer_slug'])
+
+        volunteer = Volunteer.objects.get(slug=volunteer_slug)
+        context['volunteer'] = volunteer
+        context['assigned'] = Assignment.objects.filter(
+            volunteer__slug=volunteer_slug)
+        context['assignable'] = CampaignDuty.objects.filter(
+            assignment__isnull=True).filter(
+                Q(duty__attributes__volunteer=volunteer) |
+                Q(duty__attributes__isnull=True)
+            )
         return context
 
-class DutyView(TemplateView):
 
-    template_name = 'volunteering/duty.html'
+class AssignmentView(TemplateView):
+
+    template_name = 'volunteering/assignment.html'
 
     def get_context_data(self, **kwargs):
-        context = super(DutyView, self).get_context_data(**kwargs)
+        context = super(AssignmentView, self).get_context_data(**kwargs)
 
         volunteer = Volunteer.objects.get(slug=kwargs['volunteer_slug'])
+        campaign = Campaign.objects.get(slug=kwargs['campaign_slug'])
         duty = Duty.objects.get(slug=kwargs['duty_slug'])
 
         context['volunteer'] = volunteer
         context['duty'] = duty
-        context['is_claimed'] = volunteer.has_claimed(duty)
+        context['is_claimed'] = volunteer.has_claimed(campaign, duty)
         return context
 
     def post(self, request, *args, **kwargs):
-        volunteer = Volunteer.objects.get(slug=kwargs['volunteer_slug'])
-        duty = Duty.objects.get(slug=kwargs['duty_slug'])
+        volunteer_slug = kwargs['volunteer_slug']
+        campaign_slug = kwargs['campaign_slug']
+        duty_slug = kwargs['duty_slug']
 
-        volunteer.duty_set.add(duty)
-        return redirect(request.path, permanent=False)
+        volunteer = Volunteer.objects.get(slug=volunteer_slug)
+        campaign_duty = CampaignDuty.objects.get(campaign__slug=campaign_slug,
+                                                 duty__slug=duty_slug)
+
+        Assignment.objects.create(volunteer=volunteer,
+                                  campaign_duty=campaign_duty)
+        return redirect(volunteer.get_absolute_url(), permanent=False)

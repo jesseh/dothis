@@ -4,11 +4,10 @@ from lettuce import step, before, after
 
 from helpers import (setup_session, teardown_session, create_volunteer,
                      create_attribute, create_duty, create_campaign,
-                     volunteer_for_duty, view_volunteer_plan,
+                     create_campaign_duty, volunteer_for_duty,
+                     view_volunteer_plan,
                      assert_volunteer_has_available_duties,
-                     assert_volunteer_is_assigned_duties,
                      assert_volunteer_sees_assigned_duties,
-                     assert_volunteer_is_not_assigned_duties,
                      assert_duty_not_assigned_to_volunteer,
                      assert_volunteer_does_not_see_duties,
                      assert_volunteer_is_assigned_duty)
@@ -50,7 +49,8 @@ def when_he_creates_a_duty_called_group1_in_the_group2_campaign(step,
                                                                 duty_name,
                                                                 campaign_name):
     create_campaign(campaign_name)
-    create_duty(duty_name, campaign_name)
+    create_duty(duty_name)
+    create_campaign_duty(campaign_name, duty_name)
 
 
 @step(u'^Then he sees that the duty "([^"]*)" was ' +
@@ -74,7 +74,8 @@ def given_a_campaign_with_a_first_aid_duty(step):
     login_as_the_admin()
     create_campaign(campaign_name)
     create_attribute(attribute_name)
-    create_duty(duty_name, campaign_name, [attribute_name])
+    create_duty(duty_name, [attribute_name])
+    create_campaign_duty(campaign_name, duty_name)
 
 
 @step(u'^And a doctor who is qualified for the First Aid duty$')
@@ -124,7 +125,6 @@ def then_she_sees_the_available_duties_for_which_she_could_be_assigned(step):
 def and_she_sees_the_duties_assigned_to_her(step):
     volunteer_name = "Sam Samson"
     duty_names = [h['Name'] for h in step.hashes]
-    assert_volunteer_is_assigned_duties(volunteer_name, duty_names)
     assert_volunteer_sees_assigned_duties(volunteer_name, duty_names)
 
 
@@ -132,7 +132,6 @@ def and_she_sees_the_duties_assigned_to_her(step):
 def and_she_does_not_sees_the_duties_assigned_to_others(step):
     volunteer = the('Volunteer', name="Sam Samson")
     duty_names = [h['Name'] for h in step.hashes]
-    assert_volunteer_is_not_assigned_duties(volunteer, duty_names)
     assert_volunteer_does_not_see_duties(volunteer, duty_names)
 
 
@@ -146,12 +145,15 @@ def then_she_sees_the_group1_attribute(step, attribute_name):
     assert_was_created(attribute_name)
 
 
-@step(u'^When the doctor volunteers for the previously unassigned First Aid duty$')
+@step(u'^When the doctor volunteers for the previously ' +
+      u'unassigned First Aid duty$')
 def when_the_doctor_volunteers_for_the_first_aid_duty(step):
-    assert_duty_not_assigned_to_volunteer("Sam Samson", "test campaign", "first aid")
+    assert_duty_not_assigned_to_volunteer("Sam Samson", "test campaign",
+                                          "first aid")
     volunteer_for_duty("Sam Samson", "test campaign", "first aid")
 
 
 @step(u'^Then the doctor is assigned the First Aid duty$')
 def then_the_doctor_is_assigned_the_first_aid_duty(step):
-    assert_volunteer_is_assigned_duty("Sam Samson", "test campaign", "first aid")
+    assert_volunteer_is_assigned_duty("Sam Samson", "test campaign",
+                                      "first aid")

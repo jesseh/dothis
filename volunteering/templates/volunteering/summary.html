@@ -3,40 +3,65 @@
 {% load staticfiles %}
 
 {% block css %}
-  {% foundation_css 'foundation-icons' %}
-  <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+{% foundation_css 'foundation-icons' %}
+<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
 {% endblock css %}
 
 
 {% block base_body %}
-  <div class="row">
+<div class="row">
     <div class="large-12 columns">
-      <h1>Volunteer at NNLS</h1>
+        <h1>Volunteer at NNLS</h1>
     </div>
-  </div>
+</div>
 
-  <div class="row">
+<div class="row">
     <div class="large-12 columns">
-    	<div class="panel">
-        <h3>How do you want to help?</h3>
-        <p>Here are the roles for which NNLS could use your help. Please choose at least one, but feel free to claim more.</p>
-    	</div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div id="duties" class="large-8 medium-8 columns">
-      {% for campaign in campaigns %}
-        <div class="row campaign">
-          <h3>{{ campaign.name }}</h3>
-          <ul class="no-bullet">
-            {% for duty in campaign.duty_set.all %}
-              <li><a href="{% url 'volunteering:duty' campaign_slug=campaign.slug duty_slug=duty.slug volunteer_slug=volunteer.slug %}"
-                     class="duty button radius tiny">Claim</a> {{duty.name}}</li>
-            {% endfor %}
-          </ul>
+        <div class="panel">
+            <h3>How do you want to help?</h3>
+            <p>Here are the roles for which NNLS could use your help. Please choose at least one, but feel free to claim more.</p>
         </div>
-      {% endfor %}
     </div>
-  </div>
+</div>
+
+<div class="row">
+    <div id="assigned" class="large-8 medium-8 columns">
+        {% if assigned %}
+        <h3>You have volunteered to:</h3>
+        <p>Click the name for specific information.</p>
+        <ul>
+            {% for assignment in assigned %}
+            <li>
+            <a href="{{ assignment.get_absolute_url }}" class="duty">
+                    {{ assignment.campaign_duty }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+<div class="row">
+    <div id="assignable" class="large-8 medium-8 columns">
+        {% if assignable %}
+            {% if not assigned %}
+                <h3>Volunteering opportunities:</h3>
+            {% else %}
+                <h3>Additional volunteering opportunities:</h3>
+            {% endif %}
+            <p>Click the name to learn more and to volunteer.</p>
+        <ul>
+            {% for c_duty in assignable %}
+            <li>
+                <a href="{% url 'volunteering:assignment' volunteer_slug=volunteer.slug campaign_slug=c_duty.campaign.slug duty_slug=c_duty.duty.slug %}"
+                class="duty">
+                    {{ c_duty.campaign.name }}:
+                    {{ c_duty.duty.name }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
 {% endblock base_body %}

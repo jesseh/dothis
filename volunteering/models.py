@@ -3,6 +3,8 @@ import random
 from django.db import models
 from django.core.urlresolvers import reverse
 
+from django_extensions.db.models import TimeStampedModel
+
 SLUG_LENGTH = 8
 SLUG_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'
 
@@ -55,30 +57,46 @@ class Volunteer(models.Model):
             self.external_id is None
         super(Volunteer, self).save(*args, **kwargs)
 
-    def assignable_duty_names(self):
-        return ", ".join(d.name for d in Duty.objects.unassigned())
-
-    def assigned_duty_names(self):
-        duty_names = (d.name for d in self.duty_set.all())
-        return ", ".join(duty_names)
-
-    def has_claimed(self, duty):
-        return duty in self.duty_set.all()
-
-
-class DutyManager(models.Manager):
-    def unassigned(self):
-        return self.get_queryset().filter(assigned_to=None)
+    def has_claimed(self, campaign, duty):
+        return Assignment.objects.filter(volunteer=self,
+                                         campaign_duty__campaign=campaign,
+                                         campaign_duty__duty=duty).exists()
 
 
 class Duty(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField()
-    campaign = models.ForeignKey(Campaign)
-    assigned_to = models.ForeignKey(Volunteer, null=True, blank=True)
+    campaign = models.ManyToManyField(Campaign, through='CampaignDuty',
+                                      null=True, blank=True)
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
-
-    objects = DutyManager()
 
     def __unicode__(self):
         return self.name
+
+
+class CampaignDuty(TimeStampedModel):
+    campaign = models.ForeignKey(Campaign)
+    duty = models.ForeignKey(Duty)
+    assignments = models.ManyToManyField(Volunteer, through='Assignment')
+
+    def __unicode__(self):
+        return "%s: %s" % (self.campaign.name, self.duty.name)
+
+
+class Assignment(TimeStampedModel):
+    volunteer = models.ForeignKey(Volunteer)
+    campaign_duty = models.ForeignKey(CampaignDuty)
+
+    class Meta:
+        unique_together = (("volunteer", "campaign_duty"))
+
+    def __unicode__(self):
+        return "%s -> %s" % (self.volunteer.name, str(self.campaign_duty))
+
+    def get_absolute_url(self):
+        return reverse(
+            'volunteering:assignment',
+            kwargs={'volunteer_slug': self.volunteer.slug,
+                    'campaign_slug':
+                    self.campaign_duty.campaign.slug, 'duty_slug':
+                    self.campaign_duty.duty.slug})

@@ -13,12 +13,13 @@
         <h1>An opportunity to volunteer at NNLS</h1>
         {% if is_claimed %}
             <p>You have volunteered for this! Thanks.</p>
+        {% else %}
+            <form action="#" method="post">
+                {% csrf_token %}
+                <input type="submit" class="small button" value="Claim this opportunity"></input>
+            </form>
         {% endif %}
       </div>
     </div>
 
-    <form action="#" method="post">
-        {% csrf_token %}
-        <input type="submit" class="small button" value="Claim this opportunity"></input>
-    </form>
 {% endblock base_body %}
