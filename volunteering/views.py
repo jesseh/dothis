@@ -52,15 +52,24 @@ class SummaryView(TemplateView):
 
         volunteer = Volunteer.objects.get(slug=volunteer_slug)
         context['volunteer'] = volunteer
-        context['assigned'] = Assignment.objects.filter(
+        assigned = Assignment.objects.filter(
             volunteer__slug=volunteer_slug).filter(
             campaign_duty__campaign__status=ActivatorModel.ACTIVE_STATUS)
-        context['assignable'] = CampaignDuty.objects.filter(
+
+        all_assignable = CampaignDuty.objects.filter(
             assignment__isnull=True).filter(
                 campaign__status=ActivatorModel.ACTIVE_STATUS).filter(
                     Q(duty__attributes__volunteer=volunteer) |
                     Q(duty__attributes__isnull=True)
-                )
+                ).order_by('campaign__name',
+                           'duty__name').distinct('campaign__name',
+                                                  'duty__name')
+        assigned_keys = [(a.campaign_duty.campaign_id, a.campaign_duty.duty_id)
+                         for a in assigned]
+        assignable = [cd for cd in all_assignable
+                      if not (cd.campaign_id, cd.duty_id) in assigned_keys]
+        context['assigned'] = assigned
+        context['assignable'] = assignable
         return context
 
 
@@ -86,8 +95,11 @@ class AssignmentView(TemplateView):
         duty_slug = kwargs['duty_slug']
 
         volunteer = Volunteer.objects.get(slug=volunteer_slug)
-        campaign_duty = CampaignDuty.objects.get(campaign__slug=campaign_slug,
-                                                 duty__slug=duty_slug)
+        campaign_duty = CampaignDuty.objects.filter(
+            campaign__slug=campaign_slug,
+            duty__slug=duty_slug,
+            assignment__isnull=True
+        )[:1].get()
 
         Assignment.objects.create(volunteer=volunteer,
                                   campaign_duty=campaign_duty)

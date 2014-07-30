@@ -83,7 +83,7 @@ LETTUCE_APPS = (
 )
 
 # Parse database configuration from $DATABASE_URL
-default_database_url = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
+default_database_url = 'postgres://dothis:dothis@localhost:5432/dothis'
 DATABASES = {
     'default': dj_database_url.config(default=default_database_url)
 }

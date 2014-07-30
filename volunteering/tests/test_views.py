@@ -30,6 +30,17 @@ class testSummaryView(TestCase):
         response = Client().get(self.url)
         self.assertNotContains(response, self.c.name)
 
+    def testSummaryContentOnlyShowsCampaignDutyOnce(self):
+        CampaignDuty.objects.create(campaign=self.c, duty=self.d)
+        response = Client().get(self.url)
+        self.assertContains(response, self.c.name, count=1)
+
+    def testSummaryContentOnlyShowsCampaignDutyOnceIfAssigned(self):
+        CampaignDuty.objects.create(campaign=self.c, duty=self.d)
+        Assignment.objects.create(volunteer=self.v, campaign_duty=self.cd)
+        response = Client().get(self.url)
+        self.assertContains(response, self.c.name, count=1)
+
 
 class testAssignmentView(TestCase):
     def setUp(self):
@@ -56,4 +67,15 @@ class testAssignmentView(TestCase):
         self.assertTrue(
             Assignment.objects.filter(volunteer=self.v,
                                       campaign_duty=self.cd).exists())
+        self.assertRedirects(response, self.v.get_absolute_url())
+
+    def testAssignmentPostWhenMultipleOfSameCampaignDuty(self):
+        cd2 = CampaignDuty.objects.create(campaign=self.c, duty=self.d)
+        self.assertFalse(
+            Assignment.objects.filter(volunteer=self.v,
+                                      campaign_duty=cd2).exists())
+        response = Client().post(self.url)
+        self.assertTrue(
+            Assignment.objects.filter(volunteer=self.v,
+                                      campaign_duty=cd2).exists())
         self.assertRedirects(response, self.v.get_absolute_url())
