@@ -1,0 +1,9 @@
+            <ul>
+                {% for duty in duties %}
+                <li>
+                    <a href="{% url 'volunteering:assignment' volunteer_slug=volunteer.slug duty_id=duty.id %}" class="duty">
+                    {{ duty.activity.name}} on {{ duty.event.name }} at {{ duty.location.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>

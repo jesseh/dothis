@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import (Activity, Assignment, Attribute, Campaign, CampaignDuty,
+from models import (Activity, Assignment, Attribute, Campaign, CampaignEvent,
                     Duty, Event, Location, Volunteer)
 
 
@@ -34,9 +34,9 @@ class DutyAdmin(admin.ModelAdmin):
 admin.site.register(Duty, DutyAdmin)
 
 
-class CampaignDutyAdmin(admin.ModelAdmin):
+class CampaignEventAdmin(admin.ModelAdmin):
     pass
-admin.site.register(CampaignDuty, CampaignDutyAdmin)
+admin.site.register(CampaignEvent, CampaignEventAdmin)
 
 
 class AssignmentAdmin(admin.ModelAdmin):

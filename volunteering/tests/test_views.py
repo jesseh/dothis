@@ -1,14 +1,13 @@
 from django.core.urlresolvers import reverse
-from django.test import Client, TestCase
+from django.test import TestCase
 
-from volunteering.models import (Activity, Assignment, Campaign, CampaignDuty,
-                                 Duty, Event, Location, Volunteer)
+from volunteering.models import (Activity, Assignment, Duty, Event, Location,
+                                 Volunteer)
 
 
 class testSummaryView(TestCase):
     def setUp(self):
         self.v = Volunteer.objects.create(name='Joe')
-        self.c = Campaign.objects.create(name='a campaign', slug='c_slug')
         self.e = Event.objects.create(
             name='an event', short_description='the short description')
         self.l = Location.objects.create(
@@ -17,46 +16,48 @@ class testSummaryView(TestCase):
             name='an activity', short_description='the short description')
         self.d = Duty.objects.create(event=self.e, location=self.l,
                                      activity=self.a)
-        self.cd = CampaignDuty.objects.create(campaign=self.c,
-                                              duty=self.d)
         self.url = reverse('volunteering:summary',
                            kwargs={'volunteer_slug': self.v.slug})
 
     def testSummaryResponseCode(self):
-        response = Client().get(self.url)
+        response = self.client.get(self.url)
         self.assertEqual(200, response.status_code)
 
-    def testSummaryContentIncludesActiveCampaigns(self):
-        response = Client().get(self.url)
-        self.assertContains(response, self.c.name)
+    def testSummaryContentIncludesActiveDuties(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, self.d.event.name)
+        self.assertContains(response, self.d.location.name)
+        self.assertContains(response, self.d.activity.name)
 
-    def testSummaryContentExcludesInactiveCampaigns(self):
-        self.c.deactivate()
-        self.c.save()
-        response = Client().get(self.url)
-        self.assertNotContains(response, self.c.name)
+    def testSummaryContentOnlyShowsDutyOnce(self):
+        self.d.multiple = 2
+        self.d.save()
+        response = self.client.get(self.url)
+        self.assertContains(response, self.d.event.name, count=1)
 
-    def testSummaryContentOnlyShowsCampaignDutyOnce(self):
-        CampaignDuty.objects.create(campaign=self.c, duty=self.d)
-        response = Client().get(self.url)
-        self.assertContains(response, self.c.name, count=1)
+    def testSummaryContentOnlyShowsDutyOnceIfAssigned(self):
+        Assignment.objects.create(volunteer=self.v, duty=self.d)
+        response = self.client.get(self.url)
+        self.assertContains(response, self.d.event.name, count=1)
+        self.assertContains(response, self.d.location.name, count=1)
+        self.assertContains(response, self.d.activity.name, count=1)
 
-    def testSummaryContentOnlyShowsCampaignDutyOnceIfAssigned(self):
-        CampaignDuty.objects.create(campaign=self.c, duty=self.d)
-        Assignment.objects.create(volunteer=self.v, campaign_duty=self.cd)
-        response = Client().get(self.url)
-        self.assertContains(response, self.c.name, count=1)
+    def testSummaryContentIncludesActivityName(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, self.d.activity.name)
 
-    def testSummaryContentIncludesActivityShortDescription(self):
-        response = Client().get(self.url)
-        self.assertContains(response, self.c.name)
+    def testSummaryContentIncludesEventName(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, self.d.event.name)
+
+    def testSummaryContentIncludesLocationName(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, self.d.location.name)
 
 
 class testAssignmentView(TestCase):
     def setUp(self):
-        self.v, _ = Volunteer.objects.get_or_create(name='Joe')
-        self.c, _ = Campaign.objects.get_or_create(name='a campaign',
-                                                   slug='c_slug')
+        self.v = Volunteer.objects.create(name='Joe')
         self.e = Event.objects.create(
             name='an event', short_description='the short description')
         self.l = Location.objects.create(
@@ -65,34 +66,46 @@ class testAssignmentView(TestCase):
             name='an activity', short_description='the short description')
         self.d = Duty.objects.create(event=self.e, location=self.l,
                                      activity=self.a)
-        self.cd, _ = CampaignDuty.objects.get_or_create(campaign=self.c,
-                                                        duty=self.d)
         self.url = reverse('volunteering:assignment',
                            kwargs={'volunteer_slug': self.v.slug,
-                                   'campaign_slug': self.c.slug,
                                    'duty_id': self.d.id})
 
     def testAssignmentGet(self):
-        response = Client().get(self.url)
+        response = self.client.get(self.url)
         self.assertEqual(200, response.status_code)
+
+    def testGetContentIfAssigned(self):
+        Assignment.objects.create(volunteer=self.v, duty=self.d)
+        response = self.client.get(self.url)
+        self.assertContains(response, "You have volunteered")
+        self.assertContains(response, self.d.event.name, count=1)
+        self.assertContains(response, self.d.location.name, count=1)
+        self.assertContains(response, self.d.activity.name, count=1)
+
+    def testGetContentIfUnassigned(self):
+        response = self.client.get(self.url)
+        self.assertNotContains(response, "have volunteered")
+        self.assertContains(response, self.d.event.name, count=1)
+        self.assertContains(response, self.d.location.name, count=1)
+        self.assertContains(response, self.d.activity.name, count=1)
 
     def testAssignmentPost(self):
         self.assertFalse(
-            Assignment.objects.filter(volunteer=self.v,
-                                      campaign_duty=self.cd).exists())
-        response = Client().post(self.url)
+            Assignment.objects.filter(volunteer=self.v, duty=self.d).exists())
+        response = self.client.post(self.url)
         self.assertTrue(
-            Assignment.objects.filter(volunteer=self.v,
-                                      campaign_duty=self.cd).exists())
+            Assignment.objects.filter(volunteer=self.v, duty=self.d).exists())
         self.assertRedirects(response, self.v.get_absolute_url())
 
-    def testAssignmentPostWhenMultipleOfSameCampaignDuty(self):
-        cd2 = CampaignDuty.objects.create(campaign=self.c, duty=self.d)
-        self.assertFalse(
-            Assignment.objects.filter(volunteer=self.v,
-                                      campaign_duty=cd2).exists())
-        response = Client().post(self.url)
-        self.assertTrue(
-            Assignment.objects.filter(volunteer=self.v,
-                                      campaign_duty=cd2).exists())
+    def testAssignmentPostWhenMultipleOfSameDuty(self):
+        self.d.multiple = 2
+        self.d.save()
+        self.assertFalse(Assignment.objects.
+                         filter(volunteer=self.v, duty=self.d).exists())
+        response = self.client.post(self.url)
+        self.assertTrue(Assignment.objects.
+                        filter(volunteer=self.v, duty=self.d).exists())
         self.assertRedirects(response, self.v.get_absolute_url())
+
+    def testNoPermissionToSeeAssignmentUnlessDutyIsAssignableOrAssigned(self):
+        pass

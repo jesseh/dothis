@@ -27,17 +27,8 @@
 <div class="row">
     <div id="assigned" class="large-8 medium-8 columns">
         {% if assigned %}
-        <h3>You have volunteered to:</h3>
-        <p>Click the name for specific information.</p>
-        <ul>
-            {% for assignment in assigned %}
-            <li>
-            <a href="{{ assignment.get_absolute_url }}" class="duty">
-                    {{ assignment.campaign_duty }}
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
+            <h3>You have volunteered to:</h3>
+            {% include 'volunteering/includes/duty_headlines.html' with duties=assigned %}
         {% endif %}
     </div>
 </div>
@@ -49,18 +40,7 @@
             {% else %}
                 <h3>Additional volunteering opportunities:</h3>
             {% endif %}
-            <p>Click the name to learn more and to volunteer.</p>
-        <ul>
-            {% for c_duty in assignable %}
-            <li>
-                <a href="{% url 'volunteering:assignment' volunteer_slug=volunteer.slug campaign_slug=c_duty.campaign.slug duty_id=c_duty.duty_id %}"
-                class="duty">
-                    {{ c_duty.campaign.name }}:
-                    {{ c_duty.duty.name }}
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
+            {% include 'volunteering/includes/duty_headlines.html' with duties=assignable %}
         {% endif %}
     </div>
 </div>

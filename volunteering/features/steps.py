@@ -4,7 +4,7 @@ from lettuce import step, before, after
 
 from helpers import (setup_session, teardown_session, create_volunteer,
                      create_attribute, create_duty, create_campaign,
-                     create_campaign_duty, volunteer_for_duty,
+                     create_duty, volunteer_for_duty,
                      view_volunteer_plan,
                      assert_volunteer_has_available_duties,
                      assert_volunteer_sees_assigned_duties,
@@ -44,7 +44,7 @@ def then_he_sees_that_the_volunteer_group1_was_created(step, volunteer_name):
     assert_was_created(volunteer_name)
 
 
-@step(u'^When he creates a duty called "([^"]*)" in the "([^"]*)" campaign$')
+@step(u'^When he creates a duty called "([^"]*)"$')
 def when_he_creates_a_duty_called_group1_in_the_group2_campaign(step,
                                                                 duty_name,
                                                                 campaign_name):
@@ -60,9 +60,9 @@ def then_the_duty_g1_created_in_g2_campaign(step, duty_name, campaign_name):
     assert_was_created(duty_name)
 
 
-@step(u'^Given a campaign called "([^"]*)" with duties:$')
-def given_a_campaign_called_group1_with_duties(step, campaign_name):
-    create_campaign(campaign_name, step.hashes)
+@step(u'^Given the duties:$')
+def given_the_duties(step):
+    create_duties(step.hashes)
 
 
 @step(u'^Given a campaign with a First Aid duty$')

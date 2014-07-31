@@ -5,7 +5,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from volunteering.models import (Activity, Assignment, Attribute, Campaign,
-                                 CampaignDuty, Duty, Event, Location,
+                                 CampaignEvent, Duty, Event, Location,
                                  Volunteer)
 
 
@@ -41,17 +41,14 @@ class TestVolunteer(TestCase):
 
     def testHasClaimed_IsFalseWhenFalse(self):
         volunteer = Volunteer.objects.create(name='tester')
-        campaign = Campaign.objects.create(slug="a campaign")
         duty = Duty.objects.create()
-        self.assertFalse(volunteer.has_claimed(campaign, duty))
+        self.assertFalse(volunteer.has_claimed(duty))
 
     def testHasClaimed_IsTrueWhenTrue(self):
         volunteer = Volunteer.objects.create(name='tester')
-        campaign = Campaign.objects.create(slug="a campaign")
         duty = Duty.objects.create()
-        c_duty = CampaignDuty.objects.create(campaign=campaign, duty=duty)
-        Assignment.objects.create(volunteer=volunteer, campaign_duty=c_duty)
-        self.assertTrue(volunteer.has_claimed(campaign, duty))
+        Assignment.objects.create(volunteer=volunteer, duty=duty)
+        self.assertTrue(volunteer.has_claimed(duty))
 
 
 class TestDuty(TestCase):
@@ -99,13 +96,13 @@ class TestCampaign(TestCase):
         self.assertEqual(0, c.status)
 
 
-class TestCampaignDuty(TestCase):
+class TestCampaignEvent(TestCase):
     def setUp(self):
         self.campaign = Campaign(name="a campaign", slug="a_campaign")
-        self.duty = Duty()
+        self.event = Event()
 
     def testHasTimestamps(self):
-        c = CampaignDuty(duty=self.duty, campaign=self.campaign)
+        c = CampaignEvent(event=self.event, campaign=self.campaign)
         self.assertTrue(c.created)
         self.assertTrue(c.modified)
 
@@ -115,23 +112,18 @@ class TestAssignment(TestCase):
     def setUp(self):
         self.campaign = Campaign.objects.create(name="a campaign",
                                                 slug="a_campaign")
-        self.duty = Duty.objects.create()
-        self.c_duty = CampaignDuty.objects.create(duty=self.duty,
-                                                  campaign=self.campaign)
         self.volunteer = Volunteer.objects.create(name='tester')
+        self.duty = Duty.objects.create()
 
     def testHasTimestamps(self):
-        assignment = Assignment(volunteer=self.volunteer,
-                                campaign_duty=self.c_duty)
+        assignment = Assignment(volunteer=self.volunteer, duty=self.duty)
         self.assertTrue(assignment.created)
         self.assertTrue(assignment.modified)
 
     def testNoDuplicates(self):
-        Assignment.objects.create(volunteer=self.volunteer,
-                                  campaign_duty=self.c_duty)
+        Assignment.objects.create(volunteer=self.volunteer, duty=self.duty)
         with self.assertRaises(IntegrityError):
-            Assignment.objects.create(volunteer=self.volunteer,
-                                      campaign_duty=self.c_duty)
+            Assignment.objects.create(volunteer=self.volunteer, duty=self.duty)
 
 
 class TestActivity(TestCase):

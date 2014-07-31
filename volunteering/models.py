@@ -20,6 +20,8 @@ class Attribute(models.Model):
 class Campaign(ActivatorModel, TimeStampedModel):
     name = models.CharField(max_length=200)
     slug = models.SlugField()
+    campaign = models.ManyToManyField('Event', through='CampaignEvent',
+                                      null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -62,10 +64,8 @@ class Volunteer(models.Model):
             self.external_id is None
         super(Volunteer, self).save(*args, **kwargs)
 
-    def has_claimed(self, campaign, duty):
-        return Assignment.objects.filter(volunteer=self,
-                                         campaign_duty__campaign=campaign,
-                                         campaign_duty__duty=duty).exists()
+    def has_claimed(self, duty):
+        return Assignment.objects.filter(volunteer=self, duty=duty).exists()
 
 
 class Event(models.Model):
@@ -98,8 +98,6 @@ class Location(models.Model):
 
 
 class Duty(models.Model):
-    campaign = models.ManyToManyField(Campaign, through='CampaignDuty',
-                                      null=True, blank=True)
     activity = models.ForeignKey(Activity, null=True, blank=True)
     event = models.ForeignKey(Event, null=True, blank=True)
     location = models.ForeignKey(Location, null=True, blank=True)
@@ -124,12 +122,12 @@ class Duty(models.Model):
         return name
 
 
-class CampaignDuty(TimeStampedModel):
+class CampaignEvent(TimeStampedModel):
     campaign = models.ForeignKey(Campaign)
-    duty = models.ForeignKey(Duty)
+    event = models.ForeignKey(Event)
 
     def __unicode__(self):
-        return "%s: %s" % (self.campaign, self.duty)
+        return "%s: %s" % (self.campaign, self.event)
 
 
 class Assignment(TimeStampedModel):
