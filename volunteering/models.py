@@ -77,12 +77,13 @@ class Event(models.Model):
         unique_together = (("name", "date"))
 
     def __unicode__(self):
-        return self.name
+        return "%s (%s)" % (self.name, self.date)
 
 
 class Activity(models.Model):
     name = models.CharField(max_length=200, unique=True)
     short_description = models.TextField(null=True, blank=True)
+    attributes = models.ManyToManyField(Attribute, null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -97,15 +98,17 @@ class Location(models.Model):
 
 
 class Duty(models.Model):
-    multiple = models.IntegerField(
-        default=1,
-        help_text="The number of volunteers needed for this duty.")
     campaign = models.ManyToManyField(Campaign, through='CampaignDuty',
                                       null=True, blank=True)
     activity = models.ForeignKey(Activity, null=True, blank=True)
     event = models.ForeignKey(Event, null=True, blank=True)
     location = models.ForeignKey(Location, null=True, blank=True)
-    attributes = models.ManyToManyField(Attribute, null=True, blank=True)
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    multiple = models.IntegerField(
+        default=1,
+        help_text="The number of volunteers needed for this duty.")
+    assignments = models.ManyToManyField(Volunteer, through='Assignment')
 
     class Meta:
         unique_together = (("activity", "event", "location"))
@@ -124,7 +127,6 @@ class Duty(models.Model):
 class CampaignDuty(TimeStampedModel):
     campaign = models.ForeignKey(Campaign)
     duty = models.ForeignKey(Duty)
-    assignments = models.ManyToManyField(Volunteer, through='Assignment')
 
     def __unicode__(self):
         return "%s: %s" % (self.campaign, self.duty)
@@ -132,17 +134,16 @@ class CampaignDuty(TimeStampedModel):
 
 class Assignment(TimeStampedModel):
     volunteer = models.ForeignKey(Volunteer)
-    campaign_duty = models.ForeignKey(CampaignDuty)
+    duty = models.ForeignKey(Duty)
 
     class Meta:
-        unique_together = (("volunteer", "campaign_duty"),)
+        unique_together = (("volunteer", "duty"),)
 
     def __unicode__(self):
-        return "%s -> %s" % (self.volunteer.name, str(self.campaign_duty))
+        return "%s -> %s" % (self.volunteer.name, str(self.duty))
 
     def get_absolute_url(self):
         return reverse(
             'volunteering:assignment',
             kwargs={'volunteer_slug': self.volunteer.slug,
-                    'campaign_slug': self.campaign_duty.campaign.slug,
-                    'duty_id': self.campaign_duty.duty_id})
+                    'duty_id': self.duty_id})

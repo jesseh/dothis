@@ -61,8 +61,7 @@ class SummaryView(TemplateView):
                 campaign__status=ActivatorModel.ACTIVE_STATUS).filter(
                     Q(duty__attributes__volunteer=volunteer) |
                     Q(duty__attributes__isnull=True)
-                ).order_by('campaign_id', 'duty_id').distinct('campaign_id',
-                                                              'duty_id')
+                ).order_by('duty_id').distinct('duty_id')
         assigned_keys = [(a.campaign_duty.campaign_id, a.campaign_duty.duty_id)
                          for a in assigned]
         assignable = [cd for cd in all_assignable

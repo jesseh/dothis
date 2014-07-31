@@ -47,3 +47,12 @@ locations = [
 
 for l in locations:
     Location.objects.get_or_create(name=l)
+
+attributes = [
+    'Security supervisor',
+    'Security-able',
+    'Steward-able',
+]
+
+for a in attributes:
+    Attribute.objects.get_or_create(name=a)

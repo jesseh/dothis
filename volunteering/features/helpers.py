@@ -55,8 +55,8 @@ def create_duty(duty_name, attribute_names=[]):
     visit('/admin/volunteering/duty/')
     click('Add')
     f = form()
-    f['name'] = duty_name
-    f['slug'] = slugify(duty_name)
+    # f['name'] = duty_name
+    # f['slug'] = slugify(duty_name)
     for attribute_name in attribute_names:
         f.select_multiple('attributes', texts=attribute_names)
     submit()

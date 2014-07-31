@@ -44,6 +44,12 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
+        migrations.AddField(
+            model_name='activity',
+            name='attributes',
+            field=models.ManyToManyField(to='volunteering.Attribute', null=True, blank=True),
+            preserve_default=True,
+        ),
         migrations.CreateModel(
             name='Campaign',
             fields=[
@@ -77,19 +83,14 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
-        migrations.AddField(
-            model_name='assignment',
-            name='campaign_duty',
-            field=models.ForeignKey(to='volunteering.CampaignDuty'),
-            preserve_default=True,
-        ),
         migrations.CreateModel(
             name='Duty',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('start_time', models.TimeField(null=True, blank=True)),
+                ('end_time', models.TimeField(null=True, blank=True)),
                 ('multiple', models.IntegerField(default=1, help_text=b'The number of volunteers needed for this duty.')),
                 ('activity', models.ForeignKey(blank=True, to='volunteering.Activity', null=True)),
-                ('attributes', models.ManyToManyField(to='volunteering.Attribute', null=True, blank=True)),
             ],
             options={
             },
@@ -97,6 +98,12 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='campaignduty',
+            name='duty',
+            field=models.ForeignKey(to='volunteering.Duty'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='assignment',
             name='duty',
             field=models.ForeignKey(to='volunteering.Duty'),
             preserve_default=True,
@@ -146,10 +153,6 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(blank=True, to='volunteering.Location', null=True),
             preserve_default=True,
         ),
-        migrations.AlterUniqueTogether(
-            name='duty',
-            unique_together=set([(b'activity', b'event', b'location')]),
-        ),
         migrations.CreateModel(
             name='Volunteer',
             fields=[
@@ -165,10 +168,14 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.AddField(
-            model_name='campaignduty',
+            model_name='duty',
             name='assignments',
             field=models.ManyToManyField(to='volunteering.Volunteer', through='volunteering.Assignment'),
             preserve_default=True,
+        ),
+        migrations.AlterUniqueTogether(
+            name='duty',
+            unique_together=set([(b'activity', b'event', b'location')]),
         ),
         migrations.AddField(
             model_name='assignment',
@@ -178,6 +185,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='assignment',
-            unique_together=set([(b'volunteer', b'campaign_duty')]),
+            unique_together=set([(b'volunteer', b'duty')]),
         ),
     ]

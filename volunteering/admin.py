@@ -29,7 +29,8 @@ admin.site.register(Volunteer, VolunteerAdmin)
 
 
 class DutyAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', 'activity', 'event', 'location',
+                    'start_time', 'end_time', 'multiple']
 admin.site.register(Duty, DutyAdmin)
 
 

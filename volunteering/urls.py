@@ -4,13 +4,12 @@ from django.views.generic import TemplateView
 from views import SummaryView, AssignmentView
 
 VOLUNTEER_SLUG = "(?P<volunteer_slug>\w\w\w\w-\w\w\w\w)"
-CAMPAIGN_SLUG = "(?P<campaign_slug>[-\w]+)"
 DUTY_ID = "(?P<duty_id>\d+)"
 
 urlpatterns = patterns('',
     url(r'^%s/$' % VOLUNTEER_SLUG, SummaryView.as_view(), name='summary'),
 
-    url(r'^%s/%s/%s/$' % (VOLUNTEER_SLUG, CAMPAIGN_SLUG, DUTY_ID),
+    url(r'^%s/%s/$' % (VOLUNTEER_SLUG, DUTY_ID),
         AssignmentView.as_view(),
         name='assignment'),
 
