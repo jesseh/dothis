@@ -68,15 +68,57 @@ class Volunteer(models.Model):
                                          campaign_duty__duty=duty).exists()
 
 
-class Duty(models.Model):
-    name = models.CharField(max_length=200)
-    slug = models.SlugField()
-    campaign = models.ManyToManyField(Campaign, through='CampaignDuty',
-                                      null=True, blank=True)
-    attributes = models.ManyToManyField(Attribute, null=True, blank=True)
+class Event(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    short_description = models.TextField(null=True, blank=True)
+    date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        unique_together = (("name", "date"))
 
     def __unicode__(self):
         return self.name
+
+
+class Activity(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    short_description = models.TextField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+
+class Location(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    short_description = models.TextField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+
+class Duty(models.Model):
+    multiple = models.IntegerField(
+        default=1,
+        help_text="The number of volunteers needed for this duty.")
+    campaign = models.ManyToManyField(Campaign, through='CampaignDuty',
+                                      null=True, blank=True)
+    activity = models.ForeignKey(Activity, null=True, blank=True)
+    event = models.ForeignKey(Event, null=True, blank=True)
+    location = models.ForeignKey(Location, null=True, blank=True)
+    attributes = models.ManyToManyField(Attribute, null=True, blank=True)
+
+    class Meta:
+        unique_together = (("activity", "event", "location"))
+
+    def __unicode__(self):
+        name = ""
+        if self.activity:
+            name += self.activity.name
+        if self.event:
+            name += " on " + self.event.name
+        if self.location:
+            name += " at " + self.location.name
+        return name
 
 
 class CampaignDuty(TimeStampedModel):
@@ -85,7 +127,7 @@ class CampaignDuty(TimeStampedModel):
     assignments = models.ManyToManyField(Volunteer, through='Assignment')
 
     def __unicode__(self):
-        return "%s: %s" % (self.campaign.name, self.duty.name)
+        return "%s: %s" % (self.campaign, self.duty)
 
 
 class Assignment(TimeStampedModel):
@@ -93,7 +135,7 @@ class Assignment(TimeStampedModel):
     campaign_duty = models.ForeignKey(CampaignDuty)
 
     class Meta:
-        unique_together = (("volunteer", "campaign_duty"))
+        unique_together = (("volunteer", "campaign_duty"),)
 
     def __unicode__(self):
         return "%s -> %s" % (self.volunteer.name, str(self.campaign_duty))
@@ -102,6 +144,5 @@ class Assignment(TimeStampedModel):
         return reverse(
             'volunteering:assignment',
             kwargs={'volunteer_slug': self.volunteer.slug,
-                    'campaign_slug':
-                    self.campaign_duty.campaign.slug, 'duty_slug':
-                    self.campaign_duty.duty.slug})
+                    'campaign_slug': self.campaign_duty.campaign.slug,
+                    'duty_id': self.campaign_duty.duty_id})

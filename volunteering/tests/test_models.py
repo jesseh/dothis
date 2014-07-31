@@ -1,12 +1,15 @@
 import unittest
+import datetime
 
 from django.db import IntegrityError
+from django.test import TestCase
 
-from volunteering.models import (Assignment, Attribute, Campaign, CampaignDuty,
-                                 Duty, Volunteer)
+from volunteering.models import (Activity, Assignment, Attribute, Campaign,
+                                 CampaignDuty, Duty, Event, Location,
+                                 Volunteer)
 
 
-class TestAttribute(unittest.TestCase):
+class TestAttribute(TestCase):
     def testHasAName(self):
         attribute = Attribute(name='yada')
         self.assertEqual('yada', attribute.name)
@@ -17,7 +20,7 @@ class TestAttribute(unittest.TestCase):
             Attribute(name='yada').save()
 
 
-class TestVolunteer(unittest.TestCase):
+class TestVolunteer(TestCase):
     def testSettingAnAttribute(self):
         v = Volunteer.objects.create(name='tester')
         v.attributes.create(name='attr2')
@@ -39,30 +42,49 @@ class TestVolunteer(unittest.TestCase):
     def testHasClaimed_IsFalseWhenFalse(self):
         volunteer = Volunteer.objects.create(name='tester')
         campaign = Campaign.objects.create(slug="a campaign")
-        duty = Duty.objects.create(name="A duty")
+        duty = Duty.objects.create()
         self.assertFalse(volunteer.has_claimed(campaign, duty))
 
     def testHasClaimed_IsTrueWhenTrue(self):
         volunteer = Volunteer.objects.create(name='tester')
         campaign = Campaign.objects.create(slug="a campaign")
-        duty = Duty.objects.create(name="A duty")
+        duty = Duty.objects.create()
         c_duty = CampaignDuty.objects.create(campaign=campaign, duty=duty)
         Assignment.objects.create(volunteer=volunteer, campaign_duty=c_duty)
         self.assertTrue(volunteer.has_claimed(campaign, duty))
 
 
-class TestDuty(unittest.TestCase):
+class TestDuty(TestCase):
+    @unittest.SkipTest
     def testSettingAnAttribute(self):
-        d = Duty.objects.create(name='a duty')
+        d = Duty.objects.create()
         d.attributes.create(name='attr')
         self.assertEqual('attr', d.attributes.all()[0].name)
 
-    def testHasSlug(self):
-        d = Duty(slug='a slug')
-        self.assertEqual('a slug', d.slug)
+    def testHasVolunteerMultiple(self):
+        d = Duty(multiple=5)
+        self.assertEqual(5, d.multiple)
+
+    def testHasOptionalLocation(self):
+        l = Location.objects.create(name="a location")
+        d = Duty(location=l)
+        self.assertEqual(l.id, d.location_id)
+
+    def testHasOptionalEvent(self):
+        e = Event.objects.create(name="a event")
+        d = Duty(event=e)
+        self.assertEqual(e.id, d.event_id)
+
+    def testDuplicatesEventLocationActivitySet(self):
+        e, _ = Event.objects.get_or_create(name="event")
+        l, _ = Location.objects.get_or_create(name="location")
+        a, _ = Activity.objects.get_or_create(name="activity")
+        Duty.objects.get_or_create(event=e, location=l, activity=a)
+        with self.assertRaises(IntegrityError):
+            Duty(event=e, location=l, activity=a).save()
 
 
-class TestCampaign(unittest.TestCase):
+class TestCampaign(TestCase):
     def testHasSlug(self):
         c = Campaign(slug='a slug')
         self.assertEqual('a slug', c.slug)
@@ -77,10 +99,10 @@ class TestCampaign(unittest.TestCase):
         self.assertEqual(0, c.status)
 
 
-class TestCampaignDuty(unittest.TestCase):
+class TestCampaignDuty(TestCase):
     def setUp(self):
         self.campaign = Campaign(name="a campaign", slug="a_campaign")
-        self.duty = Duty(name="a duty", slug="a_duty")
+        self.duty = Duty()
 
     def testHasTimestamps(self):
         c = CampaignDuty(duty=self.duty, campaign=self.campaign)
@@ -88,12 +110,12 @@ class TestCampaignDuty(unittest.TestCase):
         self.assertTrue(c.modified)
 
 
-class TestAssignment(unittest.TestCase):
+class TestAssignment(TestCase):
 
     def setUp(self):
         self.campaign = Campaign.objects.create(name="a campaign",
                                                 slug="a_campaign")
-        self.duty = Duty.objects.create(name="a duty", slug="a_duty")
+        self.duty = Duty.objects.create()
         self.c_duty = CampaignDuty.objects.create(duty=self.duty,
                                                   campaign=self.campaign)
         self.volunteer = Volunteer.objects.create(name='tester')
@@ -110,3 +132,58 @@ class TestAssignment(unittest.TestCase):
         with self.assertRaises(IntegrityError):
             Assignment.objects.create(volunteer=self.volunteer,
                                       campaign_duty=self.c_duty)
+
+
+class TestActivity(TestCase):
+    def setUp(self):
+        self.a = Activity(name="the name",
+                          short_description="the short description")
+
+    def testHasAName(self):
+        self.assertEqual(self.a.name, 'the name')
+
+    def testNameIsUnique(self):
+        self.a.save()
+        with self.assertRaises(IntegrityError):
+            Activity.objects.create(name='the name')
+
+    def testHasAShortDescription(self):
+        self.assertEqual(self.a.short_description, 'the short description')
+
+
+class TestEvent(TestCase):
+    def setUp(self):
+        self.a = Event(name="the name",
+                       short_description="the short description",
+                       date=datetime.date(2001, 1, 1))
+
+    def testHasAName(self):
+        self.assertEqual(self.a.name, 'the name')
+
+    def testNameIsUnique(self):
+        self.a.save()
+        with self.assertRaises(IntegrityError):
+            Event.objects.create(name='the name')
+
+    def testHasAShortDescription(self):
+        self.assertEqual(self.a.short_description, 'the short description')
+
+    def testHasADate(self):
+        self.assertEqual(self.a.date, datetime.date(2001, 1, 1))
+
+
+class TestLocation(TestCase):
+    def setUp(self):
+        self.l = Location(name="the name",
+                          short_description="the short description")
+
+    def testHasAName(self):
+        self.assertEqual(self.l.name, 'the name')
+
+    def testNameIsUnique(self):
+        self.l.save()
+        with self.assertRaises(IntegrityError):
+            Location.objects.create(name='the name')
+
+    def testHasAShortDescription(self):
+        self.assertEqual(self.l.short_description, 'the short description')
