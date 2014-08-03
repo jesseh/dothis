@@ -67,10 +67,13 @@ class Volunteer(models.Model):
     def has_claimed(self, duty):
         return Assignment.objects.filter(volunteer=self, duty=duty).exists()
 
+    def attributes_list(self):
+        return ", ".join(self.attributes.values_list('name', flat=True))
+
 
 class Event(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    short_description = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     date = models.DateField(null=True, blank=True)
 
     class Meta:
@@ -82,16 +85,19 @@ class Event(models.Model):
 
 class Activity(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    short_description = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
 
     def __unicode__(self):
         return self.name
 
+    def attributes_list(self):
+        return ", ".join(self.attributes.values_list('name', flat=True))
+
 
 class Location(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    short_description = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
         return self.name

@@ -129,7 +129,7 @@ class TestAssignment(TestCase):
 class TestActivity(TestCase):
     def setUp(self):
         self.a = Activity(name="the name",
-                          short_description="the short description")
+                          description="the short description")
 
     def testHasAName(self):
         self.assertEqual(self.a.name, 'the name')
@@ -139,14 +139,14 @@ class TestActivity(TestCase):
         with self.assertRaises(IntegrityError):
             Activity.objects.create(name='the name')
 
-    def testHasAShortDescription(self):
-        self.assertEqual(self.a.short_description, 'the short description')
+    def testHasADescription(self):
+        self.assertEqual(self.a.description, 'the short description')
 
 
 class TestEvent(TestCase):
     def setUp(self):
         self.a = Event(name="the name",
-                       short_description="the short description",
+                       description="the short description",
                        date=datetime.date(2001, 1, 1))
 
     def testHasAName(self):
@@ -157,8 +157,8 @@ class TestEvent(TestCase):
         with self.assertRaises(IntegrityError):
             Event.objects.create(name='the name')
 
-    def testHasAShortDescription(self):
-        self.assertEqual(self.a.short_description, 'the short description')
+    def testHasADescription(self):
+        self.assertEqual(self.a.description, 'the short description')
 
     def testHasADate(self):
         self.assertEqual(self.a.date, datetime.date(2001, 1, 1))
@@ -167,7 +167,7 @@ class TestEvent(TestCase):
 class TestLocation(TestCase):
     def setUp(self):
         self.l = Location(name="the name",
-                          short_description="the short description")
+                          description="the short description")
 
     def testHasAName(self):
         self.assertEqual(self.l.name, 'the name')
@@ -177,5 +177,5 @@ class TestLocation(TestCase):
         with self.assertRaises(IntegrityError):
             Location.objects.create(name='the name')
 
-    def testHasAShortDescription(self):
-        self.assertEqual(self.l.short_description, 'the short description')
+    def testHasADescription(self):
+        self.assertEqual(self.l.description, 'the short description')

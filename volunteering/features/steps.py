@@ -2,16 +2,20 @@
 
 from lettuce import step, before, after
 
-from helpers import (setup_session, teardown_session, create_volunteer,
-                     create_attribute, create_duty, create_campaign,
-                     create_duty, volunteer_for_duty,
-                     view_volunteer_plan,
+from helpers import (add_a_model, set_field_on_admin_page, setup_session,
+                     teardown_session, create_volunteer, create_attribute,
+                     create_campaign, create_duties,
+                     set_multi_select_field_on_admin_page,
+                     set_select_field_on_admin_page,
+                     visit_the_model_list_page, volunteer_for_duty,
+                     view_volunteer_plan, assert_page_contains,
                      assert_volunteer_has_available_duties,
                      assert_volunteer_sees_assigned_duties,
                      assert_duty_not_assigned_to_volunteer,
                      assert_volunteer_does_not_see_duties,
                      assert_volunteer_is_assigned_duty)
-from dothis.features.helpers import login_as_the_admin, the, assert_was_created
+from dothis.features.helpers import (assert_was_created, login_as_the_admin,
+                                     the, submit)
 
 
 @before.each_scenario
@@ -44,38 +48,9 @@ def then_he_sees_that_the_volunteer_group1_was_created(step, volunteer_name):
     assert_was_created(volunteer_name)
 
 
-@step(u'^When he creates a duty called "([^"]*)"$')
-def when_he_creates_a_duty_called_group1_in_the_group2_campaign(step,
-                                                                duty_name,
-                                                                campaign_name):
-    create_campaign(campaign_name)
-    create_duty(duty_name)
-    create_campaign_duty(campaign_name, duty_name)
-
-
-@step(u'^Then he sees that the duty "([^"]*)" was ' +
-      u'created in the "([^"]*)" campaign$')
-def then_the_duty_g1_created_in_g2_campaign(step, duty_name, campaign_name):
-    assert_was_created(campaign_name)
-    assert_was_created(duty_name)
-
-
 @step(u'^Given the duties:$')
 def given_the_duties(step):
     create_duties(step.hashes)
-
-
-@step(u'^Given a campaign with a First Aid duty$')
-def given_a_campaign_with_a_first_aid_duty(step):
-    campaign_name = "test campaign"
-    duty_name = "first aid"
-    attribute_name = "doctor"
-
-    login_as_the_admin()
-    create_campaign(campaign_name)
-    create_attribute(attribute_name)
-    create_duty(duty_name, [attribute_name])
-    create_campaign_duty(campaign_name, duty_name)
 
 
 @step(u'^And a doctor who is qualified for the First Aid duty$')
@@ -157,3 +132,43 @@ def when_the_doctor_volunteers_for_the_first_aid_duty(step):
 def then_the_doctor_is_assigned_the_first_aid_duty(step):
     assert_volunteer_is_assigned_duty("Sam Samson", "test campaign",
                                       "first aid")
+
+
+@step(u'^When he adds an? "([^"]*)"$')
+def when_he_adds_an_model_object(step, model_name):
+    add_a_model(model_name)
+
+
+@step(u'^And sets the "([^"]*)" to be "([^"]*)"$')
+def and_sets_the_field_to_be_value(step, field, value):
+    set_field_on_admin_page(field, value)
+
+
+@step(u'^And sets the "([^"]*)" to select "([^"]*)"$')
+def and_sets_the_multi_select_to_value(step, field, value):
+    set_multi_select_field_on_admin_page(field, value)
+
+
+@step(u'^And sets the "([^"]*)" to choose "([^"]*)"$')
+def and_sets_the_select_field_to_value(step, field, value):
+    set_select_field_on_admin_page(field, value)
+
+
+@step(u'And sets the date to be "([^"]*)"')
+def and_sets_the_date_to_be_group1(step, group1):
+    assert False, 'This step must be implemented'
+
+
+@step(u'And submits the form')
+def and_submits_the_form(step):
+    submit()
+
+
+@step(u'Then he visits the "([^"]*)" list page')
+def then_he_visits_the_group1_list_page(step, model_name):
+    visit_the_model_list_page(model_name)
+
+
+@step(u'And it says "([^"]*)"')
+def and_it_says_group1(step, search_string):
+    assert_page_contains(search_string)

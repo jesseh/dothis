@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView
 
-from volunteering.models import (Assignment, Campaign, Duty, Volunteer)
+from volunteering.models import (Assignment, Duty, Volunteer)
 
 
 def importer(request):
@@ -50,10 +50,11 @@ class SummaryView(TemplateView):
         volunteer = Volunteer.objects.get(slug=volunteer_slug)
         context['volunteer'] = volunteer
         assigned = Duty.objects.filter(assignment__volunteer=volunteer)
-        all_assignable = Duty.objects.filter(assignment__isnull=True).filter(
-                    Q(activity__attributes__volunteer=volunteer) |
-                    Q(activity__attributes__isnull=True)
-                ).distinct()
+        all_assignable = Duty.objects.filter(
+            assignment__isnull=True).filter(
+                Q(activity__attributes__volunteer=volunteer) |
+                Q(activity__attributes__isnull=True)
+            ).distinct()
         assignable = list(set(all_assignable) - set(assigned))
         context['assigned'] = assigned
         context['assignable'] = assignable

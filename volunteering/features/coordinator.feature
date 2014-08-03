@@ -6,42 +6,78 @@ Feature: Administering Campaigns
   then he is notified of his commitment.
 
 
-  campaign -> (duties with implied potential volunteers)
-  duties -> ( description, required capabilities)
-  volunteer -> ( contact info, capabilities)
-
-
-  x coordinator can create a campaign
-  x a campaing has duties
-  x admin can setup up volunteers
-  o coordinator can see the assigned and unassigned duties for a given campaign.
-  o volunteer can go to system see potential duties
-  o volunteer can assign themself to many duties
-
-  o a duty has required capabilities
-
-  o admin can manage volunteer capabilities
-
-
-  Scenario: Creating a capaign with duties
+  Scenario: Creating a campaign
     Given a coordinator is logged in
-    # When he creates a campaign called "Summer camp" with duties and attributes:
-    #   | Name      | Attributes              |
-    #   | counselor | youth             |
-    #   | cook      | "kitchen trained" |
-    # Then he sees the "Summer camp" campaign with the duties and attributes:
-    #   | Name      | Attributes              |
-    #   | counselor | youth             |
-    #   | cook      | "kitchen trained" |
 
 
-  Scenario: Adding a duty
+  Scenario: Setting up volunteering opportunities
     Given a admin user is logged in
-    When he creates a duty called "Security" in the "July" campaign
-    Then he sees that the duty "Security" was created in the "July" campaign
+
+    When he adds an "event"
+    And sets the "name" to be "Sports day"
+    And sets the "description" to be "The sports day description"
+    And sets the "date" to be "2014-01-01"
+    And submits the form
+    Then he visits the "event" list page
+    And it says "Sports day"
+    And it says "The sports day description"
+    And it says "Jan. 1, 2014"
+
+    When he adds a "location"
+    And sets the "name" to be "Playing fields"
+    And sets the "description" to be "Behind the school"
+    And submits the form
+    Then he visits the "location" list page
+    And it says "Playing fields"
+    And it says "Behind the school"
+
+    When he adds an "attribute"
+    And sets the "name" to be "has whistle"
+    And submits the form
+    Then he visits the "attribute" list page
+    And it says "has whistle"
+
+    When he adds an "activity"
+    And sets the "name" to be "Referee"
+    And sets the "description" to be "To keep it fun and safe"
+    And sets the "attributes" to select "has whistle"
+    And submits the form
+    Then he visits the "activity" list page
+    And it says "Referee"
+    And it says "To keep it fun and safe"
+    And it says "has whistle"
+
+    When he adds a "duty"
+    And sets the "event" to choose "Sports day (2014-01-01)"
+    And sets the "location" to choose "Playing fields"
+    And sets the "activity" to choose "Referee"
+    And sets the "start_time" to be "1:00"
+    And sets the "end_time" to be "2:00"
+    And sets the "multiple" to be "5"
+    And submits the form
+    Then he visits the "duty" list page
+    And it says "Sports day"
+    And it says "Playing fields"
+    And it says "Referee"
+    #And it says "Jan. 1, 2014"
+    And it says "1 a.m."
+    And it says "2 a.m."
+    And it says "5"
 
 
-  Scenario: Creating a attribute
-    Given a coordinator is logged in
-    When she creates a attribute called "Trained for security"
-    Then she sees the "Trained for security" attribute
+  Scenario: Setting up a volunteer
+    Given a admin user is logged in
+
+    When he adds an "attribute"
+    And sets the "name" to be "kitchen staff"
+    And submits the form
+    Then he visits the "attribute" list page
+    And it says "kitchen staff"
+
+    When he adds a "volunteer"
+    And sets the "name" to be "Ron Ronaldson"
+    And sets the "attributes" to select "kitchen staff"
+    And submits the form
+    Then he visits the "volunteer" list page
+    And it says "Ron Ronaldson"
+    And it says "kitchen staff"

@@ -22,6 +22,27 @@ def teardown_session():
     pass
 
 
+def visit_the_model_list_page(model_name):
+    visit('/admin/volunteering/%s/' % model_name)
+
+
+def add_a_model(model_name):
+    visit_the_model_list_page(model_name)
+    click(description='Add')
+
+
+def set_field_on_admin_page(field, value):
+    form()[field] = value
+
+
+def set_select_field_on_admin_page(field, value):
+    form().select(field, text=value)
+
+
+def set_multi_select_field_on_admin_page(field, value):
+    form().select_multiple(field, texts=[value])
+
+
 def create_campaign(campaign_name, duties=[]):
     show_browser(True)  # for test coverage report
     visit('/admin/volunteering/campaign/')
@@ -62,6 +83,17 @@ def create_duty(duty_name, attribute_names=[]):
     submit()
 
 
+def create_duties(duty_name, attribute_names=[]):
+    visit('/admin/volunteering/duty/')
+    click('Add')
+    f = form()
+    # f['name'] = duty_name
+    # f['slug'] = slugify(duty_name)
+    for attribute_name in attribute_names:
+        f.select_multiple('attributes', texts=attribute_names)
+    submit()
+
+
 def create_campaign_duty(campaign_name, duty_name):
     visit('/admin/volunteering/campaignduty/')
     click('Add')
@@ -83,6 +115,10 @@ def volunteer_for_duty(volunteer_name, campaign_name, duty_name):
     visit("/volunteering/%s/%s/%s/" % (volunteer.slug, campaign.slug,
                                        duty.slug))
     submit()
+
+
+def assert_page_contains(search_string):
+    assert_in(search_string, body())
 
 
 def assert_volunteer_has_available_duties(volunteer, duty_names):

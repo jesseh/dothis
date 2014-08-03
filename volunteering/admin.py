@@ -21,8 +21,9 @@ admin.site.register(Campaign, CampaignAdmin)
 
 
 class VolunteerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'phone_number', 'external_id', 'slug']
-    readonly_fields = ['slug']
+    list_display = ['name', 'phone_number', 'external_id', 'slug',
+                    'attributes_list']
+    readonly_fields = ['slug', 'attributes_list']
     fields = ['name', 'phone_number', 'external_id', 'slug', 'attributes']
     search_fields = ['name', 'external_id', 'slug']
 admin.site.register(Volunteer, VolunteerAdmin)
@@ -45,19 +46,19 @@ admin.site.register(Assignment, AssignmentAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):
-    list_display = ['name', 'short_description']
-    pass
+    list_display = ['name', 'description', 'attributes_list']
+    readonly_fields = ['attributes_list']
 admin.site.register(Activity, ActivityAdmin)
 
 
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ['name', 'short_description']
+    list_display = ['name', 'description']
     pass
 admin.site.register(Location, LocationAdmin)
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('date', 'name', 'short_description')
+    list_display = ('date', 'name', 'description')
     list_display_links = ('name',)
     pass
 admin.site.register(Event, EventAdmin)

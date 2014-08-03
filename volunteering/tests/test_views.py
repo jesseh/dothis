@@ -9,11 +9,11 @@ class testSummaryView(TestCase):
     def setUp(self):
         self.v = Volunteer.objects.create(name='Joe')
         self.e = Event.objects.create(
-            name='an event', short_description='the short description')
+            name='an event', description='the short description')
         self.l = Location.objects.create(
-            name='a location', short_description='the short description')
+            name='a location', description='the short description')
         self.a = Activity.objects.create(
-            name='an activity', short_description='the short description')
+            name='an activity', description='the short description')
         self.d = Duty.objects.create(event=self.e, location=self.l,
                                      activity=self.a)
         self.url = reverse('volunteering:summary',
@@ -59,11 +59,11 @@ class testAssignmentView(TestCase):
     def setUp(self):
         self.v = Volunteer.objects.create(name='Joe')
         self.e = Event.objects.create(
-            name='an event', short_description='the short description')
+            name='an event', description='the short description')
         self.l = Location.objects.create(
-            name='a location', short_description='the short description')
+            name='a location', description='the short description')
         self.a = Activity.objects.create(
-            name='an activity', short_description='the short description')
+            name='an activity', description='the short description')
         self.d = Duty.objects.create(event=self.e, location=self.l,
                                      activity=self.a)
         self.url = reverse('volunteering:assignment',

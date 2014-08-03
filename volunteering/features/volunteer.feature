@@ -10,6 +10,23 @@ Feature: Volunteering
 
   Scenario: Viewing the plan for a volunteer
     Given a admin user is logged in
+    Given the activites:
+      | Name      |
+      | counselor |
+      | cook      |
+      | security  |
+      | greeter   |
+      | usher     |
+    Given the locations:
+      | Name          |
+      | fright street |
+      | kitchen       |
+      | scream lane   |
+      | angry ave     |
+      | candy cove    |
+    Given the event:
+      | Name      |
+      | halloween |
     Given the duties:
       | Activity  | Location      | Event     |
       | counselor | fright street | halloween |
