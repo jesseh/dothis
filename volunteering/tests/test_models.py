@@ -5,8 +5,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from volunteering.models import (Activity, Assignment, Attribute, Campaign,
-                                 CampaignEvent, Duty, Event, Location,
-                                 Volunteer)
+                                 Duty, Event, Location, Volunteer)
 
 
 class TestAttribute(TestCase):
@@ -85,26 +84,6 @@ class TestCampaign(TestCase):
     def testHasSlug(self):
         c = Campaign(slug='a slug')
         self.assertEqual('a slug', c.slug)
-
-    def testIsActiveInitially(self):
-        c = Campaign(slug='a slug')
-        self.assertEqual(1, c.status)
-
-    def testDeactivate(self):
-        c = Campaign(slug='a slug')
-        c.deactivate()
-        self.assertEqual(0, c.status)
-
-
-class TestCampaignEvent(TestCase):
-    def setUp(self):
-        self.campaign = Campaign(name="a campaign", slug="a_campaign")
-        self.event = Event()
-
-    def testHasTimestamps(self):
-        c = CampaignEvent(event=self.event, campaign=self.campaign)
-        self.assertTrue(c.created)
-        self.assertTrue(c.modified)
 
 
 class TestAssignment(TestCase):

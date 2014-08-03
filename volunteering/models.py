@@ -17,11 +17,22 @@ class Attribute(models.Model):
         return self.name
 
 
-class Campaign(ActivatorModel, TimeStampedModel):
+class Campaign(TimeStampedModel):
+    ASSIGNED, ASSIGNABLE, ASSIGNED_AND_ASSIGNABLE = range(3)
+    ASSIGNMENT_STATES = (
+        (ASSIGNED, 'Assigned'),
+        (ASSIGNABLE, 'Assignable'),
+        (ASSIGNED_AND_ASSIGNABLE, 'Assigned and assignable'),
+    )
+
     name = models.CharField(max_length=200)
     slug = models.SlugField()
-    campaign = models.ManyToManyField('Event', through='CampaignEvent',
-                                      null=True, blank=True)
+    assignment_state = models.IntegerField('assignment_state',
+                                           choices=ASSIGNMENT_STATES,
+                                           default=ASSIGNED_AND_ASSIGNABLE)
+    events = models.ManyToManyField('Event', null=True, blank=True)
+    locations = models.ManyToManyField('Location', null=True, blank=True)
+    activities = models.ManyToManyField('Activity', null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -31,8 +42,27 @@ class Campaign(ActivatorModel, TimeStampedModel):
         self.deactivate_date = datetime_now()
 
 
-class Volunteer(models.Model):
+class Message(models.Model):
+    name = models.CharField(max_length=200)
+    subject = models.CharField(max_length=200)
+    body = models.TextField(null=True, blank=True)
 
+    def __unicode__(self):
+        return self.name
+
+
+class Trigger(models.Model):
+    campaign = models.ForeignKey(Campaign, null=True, blank=True)
+    message = models.ForeignKey(Message, null=True, blank=True)
+    fixed_date = models.DateField(null=True, blank=True)
+    days_before_event = models.PositiveIntegerField(null=True, blank=True)
+    days_after_assignment = models.PositiveIntegerField(null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.campaign, self.message)
+
+
+class Volunteer(models.Model):
     name = models.CharField(max_length=200)
     external_id = models.CharField(max_length=200, null=True, blank=True)
     phone_number = models.CharField(max_length=200, null=True, blank=True)
@@ -78,6 +108,7 @@ class Event(models.Model):
 
     class Meta:
         unique_together = (("name", "date"))
+        ordering = ['date']
 
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.date)
@@ -87,6 +118,9 @@ class Activity(models.Model):
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField(null=True, blank=True)
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
+
+    class Meta:
+        ordering = ['name']
 
     def __unicode__(self):
         return self.name
@@ -99,6 +133,9 @@ class Location(models.Model):
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField(null=True, blank=True)
 
+    class Meta:
+        ordering = ['name']
+
     def __unicode__(self):
         return self.name
 
@@ -109,7 +146,7 @@ class Duty(models.Model):
     location = models.ForeignKey(Location, null=True, blank=True)
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
-    multiple = models.IntegerField(
+    multiple = models.PositiveIntegerField(
         default=1,
         help_text="The number of volunteers needed for this duty.")
     assignments = models.ManyToManyField(Volunteer, through='Assignment')
@@ -126,14 +163,6 @@ class Duty(models.Model):
         if self.location:
             name += " at " + self.location.name
         return name
-
-
-class CampaignEvent(TimeStampedModel):
-    campaign = models.ForeignKey(Campaign)
-    event = models.ForeignKey(Event)
-
-    def __unicode__(self):
-        return "%s: %s" % (self.campaign, self.event)
 
 
 class Assignment(TimeStampedModel):

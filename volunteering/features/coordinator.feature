@@ -5,11 +5,6 @@ Feature: Administering Campaigns
   when I commit bob to getting the t-shirt for this campaing
   then he is notified of his commitment.
 
-
-  Scenario: Creating a campaign
-    Given a coordinator is logged in
-
-
   Scenario: Setting up volunteering opportunities
     Given a admin user is logged in
 
@@ -81,3 +76,27 @@ Feature: Administering Campaigns
     Then he visits the "volunteer" list page
     And it says "Ron Ronaldson"
     And it says "kitchen staff"
+
+
+  Scenario: Planning communications
+    # A Recipients defines the set of people to whom the messages will be sent.
+    # They can be assigned or assignable
+    # They can include 
+    # A trigger is a set time that triggers a message for a duty set.
+    #
+    Given a admin user is logged in
+
+    # a message is sent to the recipients at a given time relative to a base time.
+    #
+    When he adds a "campaign"
+    And sets the "name" to be "Holidays"
+    Then he visits the "campaign" list page
+    And it says "Holidays"
+
+    When he adds a "message"
+    And sets the "campaign" to be "holidays"
+    And sets the "assign_state" to be "all"
+
+
+
+
