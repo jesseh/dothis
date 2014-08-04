@@ -75,9 +75,12 @@ class TestDuty(TestCase):
         e, _ = Event.objects.get_or_create(name="event")
         l, _ = Location.objects.get_or_create(name="location")
         a, _ = Activity.objects.get_or_create(name="activity")
-        Duty.objects.get_or_create(event=e, location=l, activity=a)
+        params = {'event': e, 'location': l, 'activity': a,
+                  'start_time': datetime.time(1, 2),
+                  'end_time': datetime.time(3, 4)}
+        Duty.objects.get_or_create(**params)
         with self.assertRaises(IntegrityError):
-            Duty(event=e, location=l, activity=a).save()
+            Duty(**params).save()
 
 
 class TestCampaign(TestCase):

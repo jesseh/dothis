@@ -154,7 +154,7 @@ class Duty(models.Model):
     coordinator_note = models.TextField(null=True, blank=True)
 
     class Meta:
-        unique_together = (("activity", "event", "location"))
+        unique_together = (("activity", "event", "location", "start_time", "end_time"))
 
     def __unicode__(self):
         name = ""

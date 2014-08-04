@@ -59,10 +59,6 @@ Feature: Administering Campaigns
     And it says "2 a.m."
     And it says "5"
 
-
-  Scenario: Setting up a volunteer
-    Given a admin user is logged in
-
     When he adds an "attribute"
     And sets the "name" to be "kitchen staff"
     And submits the form
@@ -77,19 +73,17 @@ Feature: Administering Campaigns
     And it says "Ron Ronaldson"
     And it says "kitchen staff"
 
+    When he adds an "assignment"
+    And sets the "volunteer" to choose "Ron Ronaldson"
+    And sets the "Duty" to choose "Referee on Sports day at Playing fields"
+    And submits the form
+    Then he visits the "assignment" list page
+    And it says "Ron Ronaldson -> Referee on Sports day at Playing fields"
 
-  Scenario: Planning communications
-    # A Recipients defines the set of people to whom the messages will be sent.
-    # They can be assigned or assignable
-    # They can include 
-    # A trigger is a set time that triggers a message for a duty set.
-    #
-    Given a admin user is logged in
-
-    # a message is sent to the recipients at a given time relative to a base time.
-    #
     When he adds a "campaign"
     And sets the "name" to be "Holidays"
+    And sets the "name" to be "Holidays"
+    And sets the "events" to select "Opening ceremony"
     Then he visits the "campaign" list page
     And it says "Holidays"
 
