@@ -151,6 +151,7 @@ class Duty(models.Model):
         help_text="The number of volunteers needed for this duty.")
     assignments = models.ManyToManyField(Volunteer, through='Assignment')
     details = models.TextField(null=True, blank=True)
+    coordinator_note = models.TextField(null=True, blank=True)
 
     class Meta:
         unique_together = (("activity", "event", "location"))
