@@ -36,13 +36,15 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'dothis',
+
     # External
     'lettuce.django',
     'django_extensions',
     'foundation',
+    'djrill',
 
     # Internal
-    'dothis',
     'volunteering',
 )
 
@@ -104,3 +106,15 @@ STATICFILES_DIRS = (
 )
 
 CSVIMPORT_MODELS = ['volunteering.Volunteer']
+
+
+# Email config
+SERVER_EMAIL = "office@nnls-masorti.org.uk"
+MANDRILL_API_KEY = os.environ.get('MANDRILL_API_KEY', "fake_mandril_api_key")
+EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
+
+# Djrill is a Mandril connection. It must override the admin.site early on.
+from django.contrib import admin
+from djrill import DjrillAdminSite
+admin.site = DjrillAdminSite()
+
