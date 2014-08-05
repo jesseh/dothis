@@ -8,6 +8,7 @@ from django_extensions.db.models import ActivatorModel, TimeStampedModel
 
 SLUG_LENGTH = 8
 SLUG_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'
+TIME_FORMAT = "%H:%M"
 
 
 class Attribute(models.Model):
@@ -73,8 +74,9 @@ class Volunteer(models.Model):
     title = models.CharField(max_length=200, blank=True)
     first_name = models.CharField(max_length=200, blank=True)
     surname = models.CharField(max_length=200)
-    dear_name = models.CharField(max_length=200, blank=True,
-                    help_text="Leave blank if same as first name")
+    dear_name = models.CharField(
+        max_length=200, blank=True,
+        help_text="Leave blank if same as first name")
     external_id = models.CharField(max_length=200, unique=True)
     family = models.ForeignKey(Family)
     email_address = models.EmailField(blank=True)
@@ -89,6 +91,9 @@ class Volunteer(models.Model):
     def get_absolute_url(self):
         return reverse('volunteering:summary',
                        kwargs={'volunteer_slug': self.slug})
+
+    def name(self):
+        return "%s %s" % (self.first_name, self.surname)
 
     def generate_slug(self):
         length = SLUG_LENGTH + 1
@@ -179,7 +184,19 @@ class Duty(models.Model):
             name += " on " + self.event.name
         if self.location:
             name += " at " + self.location.name
+        if self.times_string():
+            name += " (%s)" % self.times_string()
         return name
+
+    def times_string(self):
+        if self.start_time and self.end_time:
+            return "%s - %s" % (self.start_time.strftime(TIME_FORMAT),
+                                self.end_time.strftime(TIME_FORMAT))
+        elif self.start_time:
+            return self.start_time
+        else:
+            return ''
+
 
 
 class Assignment(TimeStampedModel):
@@ -190,7 +207,7 @@ class Assignment(TimeStampedModel):
         unique_together = (("volunteer", "duty"),)
 
     def __unicode__(self):
-        return "%s -> %s" % (self.volunteer.name, str(self.duty))
+        return "%s -> %s" % (self.volunteer.name(), str(self.duty))
 
     def get_absolute_url(self):
         return reverse(
