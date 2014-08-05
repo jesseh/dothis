@@ -20,11 +20,13 @@ class VolunteerInline(admin.StackedInline):
               'attributes',
               'slug')
     readonly_fields = ['slug']
+    filter_horizontal = ['attributes']
     extra = 0
 
 
 class FamilyAdmin(admin.ModelAdmin):
     inlines = [VolunteerInline]
+    search_fields = ['external_id', 'volunteer__surname']
 admin.site.register(Family, FamilyAdmin)
 
 
@@ -53,6 +55,7 @@ class VolunteerAdmin(admin.ModelAdmin):
     search_fields = ['slug', 'first_name', 'surname', 'family__external_id',
                      'external_id']
     list_filter = ['attributes']
+    filter_horizontal = ['attributes']
 admin.site.register(Volunteer, VolunteerAdmin)
 
 
@@ -75,6 +78,7 @@ class ActivityAdmin(admin.ModelAdmin):
     list_display = ['name', 'description', 'attributes_list']
     readonly_fields = ['attributes_list']
     list_filter = ['attributes']
+    filter_horizontal = ['attributes']
 admin.site.register(Activity, ActivityAdmin)
 
 
