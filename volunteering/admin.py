@@ -1,11 +1,25 @@
 from django.contrib import admin
 from models import (Activity, Assignment, Attribute, Campaign, Duty, Event,
-                    Location, Message, Trigger, Volunteer)
+                    Family, Location, Message, Trigger, Volunteer)
 
 
 class DutyInline(admin.StackedInline):
     model = Duty
     extra = 10
+
+
+class VolunteerInline(admin.StackedInline):
+    model = Volunteer
+    fields = (('title', 'first_name', 'surname', 'dear_name'),
+              ('email_address', 'home_phone', 'mobile_phone'),
+              'attributes',
+              'slug')
+    readonly_fields = ['slug']
+
+
+class FamilyAdmin(admin.ModelAdmin):
+    inlines = [VolunteerInline]
+admin.site.register(Family, FamilyAdmin)
 
 
 class AttributeAdmin(admin.ModelAdmin):
@@ -22,11 +36,16 @@ admin.site.register(Campaign, CampaignAdmin)
 
 
 class VolunteerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'phone_number', 'external_id', 'slug',
+    fields = ('family',
+              ('title', 'first_name', 'surname', 'dear_name'),
+              ('email_address', 'home_phone', 'mobile_phone'),
+              'attributes')
+    list_display = ['slug', 'external_id', 'title', 'first_name', 'surname',
+                    'dear_name', 'email_address', 'home_phone', 'mobile_phone',
                     'attributes_list']
-    readonly_fields = ['slug', 'attributes_list']
-    fields = ['name', 'phone_number', 'external_id', 'slug', 'attributes']
-    search_fields = ['name', 'external_id', 'slug']
+    readonly_fields = ['attributes_list']
+    search_fields = ['slug', 'first_name', 'surname', 'family__external_id',
+                     'external_id']
     list_filter = ['attributes']
 admin.site.register(Volunteer, VolunteerAdmin)
 

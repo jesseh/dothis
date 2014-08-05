@@ -4,8 +4,12 @@ import datetime
 from django.db import IntegrityError
 from django.test import TestCase
 
+from factories import (AttributeFactory, VolunteerFactory, FamilyFactory,
+                       DutyFactory, FullDutyFactory, EventFactory,
+                       LocationFactory, ActivityFactory, AssignmentFactory)
+
 from volunteering.models import (Activity, Assignment, Attribute, Campaign,
-                                 Duty, Event, Location, Volunteer)
+                                 Duty, Event, Location)
 
 
 class TestAttribute(TestCase):
@@ -14,38 +18,46 @@ class TestAttribute(TestCase):
         self.assertEqual('yada', attribute.name)
 
     def testAttributeIsUnique(self):
-        Attribute(name='yada').save()
+        AttributeFactory.create(name='yada')
         with self.assertRaises(Exception):
-            Attribute(name='yada').save()
+            AttributeFactory.create(name='yada')
 
 
 class TestVolunteer(TestCase):
     def testSettingAnAttribute(self):
-        v = Volunteer.objects.create(name='tester')
-        v.attributes.create(name='attr2')
-        self.assertEqual('attr2', v.attributes.all()[0].name)
+        v = VolunteerFactory.create(surname='tester')
+        a = AttributeFactory.create(name='an attr')
+        v.attributes.add(a)
+        self.assertEqual('an attr', v.attributes.all()[0].name)
 
     def testHasAUniqueSlugThatHas8PlusOneChars(self):
-        v = Volunteer.objects.create(name='tester')
+        v = VolunteerFactory.create()
         self.assertEqual(9, len(v.slug))
 
     def testHasSlugWithDashInTheMiddle(self):
-        v = Volunteer.objects.create(name='tester')
+        v = VolunteerFactory.create()
         self.assertEqual('-', v.slug[4])
 
     def testTheSlugIsUnique(self):
-        v1 = Volunteer.objects.create(name='tester')
-        v2 = Volunteer.objects.create(name='tester2')
+        v1 = VolunteerFactory.build()
+        v2 = VolunteerFactory.build()
+        f = FamilyFactory.create()
+        self.assertEqual('', v1.slug)
+        self.assertEqual('', v2.slug)
+        v1.family = f
+        v2.family = f
+        v1.save()
+        v2.save()
         self.assertNotEqual(v1.slug, v2.slug)
 
     def testHasClaimed_IsFalseWhenFalse(self):
-        volunteer = Volunteer.objects.create(name='tester')
-        duty = Duty.objects.create()
+        volunteer = VolunteerFactory()
+        duty = DutyFactory()
         self.assertFalse(volunteer.has_claimed(duty))
 
     def testHasClaimed_IsTrueWhenTrue(self):
-        volunteer = Volunteer.objects.create(name='tester')
-        duty = Duty.objects.create()
+        volunteer = VolunteerFactory.create()
+        duty = DutyFactory()
         Assignment.objects.create(volunteer=volunteer, duty=duty)
         self.assertTrue(volunteer.has_claimed(duty))
 
@@ -53,34 +65,31 @@ class TestVolunteer(TestCase):
 class TestDuty(TestCase):
     @unittest.SkipTest
     def testSettingAnAttribute(self):
-        d = Duty.objects.create()
-        d.attributes.create(name='attr')
+        d = DutyFactory()
+        a = AttributeFactory(name='attr')
+        d.attributes.add(a)
         self.assertEqual('attr', d.attributes.all()[0].name)
 
     def testHasVolunteerMultiple(self):
-        d = Duty(multiple=5)
+        d = DutyFactory.build(multiple=5)
         self.assertEqual(5, d.multiple)
 
     def testHasOptionalLocation(self):
-        l = Location.objects.create(name="a location")
-        d = Duty(location=l)
+        l = LocationFactory.build(name="a location")
+        d = DutyFactory.build(location=l)
         self.assertEqual(l.id, d.location_id)
 
     def testHasOptionalEvent(self):
-        e = Event.objects.create(name="a event")
-        d = Duty(event=e)
+        e = EventFactory(name="a event")
+        d = DutyFactory(event=e)
         self.assertEqual(e.id, d.event_id)
 
     def testDuplicatesEventLocationActivitySet(self):
-        e, _ = Event.objects.get_or_create(name="event")
-        l, _ = Location.objects.get_or_create(name="location")
-        a, _ = Activity.objects.get_or_create(name="activity")
-        params = {'event': e, 'location': l, 'activity': a,
-                  'start_time': datetime.time(1, 2),
-                  'end_time': datetime.time(3, 4)}
-        Duty.objects.get_or_create(**params)
+        a_time = datetime.time(10, 0)
+        d = FullDutyFactory.create(start_time=a_time, end_time=a_time)
         with self.assertRaises(IntegrityError):
-            Duty(**params).save()
+            Duty(activity=d.activity, location=d.location, event=d.event,
+                 start_time=d.start_time, end_time=d.end_time).save()
 
 
 class TestCampaign(TestCase):
@@ -92,9 +101,7 @@ class TestCampaign(TestCase):
 class TestAssignment(TestCase):
 
     def setUp(self):
-        self.campaign = Campaign.objects.create(name="a campaign",
-                                                slug="a_campaign")
-        self.volunteer = Volunteer.objects.create(name='tester')
+        self.volunteer = VolunteerFactory.create()
         self.duty = Duty.objects.create()
 
     def testHasTimestamps(self):
@@ -103,15 +110,15 @@ class TestAssignment(TestCase):
         self.assertTrue(assignment.modified)
 
     def testNoDuplicates(self):
-        Assignment.objects.create(volunteer=self.volunteer, duty=self.duty)
+        AssignmentFactory.create(volunteer=self.volunteer, duty=self.duty)
         with self.assertRaises(IntegrityError):
-            Assignment.objects.create(volunteer=self.volunteer, duty=self.duty)
+            AssignmentFactory.create(volunteer=self.volunteer, duty=self.duty)
 
 
 class TestActivity(TestCase):
     def setUp(self):
-        self.a = Activity(name="the name",
-                          description="the short description")
+        self.a = ActivityFactory.build(name="the name",
+                                       description="the short description")
 
     def testHasAName(self):
         self.assertEqual(self.a.name, 'the name')

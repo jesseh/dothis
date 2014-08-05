@@ -62,15 +62,29 @@ class Trigger(models.Model):
         return "%s: %s" % (self.campaign, self.message)
 
 
+class Family(models.Model):
+    external_id = models.CharField(max_length=200, unique=True)
+
+    def __unicode__(self):
+        return self.external_id
+
+
 class Volunteer(models.Model):
-    name = models.CharField(max_length=200)
-    external_id = models.CharField(max_length=200, null=True, blank=True)
-    phone_number = models.CharField(max_length=200, null=True, blank=True)
+    title = models.CharField(max_length=200, blank=True)
+    first_name = models.CharField(max_length=200, blank=True)
+    surname = models.CharField(max_length=200)
+    dear_name = models.CharField(max_length=200, blank=True,
+                    help_text="Leave blank if same as first name")
+    external_id = models.CharField(max_length=200, unique=True)
+    family = models.ForeignKey(Family)
+    email_address = models.EmailField(blank=True)
+    home_phone = models.CharField(max_length=200, null=True, blank=True)
+    mobile_phone = models.CharField(max_length=200, null=True, blank=True)
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
     slug = models.CharField(max_length=10, unique=True, blank=True)
 
     def __unicode__(self):
-        return self.name
+        return "%s %s (%s)" % (self.first_name, self.surname, self.external_id)
 
     def get_absolute_url(self):
         return reverse('volunteering:summary',
@@ -154,7 +168,8 @@ class Duty(models.Model):
     coordinator_note = models.TextField(null=True, blank=True)
 
     class Meta:
-        unique_together = (("activity", "event", "location", "start_time", "end_time"))
+        unique_together = (("activity", "event", "location", "start_time",
+                            "end_time"))
 
     def __unicode__(self):
         name = ""

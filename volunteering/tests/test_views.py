@@ -1,21 +1,19 @@
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from volunteering.models import (Activity, Assignment, Duty, Event, Location,
-                                 Volunteer)
+import factories
+
+from volunteering.models import (Assignment, )
 
 
 class testSummaryView(TestCase):
     def setUp(self):
-        self.v = Volunteer.objects.create(name='Joe')
-        self.e = Event.objects.create(
-            name='an event', description='the short description')
-        self.l = Location.objects.create(
-            name='a location', description='the short description')
-        self.a = Activity.objects.create(
-            name='an activity', description='the short description')
-        self.d = Duty.objects.create(event=self.e, location=self.l,
-                                     activity=self.a)
+        self.v = factories.VolunteerFactory.create()
+        self.e = factories.EventFactory()
+        self.l = factories.LocationFactory()
+        self.a = factories.ActivityFactory()
+        self.d = factories.DutyFactory.create(
+            event=self.e, location=self.l, activity=self.a)
         self.url = reverse('volunteering:summary',
                            kwargs={'volunteer_slug': self.v.slug})
 
@@ -36,7 +34,7 @@ class testSummaryView(TestCase):
         self.assertContains(response, self.d.event.name, count=1)
 
     def testSummaryContentOnlyShowsDutyOnceIfAssigned(self):
-        Assignment.objects.create(volunteer=self.v, duty=self.d)
+        factories.AssignmentFactory.create(volunteer=self.v, duty=self.d)
         response = self.client.get(self.url)
         self.assertContains(response, self.d.event.name, count=1)
         self.assertContains(response, self.d.location.name, count=1)
@@ -57,15 +55,12 @@ class testSummaryView(TestCase):
 
 class testAssignmentView(TestCase):
     def setUp(self):
-        self.v = Volunteer.objects.create(name='Joe')
-        self.e = Event.objects.create(
-            name='an event', description='the short description')
-        self.l = Location.objects.create(
-            name='a location', description='the short description')
-        self.a = Activity.objects.create(
-            name='an activity', description='the short description')
-        self.d = Duty.objects.create(event=self.e, location=self.l,
-                                     activity=self.a)
+        self.v = factories.VolunteerFactory.create()
+        self.e = factories.EventFactory.create()
+        self.l = factories.LocationFactory.create()
+        self.a = factories.ActivityFactory.create()
+        self.d = factories.DutyFactory.create(event=self.e, location=self.l,
+                                              activity=self.a)
         self.url = reverse('volunteering:assignment',
                            kwargs={'volunteer_slug': self.v.slug,
                                    'duty_id': self.d.id})

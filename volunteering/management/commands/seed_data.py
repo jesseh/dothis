@@ -69,15 +69,18 @@ class Command(BaseCommand):
     def attribute_data(self):
         return [
             {'name': 'security supervisor'},
+            {'name': 'security able'},
+            {'name': 'steward able'},
             {'name': 'adult'},
+            {'name': 'senior'},
             {'name': 'b\'nei mitzvah'},
         ]
 
     def activity_data(self):
         return [
             {'name': 'Security supervisor', 'attributes': self.lookup_attributes(['security supervisor'])},
-            {'name': 'Security team member', 'attributes': self.lookup_attributes(['adult'])},
-            {'name': 'Steward', 'attributes': self.lookup_attributes(['adult'])},
+            {'name': 'Security team member', 'attributes': self.lookup_attributes(['security able'])},
+            {'name': 'Steward', 'attributes': self.lookup_attributes(['steward able'])},
             {'name': 'Youth steward', 'attributes': self.lookup_attributes(['b\'nei mitzvah'])},
         ]
 
