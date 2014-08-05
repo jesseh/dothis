@@ -46,7 +46,7 @@ class Campaign(TimeStampedModel):
 class Message(models.Model):
     name = models.CharField(max_length=200)
     subject = models.CharField(max_length=200)
-    body = models.TextField(null=True, blank=True)
+    body = models.TextField(blank=True)
 
     def __unicode__(self):
         return self.name
@@ -80,8 +80,8 @@ class Volunteer(models.Model):
     external_id = models.CharField(max_length=200, unique=True)
     family = models.ForeignKey(Family)
     email_address = models.EmailField(blank=True)
-    home_phone = models.CharField(max_length=200, null=True, blank=True)
-    mobile_phone = models.CharField(max_length=200, null=True, blank=True)
+    home_phone = models.CharField(max_length=200, blank=True)
+    mobile_phone = models.CharField(max_length=200, blank=True)
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
     slug = models.CharField(max_length=10, unique=True, blank=True)
 
@@ -122,7 +122,7 @@ class Volunteer(models.Model):
 
 class Event(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(blank=True)
     date = models.DateField(null=True, blank=True)
 
     class Meta:
@@ -135,7 +135,7 @@ class Event(models.Model):
 
 class Activity(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(blank=True)
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
 
     class Meta:
@@ -150,7 +150,7 @@ class Activity(models.Model):
 
 class Location(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(blank=True)
 
     class Meta:
         ordering = ['name']
@@ -169,8 +169,8 @@ class Duty(models.Model):
         default=1,
         help_text="The number of volunteers needed for this duty.")
     assignments = models.ManyToManyField(Volunteer, through='Assignment')
-    details = models.TextField(null=True, blank=True)
-    coordinator_note = models.TextField(null=True, blank=True)
+    details = models.TextField(blank=True)
+    coordinator_note = models.TextField(blank=True)
 
     class Meta:
         unique_together = (("activity", "event", "location", "start_time",

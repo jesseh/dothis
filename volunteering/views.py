@@ -18,11 +18,11 @@ def importer(request):
         created_count = 0
         updated_count = 0
         for record in data_csv:
-            updated = _update_or_create_volunteer(record)
-            if updated:
-                updated_count += 1
-            else:
+            created = _update_or_create_volunteer(record)
+            if created:
                 created_count += 1
+            else:
+                updated_count += 1
         messages.success(request, '%s volunteers created and %s updated.' %
                          (created_count, updated_count))
         return redirect('/admin/volunteering/volunteer/')
