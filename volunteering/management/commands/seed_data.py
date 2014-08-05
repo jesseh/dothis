@@ -45,8 +45,8 @@ class Command(BaseCommand):
     def event_data(self):
         return [
             {'name': "Chol Ha'Moed Shabbat", 'date': date(2014, 10, 11)},
-            {'name': "Erev Rosh HaShanah", 'date': date(2014, 9, 25)},
-            {'name': "Erev Rosh HaShanah 2", 'date': date(2014, 9, 24)},
+            {'name': "Erev Rosh HaShanah", 'date': date(2014, 9, 24)},
+            {'name': "Erev Rosh HaShanah 2", 'date': date(2014, 9, 25)},
             {'name': "Erev Shabbat - Shabbat Shuvah", 'date': date(2014, 9, 26)},
             {'name': "Erev Shabbat Bereishit", 'date': date(2014, 10, 17)},
             {'name': "Erev Shmini Atzeret", 'date': date(2014, 10, 15)},
@@ -55,7 +55,7 @@ class Command(BaseCommand):
             {'name': "Kol Nidrei", 'date': date(2014, 10, 3)},
             {'name': "Rosh HaShanah 1", 'date': date(2014, 9, 25)},
             {'name': "Rosh HaShanah 2", 'date': date(2014, 9, 26)},
-            {'name': "Shabbat Bereishit", 'date': date(2014, 10, 18)},
+            {'name': "Shabbat Bereishit", 'date': date(2014, 10, 17)},
             {'name': "Shabbat Shuvah", 'date': date(2014, 9, 27)},
             {'name': "Shmini Atzeret", 'date': date(2014, 10, 16)},
             {'name': "Simchat Torah", 'date': date(2014, 10, 17)},
@@ -86,18 +86,22 @@ class Command(BaseCommand):
 
 
     def location_data(self):
-        return [{'name': 'Sternberg Centre'},
-                {'name': 'Regent Suite'},
+        return [{'name': 'Regent Suite'},
                 {'name': 'Hall Pavilion'},
                 {'name': 'Manor House'},
                 {'name': 'Akiva'},
                 {'name': 'Shul hall'},
+                {'name': 'To be determined',
+                 'description': 'We need to recruit volunteers before the allocation of people to ' + \
+                 'venues. As a result we\'ll align the locations at a later date and will let you ' + \
+                 'know where to go then.'}
                ]
 
     def duty_data(self):
         data = csv.DictReader(self.duty_csv())
         records = []
         for duty in data:
+            self.stdout.write(str(duty))
             event = Event.objects.get(name=smart_text(duty['Event']))
             activity = Activity.objects.get(name=smart_text(duty['Activity']))
             location = Location.objects.get(name=smart_text(duty['Location']))
@@ -114,171 +118,129 @@ class Command(BaseCommand):
         return records
 
     def duty_csv(self):
-        return StringIO("""Event,Activity,Start Time,End Time,Multiple,Location,Coordinator note
-Rosh HaShanah 1,Security supervisor,10:10,12:10,1,Hall Pavilion,
-Yom Kippur,Security supervisor,10:40,12:40,1,Hall Pavilion,
-Chol Ha'Moed Shabbat,Security supervisor,09:15,11:05,1,Manor House,
-Chol Ha'Moed Shabbat,Security supervisor,10:55,13:00,1,Manor House,
-Erev Shabbat Bereishit,Security supervisor,18:10,19:45,1,Manor House,
-Rosh HaShanah 2,Security supervisor,07:45,09:15,1,Manor House,
-Rosh HaShanah 2,Security supervisor,09:00,10:45,1,Manor House,
-Rosh HaShanah 2,Security supervisor,10:30,12:15,1,Manor House,
-Rosh HaShanah 2,Security supervisor,12:00,13:30,1,Manor House,
-Shabbat Bereishit,Security supervisor,09:15,11:05,1,Manor House,
-Shabbat Bereishit,Security supervisor,10:55,13:00,1,Manor House,
-Shabbat Shuvah,Security supervisor,09:15,11:05,1,Manor House,
-Shabbat Shuvah,Security supervisor,10:55,13:00,1,Manor House,
-Shmini Atzeret,Security supervisor,09:15,11:05,1,Manor House,
-Simchat Torah,Security supervisor,09:15,11:05,1,Manor House,
-Simchat Torah,Security supervisor,10:55,13:00,1,Manor House,
-Succot 1,Security supervisor,09:15,11:05,1,Manor House,
-Succot 1,Security supervisor,10:55,13:00,1,Manor House,
-Succot 1,Security supervisor,17:55,19:30,1,Manor House,
-Succot 2,Security supervisor,09:15,11:05,1,Manor House,
-Succot 2,Security supervisor,10:55,13:00,1,Manor House,
-Erev Simchat Torah,Security supervisor,18:30,20:15,1,Manor House,Adult's service starts at 19:00
-Erev Simchat Torah,Security supervisor,17:10,18:40,1,Manor House,Childrens service
-Succot 2/Erev Chol Ha'Moed Shabbat,Security supervisor,18:10,19:45,1,Manor House,Service starts 18:30
-Erev Shmini Atzeret,Security supervisor,17:40,19:00,1,Manor House,Service starts 18:00
-Erev Succot 1,Security supervisor,17:55,19:30,1,Manor House,Service starts 18:15
-Erev Rosh HaShanah 2,Security supervisor,18:00,19:45,1,Manor House,Service starts at 18:30 and lasts hour max
-Erev Rosh HaShanah,Security supervisor,18:00,19:45,1,Manor House,Service starts at 18:30 and lasts hour max
-Erev Shabbat - Shabbat Shuvah,Security supervisor,18:00,19:45,1,Manor House,Service starts 18:30
-Rosh HaShanah 1,Security supervisor,07:45,09:15,2,Manor House,
-Rosh HaShanah 1,Security supervisor,09:00,10:45,2,Manor House,
-Rosh HaShanah 1,Security supervisor,10:30,12:15,2,Manor House,
-Rosh HaShanah 1,Security supervisor,12:00,13:30,2,Manor House,could obviously end earlier if respective sites are cleared before 13:30
-Kol Nidrei,Security supervisor,17:30,19:00,2,Manor House,"If RS start time should be later, you can advise those signed up and allocated there in due course"
-Yom Kippur,Security supervisor,08:15,09:45,2,Manor House,
-Yom Kippur,Security supervisor,09:30,11:15,2,Manor House,
-Yom Kippur,Security supervisor,11:00,12:45,2,Manor House,
-Yom Kippur,Security supervisor,12:30,14:30,2,Manor House,
-Yom Kippur,Security supervisor,14:15,16:00,2,Manor House,
-Yom Kippur,Security supervisor,15:45,17:45,2,Manor House,
-Yom Kippur,Security supervisor,17:30,19:30,2,Manor House,
-Kol Nidrei,Security supervisor,18:45,20:30,2,Manor House,
-Kol Nidrei,Security supervisor,20:15,21:30,2,Manor House,
-Rosh HaShanah 1,Security supervisor,07:45,09:15,1,Regent Suite,
-Rosh HaShanah 1,Security supervisor,09:00,10:45,1,Regent Suite,
-Rosh HaShanah 1,Security supervisor,10:30,12:15,1,Regent Suite,
-Rosh HaShanah 1,Security supervisor,12:00,13:30,1,Regent Suite,could obviously end earlier if respective sites are cleared before 13:30
-Kol Nidrei,Security supervisor,17:30,19:00,2,Regent Suite,"If RS start time should be later, you can advise those signed up and allocated there in due course"
-Kol Nidrei,Security supervisor,18:45,20:30,2,Regent Suite,
-Kol Nidrei,Security supervisor,20:15,21:30,2,Regent Suite,
-Yom Kippur,Security supervisor,08:15,09:45,1,Regent Suite,
-Yom Kippur,Security supervisor,09:30,11:15,1,Regent Suite,
-Yom Kippur,Security supervisor,11:00,12:45,1,Regent Suite,
-Yom Kippur,Security supervisor,12:30,14:30,1,Regent Suite,
-Yom Kippur,Security supervisor,14:15,16:00,1,Regent Suite,
-Yom Kippur,Security supervisor,15:45,17:45,1,Regent Suite,
-Yom Kippur,Security supervisor,17:30,19:30,1,Regent Suite,
-Rosh HaShanah 1,Security team member,10:10,12:10,1,Hall Pavilion,
-Yom Kippur,Security team member,10:40,12:40,1,Hall Pavilion,
-Erev Rosh HaShanah 2,Security team member,18:00,19:45,1,Manor House,
-Erev Shabbat - Shabbat Shuvah,Security team member,18:00,19:45,1,Manor House,
-Erev Shabbat Bereishit,Security team member,18:10,19:45,1,Manor House,
-Erev Shmini Atzeret,Security team member,17:40,19:00,1,Manor House,
-Erev Simchat Torah,Security team member,17:10,18:40,1,Manor House,
-Erev Simchat Torah,Security team member,18:30,20:15,1,Manor House,
-Erev Succot 1,Security team member,17:55,19:30,1,Manor House,
-Succot 1,Security team member,17:55,19:30,1,Manor House,
-Succot 2/Erev Chol Ha'Moed Shabbat,Security team member,18:10,19:45,1,Manor House,
-Chol Ha'Moed Shabbat,Security team member,09:15,11:05,2,Manor House,
-Chol Ha'Moed Shabbat,Security team member,10:55,13:00,2,Manor House,
-Erev Rosh HaShanah,Security team member,18:00,19:45,2,Manor House,
-Shabbat Bereishit,Security team member,09:15,11:05,2,Manor House,
-Shabbat Bereishit,Security team member,10:55,13:00,2,Manor House,
-Shabbat Shuvah,Security team member,09:15,11:05,2,Manor House,
-Shabbat Shuvah,Security team member,10:55,13:00,2,Manor House,
-Simchat Torah,Security team member,09:15,11:05,2,Manor House,
-Simchat Torah,Security team member,10:55,13:00,2,Manor House,
-Succot 1,Security team member,09:15,11:05,2,Manor House,
-Succot 1,Security team member,10:55,13:00,2,Manor House,
-Succot 2,Security team member,09:15,11:05,2,Manor House,
-Succot 2,Security team member,10:55,13:00,2,Manor House,
-Rosh HaShanah 2,Security team member,07:45,09:15,4,Manor House,
-Rosh HaShanah 2,Security team member,09:00,10:45,4,Manor House,
-Rosh HaShanah 2,Security team member,10:30,12:15,4,Manor House,
-Rosh HaShanah 2,Security team member,12:00,13:30,4,Manor House,
-Rosh HaShanah 1,Security team member,07:45,09:15,6,Manor House,
-Yom Kippur,Security team member,08:15,09:45,3,Manor House,
-Yom Kippur,Security team member,09:30,11:15,3,Manor House,
-Yom Kippur,Security team member,15:45,17:45,3,Manor House,
-Yom Kippur,Security team member,11:00,12:45,4,Manor House,
-Yom Kippur,Security team member,12:30,14:30,4,Manor House,
-Yom Kippur,Security team member,14:15,16:00,4,Manor House,
-Yom Kippur,Security team member,17:30,19:30,5,Manor House,
-Kol Nidrei,Security team member,17:30,19:00,6,Manor House,
-Kol Nidrei,Security team member,18:45,20:30,6,Manor House,
-Kol Nidrei,Security team member,20:15,21:30,6,Manor House,
-Rosh HaShanah 1,Security team member,09:00,10:45,6,Manor House,
-Rosh HaShanah 1,Security team member,10:30,12:15,6,Manor House,
-Rosh HaShanah 1,Security team member,12:00,13:30,6,Manor House,could obviously end earlier if respective sites are cleared before 13:30
-Rosh HaShanah 1,Security team member,07:45,09:15,3,Regent Suite,
-Yom Kippur,Security team member,08:15,09:45,3,Regent Suite,
-Yom Kippur,Security team member,09:30,11:15,3,Regent Suite,
-Yom Kippur,Security team member,15:45,17:45,3,Regent Suite,
-Yom Kippur,Security team member,11:00,12:45,4,Regent Suite,
-Yom Kippur,Security team member,12:30,14:30,4,Regent Suite,
-Yom Kippur,Security team member,14:15,16:00,4,Regent Suite,
-Yom Kippur,Security team member,17:30,19:30,5,Regent Suite,
-Kol Nidrei,Security team member,17:30,19:00,6,Regent Suite,
-Kol Nidrei,Security team member,18:45,20:30,6,Regent Suite,
-Kol Nidrei,Security team member,20:15,21:30,6,Regent Suite,
-Rosh HaShanah 1,Security team member,09:00,10:45,6,Regent Suite,
-Rosh HaShanah 1,Security team member,10:30,12:15,6,Regent Suite,
-Rosh HaShanah 1,Security team member,12:00,13:30,6,Regent Suite,could obviously end earlier if respective sites are cleared before 13:30
-Rosh HaShanah 1,Steward,08:15,09:45,3,Akiva,
-Rosh HaShanah 2,Steward,08:15,09:45,3,Akiva,
-Rosh HaShanah 2,Steward,09:45,11:15,5,Akiva,
-Rosh HaShanah 2,Steward,11:15,13:15,5,Akiva,Obviously could finish sooner if services finish earlier
-Rosh HaShanah 1,Steward,09:45,11:15,5,Akiva,
-Rosh HaShanah 1,Steward,11:15,13:15,5,Akiva,
-Erev Rosh HaShanah,Steward,18:20,19:45,1,Manor House,
-Erev Rosh HaShanah 2,Steward,18:20,19:45,1,Manor House,
-Erev Shabbat - Shabbat Shuvah,Steward,18:20,19:00,1,Manor House,
-Erev Shabbat Bereishit,Steward,18:20,19:00,1,Manor House,
-Erev Shmini Atzeret,Steward,17:50,18:30,1,Manor House,
-Erev Simchat Torah,Steward,18:50,19:30,1,Manor House,
-Erev Succot 1,Steward,18:05,19:00,1,Manor House,
-Shabbat Shuvah,Steward,09:20,11:15,1,Manor House,
-Simchat Torah,Steward,09:20,11:15,1,Manor House,
-Succot 1,Steward,09:20,11:15,1,Manor House,
-Succot 1,Steward,18:05,19:00,1,Manor House,
-Succot 2,Steward,09:20,11:15,1,Manor House,
-Succot 2/Erev Chol Ha'Moed Shabbat,Steward,18:15,19:00,1,Manor House,
-Rosh HaShanah 1,Steward,10:45,12:30,3,Manor House,Help with Buggy Parking/Management before/during/after children's services (1 at GA entrance; 1 at MH/Circle; 1 outside Akiva)
-Yom Kippur,Steward,10:45,12:30,3,Manor House, Help with Buggy Parking/Management before/during/after children's services (1 at GA entrance; 1 at MH/Circle; 1 outside Akiva
-Rosh HaShanah 1,Steward,10:15,12:15,4,Manor House,
-Yom Kippur,Steward,10:40,12:40,4,Manor House,
-Yom Kippur,Steward,15:15,16:45,8,Manor House,Akiva-4; Shul-4
-Yom Kippur,Steward,16:45,18:15,8,Manor House,Akiva-4; Shul-4
-Yom Kippur,Steward,08:50,10:30,8,Manor House,Akiva-4; Shul-4
-Yom Kippur,Steward,13:45,15:15,8,Manor House,Akiva-4; Shul-4
-Yom Kippur,Steward,10:30,12:00,11,Manor House, Akiva:5; Shul: 6
-Yom Kippur,Steward,12:15,13:45,11,Manor House, Akiva:5; Shul: 6
-Yom Kippur,Steward,18:15,19:30,11,Manor House, Akiva:5; Shul: 6
-Rosh HaShanah 1,Steward,08:15,09:45,3,Regent Suite,
-Yom Kippur,Steward,15:15,16:45,4,Regent Suite,
-Yom Kippur,Steward,16:45,18:15,4,Regent Suite,
-Yom Kippur,Steward,08:50,10:30,5,Regent Suite,
-Yom Kippur,Steward,13:45,15:15,5,Regent Suite,
-Rosh HaShanah 1,Steward,09:45,11:15,6,Regent Suite,
-Rosh HaShanah 1,Steward,11:15,13:15,6,Regent Suite,
-Yom Kippur,Steward,10:30,12:00,6,Regent Suite,
-Yom Kippur,Steward,12:15,13:45,6,Regent Suite,
-Yom Kippur,Steward,18:15,19:30,6,Regent Suite,
-Rosh HaShanah 2,Steward,10:45,12:30,3,Shul hall,Help with buggy parking/management as per RH1
-Rosh HaShanah 2,Steward,08:15,09:45,4,Shul hall,
-Rosh HaShanah 2,Steward,09:45,11:15,6,Shul hall,
-Rosh HaShanah 2,Steward,11:15,13:15,6,Shul hall,Obviously could finish sooner if services finish earlier
-Rosh HaShanah 1,Steward,09:45,11:15,6,Shul hall,
-Rosh HaShanah 1,Steward,11:15,13:15,6,Shul hall,
-Rosh HaShanah 1,Steward,08:15,09:45,4,Shul hall,
-Kol Nidrei,Steward,18:00,19:30,11,Manor House,5 - Akiva; 6 - Shul
-Kol Nidrei,Steward,19:30,21:15,11,Manor House,5 - Akiva; 6 - Shul
-Kol Nidrei,Steward,18:00,19:30,11,Regent Suite,5 - Akiva; 6 - Shul
-Kol Nidrei,Steward,19:30,21:15,11,Regent Suite,5 - Akiva; 6 - Shul
-Chol Ha'Moed Shabbat,Youth steward,09:20,11:15,2,Manor House,
-Shabbat Bereishit,Youth steward,09:15,11:15,2,Manor House,
+        return StringIO("""Event,Start Time,End Time,Activity,Multiple,Location,Coordinator note
+Chol Ha'Moed Shabbat,09:15,11:05,Security supervisor,1,To be determined,
+Chol Ha'Moed Shabbat,09:15,11:05,Security team member,2,To be determined,
+Chol Ha'Moed Shabbat,09:20,11:15,Youth steward,2,To be determined,
+Chol Ha'Moed Shabbat,10:55,13:00,Security supervisor,1,To be determined,
+Chol Ha'Moed Shabbat,10:55,13:00,Security team member,2,To be determined,
+Erev Rosh HaShanah 2,18:00,19:45,Security supervisor,1,To be determined,Service starts at 18:30 and lasts hour max
+Erev Rosh HaShanah 2,18:00,19:45,Security team member,1,To be determined,
+Erev Rosh HaShanah 2,18:20,19:45,Steward,1,To be determined,
+Erev Rosh HaShanah,18:00,19:45,Security supervisor,1,To be determined,Service starts at 18:30 and lasts hour max
+Erev Rosh HaShanah,18:00,19:45,Security team member,2,To be determined,
+Erev Shabbat - Shabbat Shuvah,18:00,19:45,Security supervisor,1,To be determined,Service starts 18:30
+Erev Shabbat - Shabbat Shuvah,18:00,19:45,Security team member,1,To be determined,
+Erev Shabbat - Shabbat Shuvah,18:20,19:00,Steward,1,To be determined,
+Erev Shabbat Bereishit,18:10,19:45,Security supervisor,1,To be determined,
+Erev Shabbat Bereishit,18:10,19:45,Security team member,1,To be determined,
+Erev Shabbat Bereishit,18:20,19:00,Steward,1,To be determined,
+Erev Shmini Atzeret,17:40,19:00,Security supervisor,1,To be determined,Service starts 18:00
+Erev Shmini Atzeret,17:40,19:00,Security team member,1,To be determined,
+Erev Shmini Atzeret,17:50,18:30,Steward,1,To be determined,
+Erev Simchat Torah,17:10,18:40,Security supervisor,1,To be determined,Childrens service
+Erev Simchat Torah,17:10,18:40,Security team member,1,To be determined,
+Erev Simchat Torah,18:30,20:15,Security supervisor,1,To be determined,Adult's service starts at 19:00
+Erev Simchat Torah,18:30,20:15,Security team member,1,To be determined,
+Erev Simchat Torah,18:50,19:30,Steward,1,To be determined,
+Erev Succot 1,17:55,19:30,Security supervisor,1,To be determined,Service starts 18:15
+Erev Succot 1,17:55,19:30,Security team member,1,To be determined,
+Erev Succot 1,18:05,19:00,Steward,1,To be determined,
+Kol Nidrei,17:30,19:00,Security supervisor,4,To be determined,"If RS start time should be later, you can advise those signed up and allocated there in due course"
+Kol Nidrei,17:30,19:00,Security team member,15,To be determined,
+Kol Nidrei,18:00,19:30,Steward,17,To be determined,RS: 6; MH: 11 (5 - Akiva; 6 - Shul)
+Kol Nidrei,18:45,20:30,Security supervisor,4,To be determined,MH:2; RS:2
+Kol Nidrei,18:45,20:30,Security team member,15,To be determined,MH: 9; RS: 6
+Kol Nidrei,19:30,21:15,Steward,17,To be determined,RS: 6; MH: 11 (5 - Akiva; 6 - Shul)
+Kol Nidrei,20:15,21:30,Security supervisor,4,To be determined,MH:2; RS:2
+Kol Nidrei,20:15,21:30,Security team member,15,To be determined,MH: 9; RS: 6
+Rosh HaShanah 1,07:45,09:15,Security supervisor,3,To be determined,MH: 2; RS: 1
+Rosh HaShanah 1,07:45,09:15,Security team member,9,To be determined,MH: 6; RS: 3
+Rosh HaShanah 1,08:15,09:45,Steward,10,To be determined,Akiva: 3, Shul: 4; RS: 3
+Rosh HaShanah 1,09:00,10:45,Security supervisor,3,To be determined,MH: 2; RS: 1
+Rosh HaShanah 1,09:00,10:45,Security team member,15,To be determined,MH: 9; RS: 6
+Rosh HaShanah 1,10:10,12:10,Security supervisor,1,To be determined,Hall Pavilion
+Rosh HaShanah 1,10:10,12:10,Security team member,1,To be determined,Hall Pavilion
+Rosh HaShanah 1,09:45,11:15,Steward,17,To be determined,Akiva: 5; Shul: 6; RS: 6
+Rosh HaShanah 1,10:15,12:15,Steward,4,To be determined,MH - Beit Tefilah - Family Service (1) - Hall Pav: 2 - Explanatory Service (CM to liaise with ZSh)
+Rosh HaShanah 1,10:45,12:30,Steward,3,To be determined,Help with Buggy Parking/Management before/during/after children's services (1 at GA entrance; 1 at MH/Circle; 1 outside Akiva)
+Rosh HaShanah 1,10:30,12:15,Security supervisor,3,To be determined,MH: 2; RS: 1
+Rosh HaShanah 1,10:30,12:15,Security team member,15,To be determined,MH: 9; RS: 6
+Rosh HaShanah 1,11:15,13:15,Steward,17,To be determined,Akiva: 5; Shul: 6; RS: 6
+Rosh HaShanah 1,12:00,13:30,Security supervisor,3,To be determined,could obviously end earlier if respective sites are cleared before 13:30
+Rosh HaShanah 1,12:00,13:30,Security team member,15,To be determined,could obviously end earlier if respective sites are cleared before 13:30
+Rosh HaShanah 2,07:45,09:15,Security supervisor,1,Manor House,
+Rosh HaShanah 2,07:45,09:15,Security team member,4,Manor House,
+Rosh HaShanah 2,08:15,09:45,Steward,7,To be determined,Akiva: 3; Shul: 4
+Rosh HaShanah 2,09:00,10:45,Security supervisor,1,Manor House,
+Rosh HaShanah 2,09:00,10:45,Security team member,4,Manor House,
+Rosh HaShanah 2,09:45,11:15,Steward,11,To be determined,Akiva: 5; Shul: 6
+Rosh HaShanah 2,10:45,12:30,Steward,3,To be determined,Help with buggy parking/management as per RH1
+Rosh HaShanah 2,10:30,12:15,Security supervisor,1,Manor House,
+Rosh HaShanah 2,10:30,12:15,Security team member,4,Manor House,
+Rosh HaShanah 2,11:15,13:15,Steward,11,To be determined,Obviously could finish sooner if services finish earlier
+Rosh HaShanah 2,12:00,13:30,Security supervisor,1,Manor House,
+Rosh HaShanah 2,12:00,13:30,Security team member,4,Manor House,
+Shabbat Bereishit,09:15,11:05,Security supervisor,1,To be determined,
+Shabbat Bereishit,09:15,11:05,Security team member,2,To be determined,
+Shabbat Bereishit,09:15,11:15,Youth steward,2,To be determined,
+Shabbat Bereishit,10:55,13:00,Security supervisor,1,To be determined,
+Shabbat Bereishit,10:55,13:00,Security team member,2,To be determined,
+Shabbat Shuvah,09:15,11:05,Security supervisor,1,To be determined,
+Shabbat Shuvah,09:15,11:05,Security team member,2,To be determined,
+Shabbat Shuvah,09:20,11:15,Steward,1,To be determined,
+Shabbat Shuvah,10:55,13:00,Security supervisor,1,To be determined,
+Shabbat Shuvah,10:55,13:00,Security team member,2,To be determined,
+Shmini Atzeret,09:15,11:05,Security supervisor,1,Manor House,
+Shmini Atzeret,09:15,11:05,Security supervisor,1,Manor House,
+Shmini Atzeret,09:15,11:05,Security team member,2,Manor House,
+Shmini Atzeret,09:20,11:15,Steward,1,Manor House,
+Shmini Atzeret,10:55,13:00,Security supervisor,1,Manor House,
+Shmini Atzeret,10:55,13:00,Security team member,2,Manor House,
+Simchat Torah,09:15,11:05,Security supervisor,1,Manor House,
+Simchat Torah,09:15,11:05,Security team member,2,Manor House,
+Simchat Torah,09:20,11:15,Steward,1,Manor House,
+Simchat Torah,10:55,13:00,Security supervisor,1,Manor House,
+Simchat Torah,10:55,13:00,Security team member,2,Manor House,
+Succot 1,09:15,11:05,Security supervisor,1,To be determined,
+Succot 1,09:15,11:05,Security team member,2,To be determined,
+Succot 1,09:20,11:15,Steward,1,To be determined,
+Succot 1,10:55,13:00,Security supervisor,1,To be determined,
+Succot 1,10:55,13:00,Security team member,2,To be determined,
+Succot 1,17:55,19:30,Security supervisor,1,To be determined,
+Succot 1,17:55,19:30,Security team member,1,To be determined,
+Succot 1,18:05,19:00,Steward,1,To be determined,
+Succot 2,09:15,11:05,Security supervisor,1,Manor House,
+Succot 2,09:15,11:05,Security team member,2,Manor House,
+Succot 2,09:20,11:15,Steward,1,Manor House,
+Succot 2,10:55,13:00,Security supervisor,1,Manor House,
+Succot 2,10:55,13:00,Security team member,2,Manor House,
+Succot 2/Erev Chol Ha'Moed Shabbat,18:10,19:45,Security supervisor,1,Manor House, Service starts 18:30
+Succot 2/Erev Chol Ha'Moed Shabbat,18:10,19:45,Security team member,1,Manor House,
+Succot 2/Erev Chol Ha'Moed Shabbat,18:15,19:00,Steward,1,Manor House,
+Yom Kippur,08:15,09:45,Security supervisor,3,To be determined,MH:2; RS: 1
+Yom Kippur,08:15,09:45,Security team member,12,To be determined,MH: 9; RS: 3
+Yom Kippur,08:50,10:30,Steward,13,To be determined,MH: 8 (Akiva-4; Shul-4); RS: 5
+Yom Kippur,09:30,11:15,Security supervisor,3,To be determined,MH:2; RS: 1,MH:2; RS: 1
+Yom Kippur,09:30,11:15,Security team member,12,To be determined,
+Yom Kippur,10:40,12:40,Security supervisor,1,To be determined,Hall pavilion
+Yom Kippur,10:40,12:40,Security team member,1,To be determined,Hall pavilion
+Yom Kippur,10:40,12:40,Steward,4,To be determined,MH - Beit Tefilah - Family Service (1) - Hall Pav: 2 - Explanatory Service (CM to liaise with ZSh)
+Yom Kippur,10:30,12:00,Steward,17,To be determined, MH: 11 (Akiva:5; Shul: 6); RS: 6
+Yom Kippur,10:45,12:30,Steward,3,To be determined, Help with Buggy Parking/Management before/during/after children's services (1 at GA entrance; 1 at MH/Circle; 1 outside Akiva
+Yom Kippur,11:00,12:45,Security supervisor,3,To be determined,MH:2; RS: 1
+Yom Kippur,11:00,12:45,Security team member,13,To be determined,MH: 9; RS: 4
+Yom Kippur,12:15,13:45,Steward,17,To be determined,MH: 11 (Akiva:5; Shul: 6); RS: 6
+Yom Kippur,12:30,14:30,Security supervisor,3,To be determined,MH:2; RS: 1
+Yom Kippur,12:30,14:30,Security team member,13,To be determined,MH: 9; RS: 4
+Yom Kippur,13:45,15:15,Steward,13,To be determined,MH: 8 (Akiva-4; Shul-4); RS: 5
+Yom Kippur,14:15,16:00,Security supervisor,3,To be determined,MH:2; RS: 1
+Yom Kippur,14:15,16:00,Security team member,13,To be determined,MH: 9; RS: 4
+Yom Kippur,15:15,16:45,Steward,12,To be determined,MH: 8 (Akiva-4; Shul-4); RS: 4
+Yom Kippur,15:45,17:45,Security supervisor,3,To be determined,MH:2; RS: 1
+Yom Kippur,15:45,17:45,Security team member,12,To be determined,MH: 9; RS: 3
+Yom Kippur,16:45,18:15,Steward,12,To be determined,MH: 8 (Akiva-4; Shul-4); RS: 4
+Yom Kippur,17:30,19:30,Security supervisor,3,To be determined,MH:2; RS: 1
+Yom Kippur,17:30,19:30,Security team member,14,To be determined,MH: 9; RS: 5
+Yom Kippur,18:15,19:30,Steward,17,To be determined,MH: 11 (Akiva:5; Shul: 6); RS: 6
 """)
