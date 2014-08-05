@@ -70,6 +70,11 @@ class Family(models.Model):
     def __unicode__(self):
         return self.external_id
 
+    def surnames(self):
+        surnames = self.volunteer_set.order_by('surname').distinct(
+            ).values_list('surname', flat=True)
+        return ", ".join(surnames)
+
 
 class Volunteer(models.Model):
     title = models.CharField(max_length=200, blank=True)

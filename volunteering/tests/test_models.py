@@ -182,3 +182,16 @@ class TestLocation(TestCase):
 
     def testHasADescription(self):
         self.assertEqual(self.l.description, 'the short description')
+
+
+class TestFamily(TestCase):
+    def testSingleSurnames(self):
+        v = VolunteerFactory(surname="Abba")
+        family = v.family
+        self.assertEqual("Abba", family.surnames())
+
+    def testMultipleSurnames(self):
+        v = VolunteerFactory(surname="Abba")
+        family = v.family
+        VolunteerFactory(family=family, surname="Bacca")
+        self.assertEqual('Abba, Bacca', family.surnames())
