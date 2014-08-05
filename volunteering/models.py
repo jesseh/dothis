@@ -197,6 +197,8 @@ class Duty(models.Model):
         else:
             return ''
 
+    def unassigned_count(self):
+        return self.multiple - self.assignment_set.count()
 
 
 class Assignment(TimeStampedModel):

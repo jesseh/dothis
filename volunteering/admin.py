@@ -8,6 +8,11 @@ class DutyInline(admin.StackedInline):
     extra = 10
 
 
+class AssignmentInline(admin.StackedInline):
+    model = Assignment
+    extra = 0
+
+
 class VolunteerInline(admin.StackedInline):
     model = Volunteer
     fields = (('title', 'first_name', 'surname', 'dear_name'),
@@ -52,8 +57,10 @@ admin.site.register(Volunteer, VolunteerAdmin)
 
 class DutyAdmin(admin.ModelAdmin):
     list_display = ['id', 'activity', 'event', 'location',
-                    'start_time', 'end_time', 'multiple']
+                    'start_time', 'end_time', 'multiple', 'unassigned_count']
     list_filter = ['activity', 'event', 'location', 'start_time']
+    readonly_fields = ['unassigned_count']
+    inlines = [AssignmentInline]
 admin.site.register(Duty, DutyAdmin)
 
 
