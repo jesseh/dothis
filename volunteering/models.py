@@ -28,7 +28,7 @@ class Campaign(TimeStampedModel):
         (ASSIGNED_AND_ASSIGNABLE, 'Assigned and assignable'),
     )
 
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField()
     assignment_state = models.IntegerField('assignment_state',
                                            choices=ASSIGNMENT_STATES,
@@ -217,6 +217,7 @@ class Duty(models.Model):
     class Meta:
         unique_together = (("activity", "event", "location", "start_time",
                             "end_time"))
+        verbose_name_plural = "Duties"
 
     def __unicode__(self):
         name = ""
