@@ -66,12 +66,12 @@ class SummaryView(TemplateView):
         volunteer = Volunteer.objects.get(slug=volunteer_slug)
         context['volunteer'] = volunteer
         assigned = Duty.objects.filter(assignment__volunteer=volunteer)
-        all_assignable = Duty.objects.filter(
+        assignable = Duty.objects.filter(
             assignment__isnull=True).filter(
                 Q(activity__attributes__volunteer=volunteer) |
                 Q(activity__attributes__isnull=True)
-            ).distinct()
-        assignable = list(set(all_assignable) - set(assigned))
+            ).exclude(assignment__volunteer=volunteer
+            ).order_by('event', 'start_time').distinct()
         context['assigned'] = assigned
         context['assignable'] = assignable
         return context

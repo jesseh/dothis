@@ -13,13 +13,14 @@
         <h1>An opportunity to volunteer at NNLS</h1>
         {% if is_claimed %}
             <p>You have volunteered for this! Thanks.</p>
+            {% include 'volunteering/includes/duty_details.html' %}
         {% else %}
+            {% include 'volunteering/includes/duty_details.html' %}
             <form action="#" method="post">
                 {% csrf_token %}
-                <input type="submit" class="small button" value="Claim this opportunity"></input>
+                <input type="submit" class="small button" value="Click to volunteer for this"></input>
             </form>
         {% endif %}
-        {% include 'volunteering/includes/duty_details.html' %}
       </div>
     </div>
 

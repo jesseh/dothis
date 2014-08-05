@@ -1,9 +1,17 @@
-            <ul>
-                {% for duty in duties %}
-                <li>
-                    <a href="{% url 'volunteering:assignment' volunteer_slug=volunteer.slug duty_id=duty.id %}" class="duty">
-                    {{ duty.activity.name}} on {{ duty.event.name }} at {{ duty.location.name }}
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
+{% regroup duties by event as event_list %}
+
+<ul>
+{% for event in event_list %}
+<li>{{ event.grouper.name }} {% if event.grouper.date %} - {{ event.grouper.date }}{% endif %}
+        <ul>
+        {% for duty in event.list %}
+            <li>
+                <a href="{% url 'volunteering:assignment' volunteer_slug=volunteer.slug duty_id=duty.id %}" class="duty">
+                    {{ duty.activity.name}}, {{ duty.times_string }} at {{ duty.location.name }}
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    </li>
+{% endfor %}
+</ul>
