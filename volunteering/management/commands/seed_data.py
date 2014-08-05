@@ -90,8 +90,8 @@ class Command(BaseCommand):
                 {'name': 'Hall Pavilion'},
                 {'name': 'Manor House'},
                 {'name': 'Akiva'},
-                {'name': 'Shul hall'},
-                {'name': 'To be determined',
+                {'name': 'Shul Hall'},
+                {'name': 'location to be determined',
                  'description': 'We need to recruit volunteers before the allocation of people to ' + \
                  'venues. As a result we\'ll align the locations at a later date and will let you ' + \
                  'know where to go then.'}
@@ -156,7 +156,7 @@ Kol Nidrei,20:15,21:30,Security supervisor,4,To be determined,MH:2; RS:2
 Kol Nidrei,20:15,21:30,Security team member,15,To be determined,MH: 9; RS: 6
 Rosh HaShanah 1,07:45,09:15,Security supervisor,3,To be determined,MH: 2; RS: 1
 Rosh HaShanah 1,07:45,09:15,Security team member,9,To be determined,MH: 6; RS: 3
-Rosh HaShanah 1,08:15,09:45,Steward,10,To be determined,Akiva: 3, Shul: 4; RS: 3
+Rosh HaShanah 1,08:15,09:45,Steward,10,To be determined,Akiva: 3,Akiva: 3, Shul: 4; RS: 3
 Rosh HaShanah 1,09:00,10:45,Security supervisor,3,To be determined,MH: 2; RS: 1
 Rosh HaShanah 1,09:00,10:45,Security team member,15,To be determined,MH: 9; RS: 6
 Rosh HaShanah 1,10:10,12:10,Security supervisor,1,To be determined,Hall Pavilion
