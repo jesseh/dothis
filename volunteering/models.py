@@ -95,6 +95,9 @@ class Volunteer(models.Model):
     def name(self):
         return "%s %s" % (self.first_name, self.surname)
 
+    def initials(self):
+        return  '%s.%s.' % (self.first_name[0], self.surname[0])
+
     def generate_slug(self):
         length = SLUG_LENGTH + 1
         while True:

@@ -40,6 +40,10 @@ class testSummaryView(TestCase):
         self.assertContains(response, self.d.location.name, count=1)
         self.assertContains(response, self.d.activity.name, count=1)
 
+    def testSummaryContentIncludesVolunteerInitials(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, self.v.initials())
+
     def testSummaryContentIncludesActivityName(self):
         response = self.client.get(self.url)
         self.assertContains(response, self.d.activity.name)
@@ -73,6 +77,7 @@ class testAssignmentView(TestCase):
         Assignment.objects.create(volunteer=self.v, duty=self.d)
         response = self.client.get(self.url)
         self.assertContains(response, "You have volunteered")
+        self.assertContains(response, self.v.initials())
         self.assertContains(response, self.d.event.name, count=1)
         self.assertContains(response, self.d.location.name, count=1)
         self.assertContains(response, self.d.activity.name, count=1)

@@ -50,6 +50,14 @@ class TestVolunteer(TestCase):
         v2.save()
         self.assertNotEqual(v1.slug, v2.slug)
 
+    def testInitials(self):
+        volunteer = VolunteerFactory(first_name="Jon", surname="George")
+        self.assertEqual('J.G.', volunteer.initials())
+
+    def testInitialsMultipleLastName(self):
+        volunteer = VolunteerFactory(first_name="Jon Smith", surname="Stuart")
+        self.assertEqual('J.S.', volunteer.initials())
+
     def testHasClaimed_IsFalseWhenFalse(self):
         volunteer = VolunteerFactory()
         duty = DutyFactory()
