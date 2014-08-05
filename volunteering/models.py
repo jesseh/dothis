@@ -72,8 +72,8 @@ class Family(models.Model):
 
 class Volunteer(models.Model):
     title = models.CharField(max_length=200, blank=True)
-    first_name = models.CharField(max_length=200, blank=True)
-    surname = models.CharField(max_length=200)
+    first_name = models.CharField(max_length=200, blank=True, db_index=True)
+    surname = models.CharField(max_length=200, db_index=True)
     dear_name = models.CharField(
         max_length=200, blank=True,
         help_text="Leave blank if same as first name")
