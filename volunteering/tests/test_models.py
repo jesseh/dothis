@@ -58,6 +58,12 @@ class TestVolunteer(TestCase):
         volunteer = VolunteerFactory(first_name="Jon Smith", surname="Stuart")
         self.assertEqual('J.S.', volunteer.initials())
 
+    def testFamilyLink(self):
+        volunteer = VolunteerFactory()
+        self.assertRegexpMatches(
+            volunteer.family_link(),
+            '<a href="/admin/volunteering/family/\d/">FM\d</a>')
+
     def testHasClaimed_IsFalseWhenFalse(self):
         volunteer = VolunteerFactory()
         duty = DutyFactory()

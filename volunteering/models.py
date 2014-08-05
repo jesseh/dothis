@@ -3,6 +3,7 @@ import random
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now as datetime_now
+from django.template.defaultfilters import escape
 
 from django_extensions.db.models import ActivatorModel, TimeStampedModel
 
@@ -96,7 +97,16 @@ class Volunteer(models.Model):
         return "%s %s" % (self.first_name, self.surname)
 
     def initials(self):
-        return  '%s.%s.' % (self.first_name[0], self.surname[0])
+        return '%s.%s.' % (self.first_name[0], self.surname[0])
+
+    def family_link(self):
+        return '<a href="%s">%s</a>' % (
+            reverse("admin:volunteering_family_change",
+                    args=(self.family_id,)),
+            escape(self.family.external_id))
+
+    family_link.allow_tags = True
+    family_link.short_description = "Family"
 
     def generate_slug(self):
         length = SLUG_LENGTH + 1

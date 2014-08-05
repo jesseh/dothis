@@ -20,6 +20,7 @@ class VolunteerInline(admin.StackedInline):
               'attributes',
               'slug')
     readonly_fields = ['slug']
+    extra = 0
 
 
 class FamilyAdmin(admin.ModelAdmin):
@@ -46,8 +47,8 @@ class VolunteerAdmin(admin.ModelAdmin):
               ('email_address', 'home_phone', 'mobile_phone'),
               'attributes')
     list_display = ['slug', 'external_id', 'title', 'first_name', 'surname',
-                    'dear_name', 'email_address', 'home_phone', 'mobile_phone',
-                    'attributes_list']
+                    'dear_name', 'family_link', 'email_address', 'home_phone',
+                    'mobile_phone', 'attributes_list']
     readonly_fields = ['attributes_list']
     search_fields = ['slug', 'first_name', 'surname', 'family__external_id',
                      'external_id']
