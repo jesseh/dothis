@@ -1,23 +1,28 @@
+import csv
+from StringIO import StringIO
+
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView
 
-from volunteering.models import (Assignment, Duty, Volunteer)
+from volunteering.models import (Assignment, Duty, Volunteer, Family,
+                                 Attribute)
 
 
 def importer(request):
     if request.method == 'POST':
-        lines = request.POST['csv'].splitlines()
+        data_file = StringIO(request.POST['csv'])
+        data_csv = csv.DictReader(data_file, dialect=csv.excel_tab)
 
         created_count = 0
         updated_count = 0
-        for line in lines:
-            created = _get_or_create_volunteer(line)
-            if created:
-                created_count += 1
-            else:
+        for record in data_csv:
+            updated = _update_or_create_volunteer(record)
+            if updated:
                 updated_count += 1
+            else:
+                created_count += 1
         messages.success(request, '%s volunteers created and %s updated.' %
                          (created_count, updated_count))
         return redirect('/admin/volunteering/volunteer/')
@@ -25,17 +30,28 @@ def importer(request):
         return render(request, 'volunteering/import.html')
 
 
-def _get_or_create_volunteer(line):
-    parts = [part.strip() for part in line.split(',')]
-    external_id = parts[0]
-    name = " ".join(parts[1:3])
-    phone = parts[3]
+def _update_or_create_volunteer(record):
+    family, _ = Family.objects.get_or_create(external_id=record['FAMILY ID'])
+    params = {
+        'title': record['TITLE'],
+        'first_name': record['FIRSTNAMES'],
+        'surname': record['SURNAME'],
+        'dear_name': record['DEARNAMES'],
+        'external_id': record['MEMBER ID'],
+        'family': family,
+        'email_address': record['EMAIL'],
+        'home_phone': record['HOME'],
+        'mobile_phone': record['MOBILE'],
+    }
+    volunteer, updated = Volunteer.objects.update_or_create(params, external_id=record['MEMBER ID'])
+    attribute_names = [a.strip() for a in record['ATTRIBUTES'].split(",")]
+    volunteer.attributes.clear()
+    for attribute_name in attribute_names:
+        attribute = Attribute.objects.get(name=attribute_name)
+        volunteer.attributes.add(attribute)
 
-    v, created = Volunteer.objects.get_or_create(external_id=external_id)
-    v.name = name
-    v.phone_number = phone
-    v.save()
-    return created
+    volunteer.save()
+    return updated
 
 
 class SummaryView(TemplateView):
