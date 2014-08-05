@@ -195,3 +195,14 @@ class TestFamily(TestCase):
         family = v.family
         VolunteerFactory(family=family, surname="Bacca")
         self.assertEqual('Abba, Bacca', family.surnames())
+
+    def testSingleNames(self):
+        v = VolunteerFactory(first_name="Joe", surname="Abba")
+        family = v.family
+        self.assertEqual("Joe Abba", family.names())
+
+    def testMultipleNames(self):
+        v = VolunteerFactory(first_name="Joe", surname="Abba")
+        family = v.family
+        VolunteerFactory(family=family, first_name="Bob", surname="Bacca")
+        self.assertEqual('Bob Bacca, Joe Abba', family.names())

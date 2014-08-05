@@ -26,7 +26,7 @@ class VolunteerInline(admin.StackedInline):
 
 class FamilyAdmin(admin.ModelAdmin):
     inlines = [VolunteerInline]
-    list_display = ['external_id', 'surnames']
+    list_display = ['external_id', 'names']
     fields = (('external_id', 'surnames'),)
     search_fields = ['external_id', 'volunteer__surname']
     readonly_fields = ['surnames']

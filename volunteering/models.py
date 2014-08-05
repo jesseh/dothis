@@ -75,6 +75,10 @@ class Family(models.Model):
             ).values_list('surname', flat=True)
         return ", ".join(surnames)
 
+    def names(self):
+        names = [v.name() for v in self.volunteer_set.all()]
+        return ", ".join(sorted(names))
+
 
 class Volunteer(models.Model):
     title = models.CharField(max_length=200, blank=True)
