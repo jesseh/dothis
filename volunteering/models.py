@@ -1,6 +1,7 @@
 import random
 
 from django.db import models
+from django.db.models import F, Count, Q
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now as datetime_now
 from django.template.defaultfilters import escape
@@ -181,6 +182,23 @@ class Location(models.Model):
         return self.name
 
 
+class AssignableDutyManager(models.Manager):
+    def assignable(self):
+        return super(AssignableDutyManager, self). \
+            get_queryset(). \
+            annotate(num_assignments=Count('assignments')). \
+            filter(num_assignments__lt=F('multiple')). \
+            filter(multiple__gt=0)
+
+    def assignable_to(self, volunteer):
+        return self.assignable(). \
+            filter(assignment__isnull=True). \
+            filter(
+                Q(activity__attributes__volunteer=volunteer) |
+                Q(activity__attributes__isnull=True)
+            ).exclude(assignment__volunteer=volunteer)
+
+
 class Duty(models.Model):
     activity = models.ForeignKey(Activity, null=True, blank=True)
     event = models.ForeignKey(Event, null=True, blank=True)
@@ -193,6 +211,8 @@ class Duty(models.Model):
     assignments = models.ManyToManyField(Volunteer, through='Assignment')
     details = models.TextField(blank=True)
     coordinator_note = models.TextField(blank=True)
+
+    objects = AssignableDutyManager()
 
     class Meta:
         unique_together = (("activity", "event", "location", "start_time",

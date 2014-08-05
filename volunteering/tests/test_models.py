@@ -105,6 +105,24 @@ class TestDuty(TestCase):
             Duty(activity=d.activity, location=d.location, event=d.event,
                  start_time=d.start_time, end_time=d.end_time).save()
 
+    def testOneOfOneIsAssignable(self):
+        DutyFactory.create()
+        self.assertEqual(1, Duty.objects.assignable().count())
+
+    def testNoneIsAssignable(self):
+        DutyFactory.create(multiple=0)
+        self.assertEqual(0, Duty.objects.assignable().count())
+
+    def testOneIsAlreadyAssigned(self):
+        d = DutyFactory.create(multiple=1)
+        AssignmentFactory(duty=d)
+        self.assertEqual(0, Duty.objects.assignable().count())
+
+    def testOneIsAlreadyAssignedOfTwo(self):
+        d = DutyFactory.create(multiple=2)
+        AssignmentFactory(duty=d)
+        self.assertEqual(1, Duty.objects.assignable().count())
+
 
 class TestCampaign(TestCase):
     def testHasSlug(self):

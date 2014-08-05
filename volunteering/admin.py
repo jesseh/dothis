@@ -3,9 +3,10 @@ from models import (Activity, Assignment, Attribute, Campaign, Duty, Event,
                     Family, Location, Message, Trigger, Volunteer)
 
 
-class DutyInline(admin.StackedInline):
+class DutyInline(admin.TabularInline):
     model = Duty
-    extra = 10
+    readonly_fields = ['unassigned_count']
+    extra = 0
 
 
 class AssignmentInline(admin.StackedInline):
@@ -94,6 +95,7 @@ admin.site.register(Location, LocationAdmin)
 class EventAdmin(admin.ModelAdmin):
     list_display = ('date', 'name', 'description')
     list_display_links = ('name',)
+    inlines = [DutyInline]
 admin.site.register(Event, EventAdmin)
 
 

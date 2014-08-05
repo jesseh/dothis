@@ -66,11 +66,13 @@ Feature: Administering Campaigns
     And it says "kitchen staff"
 
     When he adds a "volunteer"
-    And sets the "name" to be "Ron Ronaldson"
+    And sets the "first_name" to be "Ron"
+    And sets the "surname" to be "Ronaldson"
     And sets the "attributes" to select "kitchen staff"
     And submits the form
     Then he visits the "volunteer" list page
-    And it says "Ron Ronaldson"
+    And it says "Ron"
+    And it says "Ronaldson"
     And it says "kitchen staff"
 
     When he adds an "assignment"
