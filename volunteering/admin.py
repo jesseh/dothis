@@ -56,8 +56,9 @@ admin.site.register(Volunteer, VolunteerAdmin)
 
 
 class DutyAdmin(admin.ModelAdmin):
-    list_display = ['id', 'activity', 'event', 'location',
-                    'start_time', 'end_time', 'multiple', 'unassigned_count']
+    list_display = ['id', 'activity', 'event', 'location', 'start_time',
+                    'end_time', 'multiple', 'unassigned_count',
+                    'coordinator_note', 'details']
     list_filter = ['activity', 'event', 'location', 'start_time']
     readonly_fields = ['unassigned_count']
     inlines = [AssignmentInline]

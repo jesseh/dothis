@@ -11,5 +11,6 @@ A simple app to help get volunteers to commit to duties.
 * Set up the cron job
 * Put the real Mandrill api key in to Heroku.
 * Put the count of how many have signed up already.
+* Output reports.
 
 
