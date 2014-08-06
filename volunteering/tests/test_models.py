@@ -155,7 +155,7 @@ class TestCampaign(TestCase):
         volunteer.attributes.add(attribute)
         campaign.activities.add(duty1.activity)
 
-        qs = campaign.recipients().order_by('id')
+        qs = campaign.recipients(True, True).order_by('id')
         self.assertQuerysetEqual(qs, [repr(volunteer)])
 
     def testRecipientsViaAssignableTwice(self):
@@ -170,7 +170,7 @@ class TestCampaign(TestCase):
         campaign.activities.add(duty1.activity)
         campaign.events.add(duty2.event)
 
-        qs = campaign.recipients().order_by('id')
+        qs = campaign.recipients(True, True).order_by('id')
         self.assertQuerysetEqual(qs, [repr(volunteer)])
 
     def testRecipientsViaAssigned(self):
@@ -181,7 +181,7 @@ class TestCampaign(TestCase):
         volunteer = VolunteerFactory()
         AssignmentFactory(duty=duty, volunteer=volunteer)
 
-        qs = campaign.recipients().order_by('id')
+        qs = campaign.recipients(assigned=True).order_by('id')
         self.assertQuerysetEqual(qs, [repr(volunteer)])
 
     def testRecipientsViaAssignedAndAssignable(self):
@@ -201,7 +201,7 @@ class TestCampaign(TestCase):
         volunteer2 = VolunteerFactory()
         AssignmentFactory(duty=duty2, volunteer=volunteer2)
 
-        qs = campaign.recipients().order_by('id')
+        qs = campaign.recipients(True, True).order_by('id')
         self.assertQuerysetEqual(qs, [repr(volunteer1), repr(volunteer2)])
 
     def testRecipientsCount(self):

@@ -14,6 +14,21 @@ class AssignmentInline(admin.StackedInline):
     extra = 0
 
 
+class TriggerInline(admin.StackedInline):
+    model = Trigger
+    extra = 0
+    fieldsets = ((None,
+                  {'fields': ('message',)}),
+                 ('Send on a fixed date',
+                  {'fields': ('fixed_date', 'fixed_assignment_state')}),
+                 ('Send before the event',
+                  {'fields': ('event_based_days_before',
+                              'event_based_assignment_state')}),
+                 ('Send after the volunteer was assigned the duty',
+                  {'fields': ('assignment_based_days_after',)}),
+                 )
+
+
 class VolunteerInline(admin.StackedInline):
     model = Volunteer
     fields = (('title', 'first_name', 'surname', 'dear_name'),
@@ -44,10 +59,11 @@ class CampaignAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ['name', 'slug']
     filter_horizontal = ['events', 'locations', 'activities']
-    fields = (('name', 'slug', 'assignment_state'),
+    fields = (('name', 'slug'),
               ('events', 'locations', 'activities'),
               ('recipient_names',))
     readonly_fields = ['recipient_names']
+    inlines = [TriggerInline]
 admin.site.register(Campaign, CampaignAdmin)
 
 

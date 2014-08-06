@@ -21,18 +21,8 @@ class Attribute(models.Model):
 
 
 class Campaign(TimeStampedModel):
-    ASSIGNED, ASSIGNABLE, ASSIGNED_AND_ASSIGNABLE = range(3)
-    ASSIGNMENT_STATES = (
-        (ASSIGNED, 'Assigned'),
-        (ASSIGNABLE, 'Assignable'),
-        (ASSIGNED_AND_ASSIGNABLE, 'Assigned and assignable'),
-    )
-
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField()
-    assignment_state = models.IntegerField('assignment_state',
-                                           choices=ASSIGNMENT_STATES,
-                                           default=ASSIGNED_AND_ASSIGNABLE)
     events = models.ManyToManyField('Event', null=True, blank=True)
     locations = models.ManyToManyField('Location', null=True, blank=True)
     activities = models.ManyToManyField('Activity', null=True, blank=True)
@@ -51,22 +41,28 @@ class Campaign(TimeStampedModel):
             | Q(activity__campaign=self)).distinct()
         return duties
 
-    def recipients(self):
+    def recipients(self, assigned=False, assignable=False):
         duties = self.duties
         assigned_q = Q(assignment__duty__in=duties)
         assignable_q = Q(attributes__activity__duty__in=duties)
 
-        q_def = {Campaign.ASSIGNED: assigned_q,
-                 Campaign.ASSIGNABLE: assignable_q,
-                 Campaign.ASSIGNED_AND_ASSIGNABLE: assigned_q | assignable_q
-                 }[self.assignment_state]
+        if assigned and assignable:
+            q_def = assigned_q | assignable_q
+        elif assigned:
+            q_def = assigned_q
+        elif assignable:
+            q_def = assignable_q
+        else:
+            raise ValueError("At least assigned or assignable must be true.")
+
         return Volunteer.objects.filter(q_def).distinct()
 
     def recipient_count(self):
-        return self.recipients().count()
+        return self.recipients(assignable=True, assigned=True).count()
 
     def recipient_names(self):
-        recipients = self.recipients().order_by('first_name')
+        recipients = self.recipients(assigned=True,
+                                     assignable=True).order_by('first_name')
         names = ("%s - %s" % (v.name(), v.email_address) for v in recipients)
         if names:
             return "<ul><li>%s</li></ul>" % "</li><li>".join(names)
@@ -86,11 +82,33 @@ class Message(models.Model):
 
 
 class Trigger(models.Model):
+    ASSIGNED, ASSIGNABLE, ASSIGNED_AND_ASSIGNABLE = range(3)
+    ASSIGNMENT_STATES = (
+        (ASSIGNED, 'Assigned'),
+        (ASSIGNABLE, 'Assignable'),
+        (ASSIGNED_AND_ASSIGNABLE, 'Assigned and assignable'),
+    )
+
     campaign = models.ForeignKey(Campaign, null=True, blank=True)
     message = models.ForeignKey(Message, null=True, blank=True)
-    fixed_date = models.DateField(null=True, blank=True)
-    days_before_event = models.PositiveIntegerField(null=True, blank=True)
-    days_after_assignment = models.PositiveIntegerField(null=True, blank=True)
+    fixed_date = models.DateField(
+        null=True, blank=True,
+        help_text="Send the message on this specific day. If today "
+                  "or earlier the message will go immediately")
+    fixed_assignment_state = models.IntegerField(
+        choices=ASSIGNMENT_STATES,
+        default=ASSIGNED_AND_ASSIGNABLE)
+    event_based_days_before = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="Send the message this many days before the event.")
+    event_based_assignment_state = models.IntegerField(
+        choices=ASSIGNMENT_STATES,
+        default=ASSIGNED_AND_ASSIGNABLE)
+    assignment_based_days_after = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="Send the message this many days after the role "
+                  "was assigned to the volunteer (including them assigning "
+                  "it themself). '0' will send the day they are assigned.")
 
     def __unicode__(self):
         return "%s: %s" % (self.campaign, self.message)

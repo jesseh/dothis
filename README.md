@@ -13,6 +13,8 @@ A simple app to help get volunteers to commit to duties.
 * Put the real Mandrill api key in to Heroku.
 * Output reports.
 * Fix the page title
+* Collapse the recipients list on the campaign pages using fieldsets.
+* Add a self-service flat on trigger and assignment to distinguish between who did the assignment.
 
 
 
