@@ -6,7 +6,8 @@ from django.test import TestCase
 
 from factories import (AttributeFactory, VolunteerFactory, FamilyFactory,
                        DutyFactory, FullDutyFactory, EventFactory,
-                       LocationFactory, ActivityFactory, AssignmentFactory)
+                       LocationFactory, ActivityFactory, AssignmentFactory,
+                       CampaignFactory)
 
 from volunteering.models import (Activity, Assignment, Attribute, Campaign,
                                  Duty, Event, Location)
@@ -62,7 +63,7 @@ class TestVolunteer(TestCase):
         volunteer = VolunteerFactory()
         self.assertRegexpMatches(
             volunteer.family_link(),
-            '<a href="/admin/volunteering/family/\d/">FM\d</a>')
+            '<a href="/admin/volunteering/family/\d*/">FM\d*</a>')
 
     def testHasClaimed_IsFalseWhenFalse(self):
         volunteer = VolunteerFactory()
@@ -128,6 +129,105 @@ class TestCampaign(TestCase):
     def testHasSlug(self):
         c = Campaign(slug='a slug')
         self.assertEqual('a slug', c.slug)
+
+    def testDuties(self):
+        campaign = CampaignFactory()
+        duty1 = FullDutyFactory()
+        campaign.activities.add(duty1.activity)
+        duty2 = FullDutyFactory()
+        campaign.locations.add(duty2.location)
+        duty3 = FullDutyFactory()
+        campaign.events.add(duty3.event)
+        duty4 = FullDutyFactory()
+        campaign.events.add(duty4.event)
+        campaign.locations.add(duty4.location)
+
+        qs = campaign.duties().order_by('id')
+        expected = [duty1, duty2, duty3, duty4]
+        self.assertQuerysetEqual(qs, [repr(d) for d in expected])
+
+    def testRecipientsViaAssignable(self):
+        campaign = CampaignFactory()
+        attribute = AttributeFactory()
+        duty1 = FullDutyFactory()
+        duty1.activity.attributes.add(attribute)
+        volunteer = VolunteerFactory()
+        volunteer.attributes.add(attribute)
+        campaign.activities.add(duty1.activity)
+
+        qs = campaign.recipients().order_by('id')
+        self.assertQuerysetEqual(qs, [repr(volunteer)])
+
+    def testRecipientsViaAssignableTwice(self):
+        campaign = CampaignFactory()
+        attribute = AttributeFactory()
+        duty1 = FullDutyFactory()
+        duty1.activity.attributes.add(attribute)
+        duty2 = FullDutyFactory()
+        duty2.activity.attributes.add(attribute)
+        volunteer = VolunteerFactory()
+        volunteer.attributes.add(attribute)
+        campaign.activities.add(duty1.activity)
+        campaign.events.add(duty2.event)
+
+        qs = campaign.recipients().order_by('id')
+        self.assertQuerysetEqual(qs, [repr(volunteer)])
+
+    def testRecipientsViaAssigned(self):
+        campaign = CampaignFactory()
+        duty = FullDutyFactory()
+        campaign.events.add(duty.event)
+
+        volunteer = VolunteerFactory()
+        AssignmentFactory(duty=duty, volunteer=volunteer)
+
+        qs = campaign.recipients().order_by('id')
+        self.assertQuerysetEqual(qs, [repr(volunteer)])
+
+    def testRecipientsViaAssignedAndAssignable(self):
+        campaign = CampaignFactory()
+
+        attribute = AttributeFactory()
+        duty1 = FullDutyFactory()
+        duty1.activity.attributes.add(attribute)
+        campaign.activities.add(duty1.activity)
+
+        volunteer1 = VolunteerFactory()
+        volunteer1.attributes.add(attribute)
+
+        duty2 = FullDutyFactory()
+        campaign.events.add(duty2.event)
+
+        volunteer2 = VolunteerFactory()
+        AssignmentFactory(duty=duty2, volunteer=volunteer2)
+
+        qs = campaign.recipients().order_by('id')
+        self.assertQuerysetEqual(qs, [repr(volunteer1), repr(volunteer2)])
+
+    def testRecipientsCount(self):
+        campaign = CampaignFactory()
+        duty = FullDutyFactory()
+        campaign.events.add(duty.event)
+
+        volunteer = VolunteerFactory()
+        AssignmentFactory(duty=duty, volunteer=volunteer)
+
+        self.assertEqual(1, campaign.recipient_count())
+
+    def testRecipientNames(self):
+        campaign = CampaignFactory()
+        duty = FullDutyFactory()
+        campaign.events.add(duty.event)
+
+        volunteer1 = VolunteerFactory()
+        AssignmentFactory(duty=duty, volunteer=volunteer1)
+        volunteer2 = VolunteerFactory(first_name='Abe')
+        AssignmentFactory(duty=duty, volunteer=volunteer2)
+
+        expected = "<ul><li>%s</li><li>%s</li></ul>" % (volunteer2.name(),
+                                                        volunteer1.name())
+
+        self.assertEqual(expected, campaign.recipient_names())
 
 
 class TestAssignment(TestCase):

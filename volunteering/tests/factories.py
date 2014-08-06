@@ -3,14 +3,14 @@ import factory
 from factory.django import DjangoModelFactory
 
 from volunteering.models import (Volunteer, Family, Attribute, Duty, Activity,
-                                 Location, Event, Assignment)
+                                 Location, Event, Assignment, Campaign)
 
 
 class AttributeFactory(DjangoModelFactory):
     class Meta:
         model = Attribute
 
-    name = 'happy'
+    name = factory.Sequence(lambda n: 'an attribute {0}'.format(n))
 
 
 class FamilyFactory(DjangoModelFactory):
@@ -24,13 +24,10 @@ class VolunteerFactory(DjangoModelFactory):
     class Meta:
         model = Volunteer
 
-    first_name = 'Zeb'
-    surname = 'Zooler'
-
     title = 'Mr.'
     first_name = 'Zeb'
-    surname = 'Zooler'
-    dear_name = ''
+    surname = factory.Sequence(lambda n: 'Zooler{0}'.format(n))
+    dear_name = 'Zeb'
     external_id = factory.Sequence(lambda n: 'VR{0}/{0}'.format(n))
     family = factory.SubFactory(FamilyFactory)
     email_address = 'zeb@zebra.net'
@@ -77,3 +74,11 @@ class AssignmentFactory(DjangoModelFactory):
 
     volunteer = factory.SubFactory(VolunteerFactory)
     duty = factory.SubFactory(DutyFactory)
+
+
+class CampaignFactory(DjangoModelFactory):
+    class Meta:
+        model = Campaign
+
+    name = factory.Sequence(lambda n: 'a campaign {0}'.format(n))
+    slug = factory.Sequence(lambda n: 'slug{0}'.format(n))

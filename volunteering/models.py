@@ -44,6 +44,36 @@ class Campaign(TimeStampedModel):
         self.status = ActivatorModel.INACTIVE_STATUS
         self.deactivate_date = datetime_now()
 
+    def duties(self):
+        duties = Duty.objects.filter(
+            Q(event__campaign=self)
+            | Q(location__campaign=self)
+            | Q(activity__campaign=self)).distinct()
+        return duties
+
+    def recipients(self):
+        duties = self.duties
+        assigned_q = Q(assignment__duty__in=duties)
+        assignable_q = Q(attributes__activity__duty__in=duties)
+
+        q_def = {Campaign.ASSIGNED: assigned_q,
+                 Campaign.ASSIGNABLE: assignable_q,
+                 Campaign.ASSIGNED_AND_ASSIGNABLE: assigned_q | assignable_q
+                 }[self.assignment_state]
+        return Volunteer.objects.filter(q_def).distinct()
+
+    def recipient_count(self):
+        return self.recipients().count()
+
+    def recipient_names(self):
+        names = (v.name() for v in self.recipients().order_by('first_name'))
+        if names:
+            return "<ul><li>%s</li></ul>" % "</li><li>".join(names)
+        else:
+            return ""
+    recipient_names.allow_tags = True
+    recipient_names.short_description = "Recipients"
+
 
 class Message(models.Model):
     name = models.CharField(max_length=200)

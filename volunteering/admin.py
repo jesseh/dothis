@@ -40,10 +40,14 @@ admin.site.register(Attribute, AttributeAdmin)
 
 
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name', 'recipient_count']
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ['name', 'slug']
     filter_horizontal = ['events', 'locations', 'activities']
+    fields = (('name', 'slug', 'assignment_state'),
+              ('events', 'locations', 'activities'),
+              ('recipient_names',))
+    readonly_fields = ['recipient_names']
 admin.site.register(Campaign, CampaignAdmin)
 
 
