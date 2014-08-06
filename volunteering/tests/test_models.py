@@ -133,14 +133,13 @@ class TestCampaign(TestCase):
     def testDuties(self):
         campaign = CampaignFactory()
         duty1 = FullDutyFactory()
-        campaign.activities.add(duty1.activity)
         duty2 = FullDutyFactory()
-        campaign.locations.add(duty2.location)
         duty3 = FullDutyFactory()
-        campaign.events.add(duty3.event)
         duty4 = FullDutyFactory()
+        campaign.events.add(duty1.event)
+        campaign.events.add(duty2.event)
+        campaign.events.add(duty3.event)
         campaign.events.add(duty4.event)
-        campaign.locations.add(duty4.location)
 
         qs = campaign.duties().order_by('id')
         expected = [duty1, duty2, duty3, duty4]
@@ -168,7 +167,6 @@ class TestCampaign(TestCase):
         volunteer = VolunteerFactory()
         volunteer.attributes.add(attribute)
         campaign.activities.add(duty1.activity)
-        campaign.events.add(duty2.event)
 
         qs = campaign.recipients(True, True).order_by('id')
         self.assertQuerysetEqual(qs, [repr(volunteer)])
@@ -196,7 +194,7 @@ class TestCampaign(TestCase):
         volunteer1.attributes.add(attribute)
 
         duty2 = FullDutyFactory()
-        campaign.events.add(duty2.event)
+        campaign.activities.add(duty2.activity)
 
         volunteer2 = VolunteerFactory()
         AssignmentFactory(duty=duty2, volunteer=volunteer2)

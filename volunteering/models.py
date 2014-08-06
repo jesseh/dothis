@@ -35,11 +35,15 @@ class Campaign(TimeStampedModel):
         self.deactivate_date = datetime_now()
 
     def duties(self):
-        duties = Duty.objects.filter(
-            Q(event__campaign=self)
-            | Q(location__campaign=self)
-            | Q(activity__campaign=self)).distinct()
-        return duties
+        qs = Duty.objects.all()
+        if self.events.exists():
+            qs = qs.filter(event__campaign=self)
+        if self.locations.exists():
+            qs = qs.filter(location__campaign=self)
+        if self.activities.exists():
+            qs = qs.filter(activity__campaign=self)
+        qs = qs.distinct()
+        return qs
 
     def recipients(self, assigned=False, assignable=False):
         duties = self.duties
