@@ -66,7 +66,8 @@ class Campaign(TimeStampedModel):
         return self.recipients().count()
 
     def recipient_names(self):
-        names = (v.name() for v in self.recipients().order_by('first_name'))
+        recipients = self.recipients().order_by('first_name')
+        names = ("%s - %s" % (v.name(), v.email_address) for v in recipients)
         if names:
             return "<ul><li>%s</li></ul>" % "</li><li>".join(names)
         else:

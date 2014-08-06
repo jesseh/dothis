@@ -224,8 +224,9 @@ class TestCampaign(TestCase):
         volunteer2 = VolunteerFactory(first_name='Abe')
         AssignmentFactory(duty=duty, volunteer=volunteer2)
 
-        expected = "<ul><li>%s</li><li>%s</li></ul>" % (volunteer2.name(),
-                                                        volunteer1.name())
+        expected = "<ul><li>%s - %s</li><li>%s - %s</li></ul>" % (
+            volunteer2.name(), volunteer2.email_address,
+            volunteer1.name(), volunteer1.email_address)
 
         self.assertEqual(expected, campaign.recipient_names())
 
