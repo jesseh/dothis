@@ -1,5 +1,5 @@
 import unittest
-import datetime
+from datetime import date, time
 
 from django.db import IntegrityError
 from django.test import TestCase
@@ -7,10 +7,11 @@ from django.test import TestCase
 from factories import (AttributeFactory, VolunteerFactory, FamilyFactory,
                        DutyFactory, FullDutyFactory, EventFactory,
                        LocationFactory, ActivityFactory, AssignmentFactory,
-                       CampaignFactory)
+                       CampaignFactory, SendableFactory,
+                       SendableAssignmentFactory, TriggerFactory)
 
 from volunteering.models import (Activity, Assignment, Attribute, Campaign,
-                                 Duty, Event, Location)
+                                 Duty, Event, Location, Sendable, Trigger)
 
 
 class TestAttribute(TestCase):
@@ -100,7 +101,7 @@ class TestDuty(TestCase):
         self.assertEqual(e.id, d.event_id)
 
     def testDuplicatesEventLocationActivitySet(self):
-        a_time = datetime.time(10, 0)
+        a_time = time(10, 0)
         d = FullDutyFactory.create(start_time=a_time, end_time=a_time)
         with self.assertRaises(IntegrityError):
             Duty(activity=d.activity, location=d.location, event=d.event,
@@ -267,7 +268,7 @@ class TestEvent(TestCase):
     def setUp(self):
         self.a = Event(name="the name",
                        description="the short description",
-                       date=datetime.date(2001, 1, 1))
+                       date=date(2001, 1, 1))
 
     def testHasAName(self):
         self.assertEqual(self.a.name, 'the name')
@@ -281,7 +282,7 @@ class TestEvent(TestCase):
         self.assertEqual(self.a.description, 'the short description')
 
     def testHasADate(self):
-        self.assertEqual(self.a.date, datetime.date(2001, 1, 1))
+        self.assertEqual(self.a.date, date(2001, 1, 1))
 
 
 class TestLocation(TestCase):
@@ -323,3 +324,129 @@ class TestFamily(TestCase):
         family = v.family
         VolunteerFactory(family=family, first_name="Bob", surname="Bacca")
         self.assertEqual('Bob Bacca, Joe Abba', family.names())
+
+
+class TestSendable(TestCase):
+    def testSendableFactory(self):
+        s = SendableFactory()
+        self.assertTrue(Sendable.objects.filter(pk=s.pk).exists())
+
+    def testSendableAssignmentFactory(self):
+        s = SendableAssignmentFactory()
+        self.assertTrue(Sendable.objects.filter(pk=s.pk).exists())
+
+    def testSendable_CollectSendablesAssignable(self):
+        fix_to_date = date(2005, 5, 5)
+        c = CampaignFactory()
+        d = FullDutyFactory()
+        c.events.add(d.event)
+        v = VolunteerFactory()
+        a = AttributeFactory()
+        v.attributes.add(a)
+        d.activity.attributes.add(a)
+        TriggerFactory.create_batch(3, fixed_date=fix_to_date,
+                                    fixed_assignment_state=Trigger.ASSIGNABLE,
+                                    campaign=c)
+        result = Sendable.collect_from_fixed_triggers(fix_to_date)
+        self.assertEqual(3, len(result))
+        all_qs = Sendable.objects.all()
+        self.assertQuerysetEqual(all_qs, [v, v, v],
+                                 transform=lambda s: s.volunteer)
+
+    def testSendable_CollectSendablesAssignableButAlreadyAssigned(self):
+        fix_to_date = date(2005, 5, 5)
+        c = CampaignFactory()
+        d = FullDutyFactory()
+        c.events.add(d.event)
+        v = VolunteerFactory()
+        a = AttributeFactory()
+        v.attributes.add(a)
+        d.activity.attributes.add(a)
+        AssignmentFactory(volunteer=v, duty=d)
+        TriggerFactory.create(fixed_date=fix_to_date,
+                              fixed_assignment_state=Trigger.ASSIGNABLE,
+                              campaign=c)
+        result = Sendable.collect_from_fixed_triggers(fix_to_date)
+        self.assertEqual(0, len(result))
+        all_qs = Sendable.objects.all()
+        self.assertQuerysetEqual(all_qs, [])
+
+    def testSendable_CollectSendablesAssigned(self):
+        fix_to_date = date(2005, 5, 5)
+        c = CampaignFactory()
+        d = FullDutyFactory()
+        c.events.add(d.event)
+        v = VolunteerFactory()
+        a = AttributeFactory()
+        v.attributes.add(a)
+        d.activity.attributes.add(a)
+        TriggerFactory.create_batch(3, fixed_date=fix_to_date,
+                                    fixed_assignment_state=Trigger.ASSIGNED,
+                                    campaign=c)
+        result = Sendable.collect_from_fixed_triggers(fix_to_date)
+        self.assertEqual(0, len(result))
+        all_qs = Sendable.objects.all()
+        self.assertQuerysetEqual(all_qs, [])
+
+
+class TestTrigger(TestCase):
+    def testTriggerFactory(self):
+        t = TriggerFactory()
+        self.assertTrue(Trigger.objects.filter(id=t.id).exists())
+
+    def testGetFixedDateTriggersSetForADateAllAssignmentStates(self):
+        fix_to_date = date(2005, 5, 5)
+        triggers = TriggerFactory.create_batch(3, fixed_date=fix_to_date)
+        TriggerFactory(fixed_date=date(2001, 1, 1))
+        result = Trigger.objects.triggered(fix_to_date).order_by('id')
+        self.assertQuerysetEqual(result, [repr(t) for t in triggers])
+
+    def testGetFixedDateTriggersSetForADateAssignedWithNoAssigned(self):
+        fix_to_date = date(2005, 5, 5)
+        TriggerFactory.create_batch(3, fixed_date=fix_to_date,
+                                    fixed_assignment_state=Trigger.ASSIGNED)
+        result = Trigger.objects.triggered(fix_to_date).order_by('id')
+        self.assertQuerysetEqual(result, [])
+
+    def testGetFixedDateTriggersSetForADateAssignedWithAssigned(self):
+        fix_to_date = date(2005, 5, 5)
+        d = FullDutyFactory()
+        c = CampaignFactory()
+        c.events.add(d.event)
+        v = VolunteerFactory()
+        AssignmentFactory(volunteer=v, duty=d)
+        triggers = TriggerFactory.create_batch(
+            3, fixed_date=fix_to_date, fixed_assignment_state=Trigger.ASSIGNED,
+            campaign=c)
+        result = Trigger.objects.triggered(fix_to_date).order_by('id')
+        self.assertQuerysetEqual(result, [repr(t) for t in triggers])
+
+    # Skipped until I figure out how to use annotations for this.
+    # def testGetFixedDateTriggersSetForADateAssignableWithAssigned(self):
+    #     fix_to_date = date(2005, 5, 5)
+    #     d = FullDutyFactory()
+    #     c = CampaignFactory()
+    #     c.events.add(d.event)
+    #     v = VolunteerFactory()
+    #     AssignmentFactory(volunteer=v, duty=d)
+    #     TriggerFactory.create_batch(3, fixed_date=fix_to_date,
+    #                                 fixed_assignment_state=Trigger.ASSIGNABLE,
+    #                                 campaign=c)
+    #     result = Trigger.objects.triggered(fix_to_date).order_by('id')
+    #     self.assertQuerysetEqual(result, [])
+
+    def testGetFixedDateTriggersSetForADateAssignableWithAssignable(self):
+        fix_to_date = date(2005, 5, 5)
+        c = CampaignFactory()
+        d = FullDutyFactory()
+        c.events.add(d.event)
+        v = VolunteerFactory()
+        a = AttributeFactory()
+        v.attributes.add(a)
+        d.activity.attributes.add(a)
+        AssignmentFactory(volunteer=v, duty=d)
+        triggers = TriggerFactory.create_batch(
+            3, fixed_date=fix_to_date,
+            fixed_assignment_state=Trigger.ASSIGNABLE, campaign=c)
+        result = Trigger.objects.triggered(fix_to_date).order_by('id')
+        self.assertQuerysetEqual(result, [repr(t) for t in triggers])

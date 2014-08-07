@@ -85,6 +85,27 @@ class Message(models.Model):
         return self.name
 
 
+class TriggerQuerySet(models.QuerySet):
+    def triggered(self, trigger_date):
+        q_fixed_date = Q(fixed_date=trigger_date)
+
+        q_get_assigned = Q(fixed_assignment_state=Trigger.ASSIGNED)
+        q_get_assignable = Q(fixed_assignment_state=Trigger.ASSIGNABLE)
+        q_get_assigned_and_assignable = Q(
+            fixed_assignment_state=Trigger.ASSIGNED_AND_ASSIGNABLE)
+
+        q_has_assigned = Q(campaign__events__duty__assignments__isnull=False)
+
+        q_fixed_assigned = Q(q_get_assigned & q_has_assigned)
+        q_fixed_assignable = Q(q_get_assignable)
+        q_fixed_assigned_and_assignable = Q(q_get_assigned_and_assignable)
+
+        return self. \
+            filter(q_fixed_date). \
+            filter(q_fixed_assigned | q_fixed_assignable |
+                   q_fixed_assigned_and_assignable)
+
+
 class Trigger(models.Model):
     ASSIGNED, ASSIGNABLE, ASSIGNED_AND_ASSIGNABLE = range(3)
     ASSIGNMENT_STATES = (
@@ -113,6 +134,8 @@ class Trigger(models.Model):
         help_text="Send the message this many days after the role "
                   "was assigned to the volunteer (including them assigning "
                   "it themself). '0' will send the day they are assigned.")
+
+    objects = TriggerQuerySet.as_manager()
 
     def __unicode__(self):
         return "%s: %s" % (self.campaign, self.message)
@@ -312,3 +335,36 @@ class Assignment(TimeStampedModel):
             'volunteering:assignment',
             kwargs={'volunteer_slug': self.volunteer.slug,
                     'duty_id': self.duty_id})
+
+
+class Sendable(TimeStampedModel):
+    trigger = models.ForeignKey(Trigger)
+    volunteer = models.ForeignKey(Volunteer)
+    assignment = models.ForeignKey(Assignment, null=True, blank=True)
+    send_date = models.DateField(null=True, blank=True)
+
+    @classmethod
+    def collect_from_fixed_triggers(cls, fixed_date):
+        new_sendables = []
+        for trigger in Trigger.objects.triggered(fixed_date):
+            assigned = trigger.fixed_assignment_state == Trigger.ASSIGNED or \
+                trigger.fixed_assignment_state == \
+                Trigger.ASSIGNED_AND_ASSIGNABLE
+            assignable = trigger.fixed_assignment_state == Trigger.ASSIGNABLE or \
+                trigger.fixed_assignment_state == \
+                Trigger.ASSIGNED_AND_ASSIGNABLE
+
+            recipients = trigger.campaign.recipients(assigned=assigned,
+                                                     assignable=assignable)
+            duties = trigger.campaign.duties()
+
+            for volunteer in recipients:
+                for duty in duties:
+                    if (not assignable) or Duty.objects.assignable_to(volunteer). \
+                            filter(id=duty.id).exists():
+                        s, created = Sendable.objects.get_or_create(
+                            trigger=trigger, volunteer=volunteer,
+                            send_date=fixed_date)
+                        if created:
+                            new_sendables.append(s)
+        return new_sendables

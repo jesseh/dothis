@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import date
 import factory
 from factory.django import DjangoModelFactory
 
 from volunteering.models import (Volunteer, Family, Attribute, Duty, Activity,
-                                 Location, Event, Assignment, Campaign)
+                                 Location, Event, Assignment, Campaign,
+                                 Message, Trigger, Sendable)
 
 
 class AttributeFactory(DjangoModelFactory):
@@ -45,7 +46,7 @@ class EventFactory(DjangoModelFactory):
     class Meta:
         model = Event
     name = factory.Sequence(lambda n: 'an event {0}'.format(n))
-    date = datetime(2014, 1, 1)
+    date = date(2014, 1, 1)
 
 
 class LocationFactory(DjangoModelFactory):
@@ -82,3 +83,34 @@ class CampaignFactory(DjangoModelFactory):
 
     name = factory.Sequence(lambda n: 'a campaign {0}'.format(n))
     slug = factory.Sequence(lambda n: 'slug{0}'.format(n))
+
+
+class MessageFactory(DjangoModelFactory):
+    class Meta:
+        model = Message
+
+    name = factory.Sequence(lambda n: 'a message {0}'.format(n))
+    subject = factory.Sequence(lambda n: 'message subjet {0}'.format(n))
+    body = factory.Sequence(lambda n: 'message body {0}'.format(n))
+
+
+class TriggerFactory(DjangoModelFactory):
+    class Meta:
+        model = Trigger
+
+    campaign = factory.SubFactory(CampaignFactory)
+    message = factory.SubFactory(MessageFactory)
+    fixed_date = date.today()
+
+
+class SendableFactory(DjangoModelFactory):
+    class Meta:
+        model = Sendable
+
+    trigger = factory.SubFactory(TriggerFactory)
+    volunteer = factory.SubFactory(VolunteerFactory)
+    send_date = date.today()
+
+
+class SendableAssignmentFactory(SendableFactory):
+    assignment = factory.SubFactory(AssignmentFactory)

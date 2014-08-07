@@ -59,9 +59,15 @@ class CampaignAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ['name', 'slug']
     filter_horizontal = ['events', 'locations', 'activities']
-    fields = (('name', 'slug'),
-              ('events', 'locations', 'activities'),
-              ('recipient_names',))
+    fieldsets = ((None,
+                  {'fields': ('name', 'slug'), }),
+                 ('Recipient selection',
+                  {'fields': ('events', 'locations', 'activities'), }),
+                 ('Recipient list',
+                  {'fields': ('recipient_names', ),
+                   'classes': ('collapse', ),
+                   })
+                 )
     readonly_fields = ['recipient_names']
     inlines = [TriggerInline]
 admin.site.register(Campaign, CampaignAdmin)
