@@ -2,7 +2,6 @@ import csv
 from StringIO import StringIO
 
 from django.contrib import messages
-from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView
 
@@ -43,7 +42,8 @@ def _update_or_create_volunteer(record):
         'home_phone': record['HOME'],
         'mobile_phone': record['MOBILE'],
     }
-    volunteer, updated = Volunteer.objects.update_or_create(params, external_id=record['MEMBER ID'])
+    volunteer, updated = Volunteer.objects.update_or_create(
+        params, external_id=record['MEMBER ID'])
     attribute_names = [a.strip() for a in record['ATTRIBUTES'].split(",")]
     volunteer.attributes.clear()
     for attribute_name in attribute_names:
@@ -96,4 +96,4 @@ class AssignmentView(TemplateView):
         duty = Duty.objects.get(pk=duty_id)
 
         Assignment.objects.create(volunteer=volunteer, duty=duty)
-        return redirect(volunteer.get_absolute_url(), permanent=False)
+        return redirect(request.path, permanent=False)

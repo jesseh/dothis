@@ -7,21 +7,33 @@
 
 
 {% block base_body %}
+<div class="row">
+    <div class="large-12 columns">
+        <h1>Volunteer at NNLS</h1>
+    </div>
+</div>
 
-    <div class="row">
-      <div class="large-12 columns">
-          <h1>{{ volunteer.initials }}, will you volunteer for this?</h1>
+<div class="row">
+    <div class="large-12 columns">
         {% if is_claimed %}
-            <p>You have volunteered for this! Thanks.</p>
-            {% include 'volunteering/includes/duty_details.html' %}
-        {% else %}
-            {% include 'volunteering/includes/duty_details.html' %}
+        <div class="panel">
+            <h4>Thanks {{volunteer.initials}} for volunteering for this role!</h4>
+            <p>It would be helpful if you would volunteer for more.</p>
+            <a class="small button" href="{{ volunteer.get_absolute_url }}">Click to Continue</a>
+        </div>
+        {% include 'volunteering/includes/duty_details.html' %}
+    {% else %}
+        <div class="panel">
+            <h4>{{ volunteer.initials }}, will you volunteer for this role?</h4>
+            <p>Your help will be much appreciated.</p>
             <form action="#" method="post">
                 {% csrf_token %}
                 <input type="submit" class="small button" value="Click to sign up"></input>
             </form>
-        {% endif %}
-      </div>
+        </div>
+        {% include 'volunteering/includes/duty_details.html' %}
+    {% endif %}
     </div>
+</div>
 
 {% endblock base_body %}
