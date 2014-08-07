@@ -413,7 +413,8 @@ class Sendable(TimeStampedModel):
     @classmethod
     def send_unsent(self):
         sent = []
-        for unsent in Sendable.objects.filter(sent_date__isnull=True):
+        for unsent in Sendable.objects.filter(
+                sent_date__isnull=True).filter(send_failed=False):
             message = unsent.trigger.message
             context_dict = {'volunteer': unsent.volunteer,
                             'assignment': unsent.assignment}
