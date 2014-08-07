@@ -370,7 +370,7 @@ class TestSendable(TestCase):
             3, fixed_date=fix_to_date,
             fixed_assignment_state=Trigger.ASSIGNABLE, campaign=c)
         result = Sendable.collect_from_fixed_triggers(fix_to_date)
-        self.assertEqual(3, len(result))
+        self.assertEqual(3, result)
         all_qs = Sendable.objects.all().order_by('id')
         self.assertQuerysetEqual(all_qs, [v, v, v],
                                  transform=lambda s: s.volunteer)
@@ -389,7 +389,7 @@ class TestSendable(TestCase):
             fixed_date=fix_to_date, fixed_assignment_state=Trigger.ASSIGNABLE,
             campaign=c)
         result = Sendable.collect_from_fixed_triggers(fix_to_date)
-        self.assertEqual(0, len(result))
+        self.assertEqual(0, result)
         all_qs = Sendable.objects.all()
         self.assertQuerysetEqual(all_qs, [])
 
@@ -406,7 +406,7 @@ class TestSendable(TestCase):
             3, fixed_date=fix_to_date, fixed_assignment_state=Trigger.ASSIGNED,
             campaign=c)
         result = Sendable.collect_from_fixed_triggers(fix_to_date)
-        self.assertEqual(0, len(result))
+        self.assertEqual(0, result)
         all_qs = Sendable.objects.all()
         self.assertQuerysetEqual(all_qs, [])
 

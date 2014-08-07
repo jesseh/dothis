@@ -3,9 +3,6 @@ from models import (Activity, Assignment, Attribute, Campaign, Duty, Event,
                     Family, Location, Message, Trigger, Volunteer, Sendable)
 
 
-admin.site.register(Sendable)
-
-
 class DutyInline(admin.TabularInline):
     model = Duty
     readonly_fields = ['unassigned_count']
@@ -18,16 +15,16 @@ class AssignmentInline(admin.StackedInline):
 
 
 TRIGGER_FIELDSETS = (
-                 (None,
-                  {'fields': ('message',)}),
-                 ('Send on a fixed date',
-                  {'fields': ('fixed_date', 'fixed_assignment_state')}),
-                 ('Send before the event',
-                  {'fields': ('event_based_days_before',
-                              'event_based_assignment_state')}),
-                 ('Send after the volunteer was assigned the duty',
-                  {'fields': ('assignment_based_days_after',)}),
-                 )
+    (None,
+     {'fields': ('message',)}),
+    ('Send on a fixed date',
+     {'fields': ('fixed_date', 'fixed_assignment_state')}),
+    ('Send before the event',
+     {'fields': ('event_based_days_before',
+                 'event_based_assignment_state')}),
+    ('Send after the volunteer was assigned the duty',
+     {'fields': ('assignment_based_days_after',)}),
+    )
 
 
 class TriggerInline(admin.StackedInline):
@@ -156,3 +153,11 @@ class TriggerAdmin(admin.ModelAdmin):
                     'event_based_assignment_state',
                     'assignment_based_days_after']
 admin.site.register(Trigger, TriggerAdmin)
+
+
+class SendableAdmin(admin.ModelAdmin):
+    list_display = ['send_date', 'trigger', 'volunteer', 'assignment',
+                    'sent_date', 'send_failed']
+    list_filter = ['send_failed', 'trigger']
+    date_hierarchy = ['send_date']
+admin.site.register(Sendable, SendableAdmin)

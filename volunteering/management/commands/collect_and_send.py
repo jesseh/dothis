@@ -19,4 +19,4 @@ class Command(BaseCommand):
         self.stdout.write("%s messages collected" % len(collected))
 
         sent = models.Sendable.send_unsent()
-        self.stdout.write("%s messages sent" % len(sent))
+        self.stdout.write("%s messages sent" % sent)

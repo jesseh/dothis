@@ -374,11 +374,11 @@ class Assignment(TimeStampedModel):
 
 
 class Sendable(TimeStampedModel):
-    send_date = models.DateField()
-    trigger = models.ForeignKey(Trigger)
-    volunteer = models.ForeignKey(Volunteer)
+    send_date = models.DateField(db_index=True)
+    trigger = models.ForeignKey(Trigger, db_index=True)
+    volunteer = models.ForeignKey(Volunteer, db_index=True)
     assignment = models.ForeignKey(Assignment, null=True, blank=True)
-    sent_date = models.DateField(null=True, blank=True)
+    sent_date = models.DateField(null=True, blank=True, db_index=True)
     send_failed = models.BooleanField(default=False, db_index=True)
 
     class Meta:
@@ -390,7 +390,7 @@ class Sendable(TimeStampedModel):
 
     @classmethod
     def collect_from_fixed_triggers(cls, fixed_date):
-        new_sendables = []
+        new_sendables_count = 0
         for trigger in Trigger.objects.triggered(fixed_date):
             print("Collecting %s" % trigger)
             assigned = trigger.fixed_assignment_state == Trigger.ASSIGNED or \
@@ -414,12 +414,12 @@ class Sendable(TimeStampedModel):
                             assignment=None, send_date=fixed_date)
                         if created:
                             logger.info("Collected '%s'" % s)
-                            new_sendables.append(s)
-        return new_sendables
+                            new_sendables_count += 1
+        return new_sendables_count
 
     @classmethod
     def send_unsent(self):
-        sent = []
+        sent_count = 0
         for unsent in Sendable.objects.filter(
                 sent_date__isnull=True).filter(send_failed=False):
             message = unsent.trigger.message
@@ -451,9 +451,9 @@ class Sendable(TimeStampedModel):
             try:
                 email.send(fail_silently=False)
                 unsent.sent_date = date.today()
-                sent.append(unsent)
+                sent_count += 1
             except MandrillAPIError:
                 print("FAILED %s" % email_params)
                 unsent.send_failed = True
             unsent.save()
-        return sent
+        return sent_count

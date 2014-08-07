@@ -11,4 +11,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         sent = models.Sendable.send_unsent()
-        self.stdout.write("%s messages sent" % len(sent))
+        self.stdout.write("%s messages sent" % sent)
