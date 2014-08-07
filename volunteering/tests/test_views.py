@@ -76,7 +76,7 @@ class testAssignmentView(TestCase):
     def testGetContentIfAssigned(self):
         Assignment.objects.create(volunteer=self.v, duty=self.d)
         response = self.client.get(self.url)
-        self.assertContains(response, "You have volunteered")
+        self.assertContains(response, "Thanks")
         self.assertContains(response, self.v.initials())
         self.assertContains(response, self.d.event.name, count=1)
         self.assertContains(response, self.d.location.name, count=1)
@@ -84,7 +84,7 @@ class testAssignmentView(TestCase):
 
     def testGetContentIfUnassigned(self):
         response = self.client.get(self.url)
-        self.assertNotContains(response, "have volunteered")
+        self.assertNotContains(response, "Thanks")
         self.assertContains(response, self.d.event.name, count=1)
         self.assertContains(response, self.d.location.name, count=1)
         self.assertContains(response, self.d.activity.name, count=1)
@@ -95,7 +95,7 @@ class testAssignmentView(TestCase):
         response = self.client.post(self.url)
         self.assertTrue(
             Assignment.objects.filter(volunteer=self.v, duty=self.d).exists())
-        self.assertRedirects(response, self.v.get_absolute_url())
+        self.assertRedirects(response, self.url)
 
     def testAssignmentPostWhenMultipleOfSameDuty(self):
         self.d.multiple = 2
@@ -105,7 +105,7 @@ class testAssignmentView(TestCase):
         response = self.client.post(self.url)
         self.assertTrue(Assignment.objects.
                         filter(volunteer=self.v, duty=self.d).exists())
-        self.assertRedirects(response, self.v.get_absolute_url())
+        self.assertRedirects(response, self.url)
 
     def testNoPermissionToSeeAssignmentUnlessDutyIsAssignableOrAssigned(self):
         pass
