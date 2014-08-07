@@ -1,16 +1,23 @@
+import logging
 import random
+from datetime import date
 
+from django.conf import settings
+from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import F, Count, Q
-from django.core.urlresolvers import reverse
-from django.utils.timezone import now as datetime_now
+from django.template import Context, Template
 from django.template.defaultfilters import escape
+from django.utils.timezone import now as datetime_now
 
 from django_extensions.db.models import ActivatorModel, TimeStampedModel
 
 SLUG_LENGTH = 8
 SLUG_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'
 TIME_FORMAT = "%H:%M"
+
+logger = logging.getLogger(__name__)
 
 
 class Attribute(models.Model):
@@ -80,6 +87,18 @@ class Message(models.Model):
     name = models.CharField(max_length=200)
     subject = models.CharField(max_length=200)
     body = models.TextField(blank=True)
+    body_is_html = models.BooleanField(default=False)
+
+    def _render(self, source, context_dict):
+        t = Template(source)
+        c = Context(context_dict)
+        return t.render(c)
+
+    def rendered_body(self, context_dict):
+        return self._render(self.body, context_dict)
+
+    def rendered_subject(self, context_dict):
+        return self._render(self.subject, context_dict)
 
     def __unicode__(self):
         return self.name
@@ -182,8 +201,20 @@ class Volunteer(models.Model):
     def name(self):
         return "%s %s" % (self.first_name, self.surname)
 
+    def formal_name(self):
+        if self.title:
+            return "%s %s" % (self.title, self.surname)
+        else:
+            return self.surname
+
+    def to_name(self):
+        return self.dear_name or self.first_name or self.formal_name()
+
     def initials(self):
         return '%s.%s.' % (self.first_name[0], self.surname[0])
+
+    def summary_url(self):
+        return self.get_absolute_url()
 
     def family_link(self):
         return '<a href="%s">%s</a>' % (
@@ -338,10 +369,14 @@ class Assignment(TimeStampedModel):
 
 
 class Sendable(TimeStampedModel):
+    send_date = models.DateField()
     trigger = models.ForeignKey(Trigger)
     volunteer = models.ForeignKey(Volunteer)
     assignment = models.ForeignKey(Assignment, null=True, blank=True)
-    send_date = models.DateField(null=True, blank=True)
+    sent_date = models.DateField(null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s -> %s: %s" % (self.volunteer, self.trigger, self.send_date)
 
     @classmethod
     def collect_from_fixed_triggers(cls, fixed_date):
@@ -366,5 +401,39 @@ class Sendable(TimeStampedModel):
                             trigger=trigger, volunteer=volunteer,
                             send_date=fixed_date)
                         if created:
+                            logger.info("Collected '%s'" % s)
                             new_sendables.append(s)
         return new_sendables
+
+    @classmethod
+    def send_unsent(self):
+        sent = []
+        for unsent in Sendable.objects.filter(sent_date__isnull=True):
+            message = unsent.trigger.message
+            context_dict = {'volunteer': unsent.volunteer,
+                            'assignment': unsent.assignment}
+
+            body = message.rendered_body(context_dict)
+
+            email_params = {
+                'subject': message.rendered_subject(context_dict),
+                'to': list(unsent.volunteer.email_address),
+                'from_email': settings.FROM_ADDRESS,
+            }
+
+            if message.body_is_html:
+                email = EmailMultiAlternatives(**email_params)
+                email.attach_alternative(body, "text/html")
+                email.auto_text = True
+            else:
+                email = EmailMessage(**email_params)
+                email.body = body
+                email.auto_html = True
+
+            email.tags = [message.name, "trigger %s" % unsent.trigger.id]
+            logger.info("Sending %s" % email_params)
+            email.send(fail_silently=False)
+            unsent.sent_date = date.today()
+            unsent.save()
+            sent.append(unsent)
+        return sent

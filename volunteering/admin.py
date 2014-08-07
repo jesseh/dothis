@@ -1,6 +1,9 @@
 from django.contrib import admin
 from models import (Activity, Assignment, Attribute, Campaign, Duty, Event,
-                    Family, Location, Message, Trigger, Volunteer)
+                    Family, Location, Message, Trigger, Volunteer, Sendable)
+
+
+admin.site.register(Sendable)
 
 
 class DutyInline(admin.TabularInline):
@@ -14,10 +17,8 @@ class AssignmentInline(admin.StackedInline):
     extra = 0
 
 
-class TriggerInline(admin.StackedInline):
-    model = Trigger
-    extra = 0
-    fieldsets = ((None,
+TRIGGER_FIELDSETS = (
+                 (None,
                   {'fields': ('message',)}),
                  ('Send on a fixed date',
                   {'fields': ('fixed_date', 'fixed_assignment_state')}),
@@ -27,6 +28,12 @@ class TriggerInline(admin.StackedInline):
                  ('Send after the volunteer was assigned the duty',
                   {'fields': ('assignment_based_days_after',)}),
                  )
+
+
+class TriggerInline(admin.StackedInline):
+    model = Trigger
+    extra = 0
+    fieldsets = TRIGGER_FIELDSETS
 
 
 class VolunteerInline(admin.StackedInline):
@@ -143,15 +150,9 @@ admin.site.register(Message, MessageAdmin)
 
 
 class TriggerAdmin(admin.ModelAdmin):
-    fieldsets = (
-        (None, {
-            'fields': ('campaign', 'message')
-        }),
-        ('When to send', {
-            'fields': ('fixed_date', 'days_before_event',
-                       'days_after_assignment')
-        }),
-    )
-    list_display = ['campaign', 'message', 'fixed_date', 'days_before_event',
-                    'days_after_assignment']
+    fieldsets = TRIGGER_FIELDSETS
+    list_display = ['campaign', 'message', 'fixed_date',
+                    'fixed_assignment_state', 'event_based_days_before',
+                    'event_based_assignment_state',
+                    'assignment_based_days_after']
 admin.site.register(Trigger, TriggerAdmin)

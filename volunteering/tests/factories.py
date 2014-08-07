@@ -113,4 +113,5 @@ class SendableFactory(DjangoModelFactory):
 
 
 class SendableAssignmentFactory(SendableFactory):
+    """A sendable that has an assigment"""
     assignment = factory.SubFactory(AssignmentFactory)
