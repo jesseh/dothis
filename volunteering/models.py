@@ -417,7 +417,7 @@ class Sendable(TimeStampedModel):
 
             email_params = {
                 'subject': message.rendered_subject(context_dict),
-                'to': list(unsent.volunteer.email_address),
+                'to': [unsent.volunteer.email_address],
                 'from_email': settings.FROM_ADDRESS,
             }
 
@@ -430,8 +430,11 @@ class Sendable(TimeStampedModel):
                 email.body = body
                 email.auto_html = True
 
-            email.tags = [message.name, "trigger %s" % unsent.trigger.id]
+            name_tag = ("name - %s" % message.name)[:50]
+            trigger_tag = ("trigger - %s" % unsent.trigger.id)[:50]
+            email.tags = [name_tag, trigger_tag]
             logger.info("Sending %s" % email_params)
+            print("Sending %s" % email_params)
             email.send(fail_silently=False)
             unsent.sent_date = date.today()
             unsent.save()
