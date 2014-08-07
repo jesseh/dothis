@@ -159,5 +159,5 @@ class SendableAdmin(admin.ModelAdmin):
     list_display = ['send_date', 'trigger', 'volunteer', 'assignment',
                     'sent_date', 'send_failed']
     list_filter = ['send_failed', 'trigger']
-    date_hierarchy = ['send_date']
+    date_hierarchy = 'send_date'
 admin.site.register(Sendable, SendableAdmin)
