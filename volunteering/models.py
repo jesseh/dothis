@@ -13,6 +13,8 @@ from django.utils.timezone import now as datetime_now
 
 from django_extensions.db.models import ActivatorModel, TimeStampedModel
 
+from djrill.exceptions import MandrillAPIError
+
 SLUG_LENGTH = 8
 SLUG_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'
 TIME_FORMAT = "%H:%M"
@@ -374,6 +376,7 @@ class Sendable(TimeStampedModel):
     volunteer = models.ForeignKey(Volunteer)
     assignment = models.ForeignKey(Assignment, null=True, blank=True)
     sent_date = models.DateField(null=True, blank=True)
+    send_failed = models.BooleanField(default=False, db_index=True)
 
     def __unicode__(self):
         return "%s -> %s: %s" % (self.volunteer, self.trigger, self.send_date)
@@ -382,6 +385,7 @@ class Sendable(TimeStampedModel):
     def collect_from_fixed_triggers(cls, fixed_date):
         new_sendables = []
         for trigger in Trigger.objects.triggered(fixed_date):
+            print("Collecting %s" % trigger)
             assigned = trigger.fixed_assignment_state == Trigger.ASSIGNED or \
                 trigger.fixed_assignment_state == \
                 Trigger.ASSIGNED_AND_ASSIGNABLE
@@ -394,6 +398,7 @@ class Sendable(TimeStampedModel):
             duties = trigger.campaign.duties()
 
             for volunteer in recipients:
+                print("  Collecting %s" % volunteer)
                 for duty in duties:
                     if (not assignable) or Duty.objects.assignable_to(volunteer). \
                             filter(id=duty.id).exists():
@@ -435,8 +440,12 @@ class Sendable(TimeStampedModel):
             email.tags = [name_tag, trigger_tag]
             logger.info("Sending %s" % email_params)
             print("Sending %s" % email_params)
-            email.send(fail_silently=False)
-            unsent.sent_date = date.today()
+            try:
+                email.send(fail_silently=False)
+                unsent.sent_date = date.today()
+                sent.append(unsent)
+            except MandrillAPIError:
+                print("FAILED %s" % email_params)
+                unsent.send_failed = True
             unsent.save()
-            sent.append(unsent)
         return sent
