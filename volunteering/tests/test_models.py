@@ -371,7 +371,7 @@ class TestSendable(TestCase):
             fixed_assignment_state=Trigger.ASSIGNABLE, campaign=c)
         result = Sendable.collect_from_fixed_triggers(fix_to_date)
         self.assertEqual(3, len(result))
-        all_qs = Sendable.objects.all()
+        all_qs = Sendable.objects.all().order_by('id')
         self.assertQuerysetEqual(all_qs, [v, v, v],
                                  transform=lambda s: s.volunteer)
 

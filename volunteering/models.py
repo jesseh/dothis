@@ -138,7 +138,7 @@ class Trigger(models.Model):
     campaign = models.ForeignKey(Campaign, null=True, blank=True)
     message = models.ForeignKey(Message, null=True, blank=True)
     fixed_date = models.DateField(
-        null=True, blank=True,
+        null=True, blank=True, db_index=True,
         help_text="Send the message on this specific day. If today "
                   "or earlier the message will go immediately")
     fixed_assignment_state = models.IntegerField(
@@ -309,15 +309,18 @@ class AssignableDutyManager(models.Manager):
 
 
 class Duty(models.Model):
-    activity = models.ForeignKey(Activity, null=True, blank=True)
-    event = models.ForeignKey(Event, null=True, blank=True)
-    location = models.ForeignKey(Location, null=True, blank=True)
+    activity = models.ForeignKey(Activity, null=True, blank=True,
+                                 db_index=True)
+    event = models.ForeignKey(Event, null=True, blank=True, db_index=True)
+    location = models.ForeignKey(Location, null=True, blank=True,
+                                 db_index=True)
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
     multiple = models.PositiveIntegerField(
         default=1,
         help_text="The number of volunteers needed for this duty.")
-    assignments = models.ManyToManyField(Volunteer, through='Assignment')
+    assignments = models.ManyToManyField(Volunteer, through='Assignment',
+                                         db_index=True)
     details = models.TextField(blank=True)
     coordinator_note = models.TextField(blank=True)
 
@@ -354,8 +357,8 @@ class Duty(models.Model):
 
 
 class Assignment(TimeStampedModel):
-    volunteer = models.ForeignKey(Volunteer)
-    duty = models.ForeignKey(Duty)
+    volunteer = models.ForeignKey(Volunteer, db_index=True)
+    duty = models.ForeignKey(Duty, db_index=True)
 
     class Meta:
         unique_together = (("volunteer", "duty"),)
@@ -377,6 +380,10 @@ class Sendable(TimeStampedModel):
     assignment = models.ForeignKey(Assignment, null=True, blank=True)
     sent_date = models.DateField(null=True, blank=True)
     send_failed = models.BooleanField(default=False, db_index=True)
+
+    class Meta:
+        unique_together = (("send_date", "trigger", "volunteer",
+                            "assignment"),)
 
     def __unicode__(self):
         return "%s -> %s: %s" % (self.volunteer, self.trigger, self.send_date)
@@ -404,7 +411,7 @@ class Sendable(TimeStampedModel):
                             filter(id=duty.id).exists():
                         s, created = Sendable.objects.get_or_create(
                             trigger=trigger, volunteer=volunteer,
-                            send_date=fixed_date)
+                            assignment=None, send_date=fixed_date)
                         if created:
                             logger.info("Collected '%s'" % s)
                             new_sendables.append(s)
