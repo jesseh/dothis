@@ -90,6 +90,7 @@ class VolunteerAdmin(admin.ModelAdmin):
                      'external_id']
     list_filter = ['attributes']
     filter_horizontal = ['attributes']
+    inlines = [AssignmentInline]
 admin.site.register(Volunteer, VolunteerAdmin)
 
 

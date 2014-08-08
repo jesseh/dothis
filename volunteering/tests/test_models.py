@@ -253,20 +253,17 @@ class TestCampaign(TestCase):
 
 class TestAssignment(TestCase):
 
-    def setUp(self):
-        self.volunteer = f.VolunteerFactory.create()
-        self.duty = Duty.objects.create()
-
     def testHasTimestamps(self):
-        assignment = Assignment(volunteer=self.volunteer, duty=self.duty)
+        assignment = f.AssignmentFactory()
         self.assertTrue(assignment.created)
         self.assertTrue(assignment.modified)
 
     def testNoDuplicates(self):
-        f.AssignmentFactory.create(volunteer=self.volunteer, duty=self.duty)
+        a = f.AssignmentFactory.create()
         with self.assertRaises(IntegrityError):
-            f.AssignmentFactory.create(volunteer=self.volunteer,
-                                       duty=self.duty)
+            f.AssignmentFactory.create(volunteer=a.volunteer,
+                                       duty=a.duty)
+
 
 
 class TestActivity(TestCase):
