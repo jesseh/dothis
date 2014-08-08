@@ -301,7 +301,6 @@ class AssignableDutyManager(models.Manager):
 
     def assignable_to(self, volunteer):
         return self.assignable(). \
-            filter(assignment__isnull=True). \
             filter(
                 Q(activity__attributes__volunteer=volunteer) |
                 Q(activity__attributes__isnull=True)
