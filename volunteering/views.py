@@ -1,9 +1,11 @@
 import csv
+from datetime import datetime
 from StringIO import StringIO
 
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView
+from django.utils import timezone
 
 from volunteering.models import (Assignment, Duty, Volunteer, Family,
                                  Attribute)
@@ -59,18 +61,22 @@ class SummaryView(TemplateView):
     template_name = 'volunteering/summary.html'
 
     def get_context_data(self, **kwargs):
-        volunteer_slug = kwargs['volunteer_slug']
-
         context = super(SummaryView, self).get_context_data(**kwargs)
+        volunteer = Volunteer.objects.get(slug=kwargs['volunteer_slug'])
 
-        volunteer = Volunteer.objects.get(slug=volunteer_slug)
+        self.set_volunteer_last_view(volunteer)
+
         context['volunteer'] = volunteer
-        assigned = Duty.objects.filter(assignment__volunteer=volunteer)
-        assignable = Duty.objects.assignable_to(volunteer). \
+        context['assigned'] = Duty.objects.filter(
+            assignment__volunteer=volunteer)
+        context['assignable'] = Duty.objects.assignable_to(volunteer). \
             order_by('event', 'start_time').distinct()
-        context['assigned'] = assigned
-        context['assignable'] = assignable
+
         return context
+
+    def set_volunteer_last_view(self, volunteer):
+        volunteer.last_summary_view = timezone.now()
+        volunteer.save()
 
 
 class AssignmentView(TemplateView):

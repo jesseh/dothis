@@ -1,18 +1,18 @@
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-import factories
+import factories as f
 
-from volunteering.models import (Assignment, )
+from volunteering.models import (Assignment, Volunteer)
 
 
 class testSummaryView(TestCase):
     def setUp(self):
-        self.v = factories.VolunteerFactory.create()
-        self.e = factories.EventFactory()
-        self.l = factories.LocationFactory()
-        self.a = factories.ActivityFactory()
-        self.d = factories.DutyFactory.create(
+        self.v = f.VolunteerFactory.create()
+        self.e = f.EventFactory()
+        self.l = f.LocationFactory()
+        self.a = f.ActivityFactory()
+        self.d = f.DutyFactory.create(
             event=self.e, location=self.l, activity=self.a)
         self.url = reverse('volunteering:summary',
                            kwargs={'volunteer_slug': self.v.slug})
@@ -20,6 +20,15 @@ class testSummaryView(TestCase):
     def testSummaryResponseCode(self):
         response = self.client.get(self.url)
         self.assertEqual(200, response.status_code)
+
+    def testSummaryViewSetsLastSummaryViewDate(self):
+        self.assertIsNone(self.v.last_summary_view)
+        self.client.get(self.url)
+        d1 = Volunteer.objects.get(id=self.v.id).last_summary_view
+        self.assertIsNotNone(d1)
+        self.client.get(self.url)
+        d2 = Volunteer.objects.get(id=self.v.id).last_summary_view
+        self.assertTrue(d1 < d2)
 
     def testSummaryContentIncludesActiveDuties(self):
         response = self.client.get(self.url)
@@ -34,7 +43,7 @@ class testSummaryView(TestCase):
         self.assertContains(response, self.d.event.name, count=1)
 
     def testSummaryContentOnlyShowsDutyOnceIfAssigned(self):
-        factories.AssignmentFactory.create(volunteer=self.v, duty=self.d)
+        f.AssignmentFactory.create(volunteer=self.v, duty=self.d)
         response = self.client.get(self.url)
         self.assertContains(response, self.d.event.name, count=1)
         self.assertContains(response, self.d.location.name, count=1)
@@ -59,12 +68,12 @@ class testSummaryView(TestCase):
 
 class testAssignmentView(TestCase):
     def setUp(self):
-        self.v = factories.VolunteerFactory.create()
-        self.e = factories.EventFactory.create()
-        self.l = factories.LocationFactory.create()
-        self.a = factories.ActivityFactory.create()
-        self.d = factories.DutyFactory.create(event=self.e, location=self.l,
-                                              activity=self.a)
+        self.v = f.VolunteerFactory.create()
+        self.e = f.EventFactory.create()
+        self.l = f.LocationFactory.create()
+        self.a = f.ActivityFactory.create()
+        self.d = f.DutyFactory.create(event=self.e, location=self.l,
+                                      activity=self.a)
         self.url = reverse('volunteering:assignment',
                            kwargs={'volunteer_slug': self.v.slug,
                                    'duty_id': self.d.id})

@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 class Attribute(models.Model):
     name = models.CharField(max_length=200, unique=True)
 
+    class Meta:
+        ordering = ('name',)
+
     def __unicode__(self):
         return self.name
 
@@ -35,6 +38,9 @@ class Campaign(TimeStampedModel):
     events = models.ManyToManyField('Event', null=True, blank=True)
     locations = models.ManyToManyField('Location', null=True, blank=True)
     activities = models.ManyToManyField('Activity', null=True, blank=True)
+
+    class Meta:
+        ordering = ('name',)
 
     def __unicode__(self):
         return self.name
@@ -102,6 +108,9 @@ class Message(models.Model):
     def rendered_subject(self, context_dict):
         return self._render(self.subject, context_dict)
 
+    class Meta:
+        ordering = ['name']
+
     def __unicode__(self):
         return self.name
 
@@ -158,12 +167,18 @@ class Trigger(models.Model):
 
     objects = TriggerQuerySet.as_manager()
 
+    class Meta:
+        ordering = ['campaign']
+
     def __unicode__(self):
         return "%s: %s" % (self.campaign, self.message)
 
 
 class Family(models.Model):
     external_id = models.CharField(max_length=200, unique=True)
+
+    class Meta:
+        ordering = ['external_id']
 
     def __unicode__(self):
         return self.external_id
@@ -192,6 +207,7 @@ class Volunteer(models.Model):
     mobile_phone = models.CharField(max_length=200, blank=True)
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
     slug = models.CharField(max_length=10, unique=True, blank=True)
+    last_summary_view = models.DateTimeField(null=True)
 
     class Meta:
         ordering = ['surname']
@@ -333,6 +349,7 @@ class Duty(models.Model):
         unique_together = (("activity", "event", "location", "start_time",
                             "end_time"))
         verbose_name_plural = "Duties"
+        ordering = ['event', 'start_time', 'activity', 'location']
 
     def __unicode__(self):
         name = ""
