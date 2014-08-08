@@ -193,8 +193,12 @@ class Volunteer(models.Model):
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
     slug = models.CharField(max_length=10, unique=True, blank=True)
 
+    class Meta:
+        ordering = ['surname']
+
     def __unicode__(self):
-        return "%s %s (%s)" % (self.first_name, self.surname, self.external_id)
+        return "%s, %s (%s)" % (self.surname, self.first_name,
+                                self.external_id)
 
     def get_absolute_url(self):
         return reverse('volunteering:summary',
