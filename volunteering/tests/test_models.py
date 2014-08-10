@@ -132,6 +132,17 @@ class TestDuty(TestCase):
         f.DutyFactory.create()
         self.assertEqual(1, Duty.objects.assignable().count())
 
+    def testOneOfOneIsAssignableWhenMultiple2And1Assignment(self):
+        duty = f.DutyFactory.create(multiple=2)
+        f.AssignmentFactory(duty=duty)
+        self.assertEqual(1, Duty.objects.assignable().count())
+
+    def testNoneIsAssignableWhenMultiple2And2Assignments(self):
+        duty = f.DutyFactory.create(multiple=2)
+        f.AssignmentFactory(duty=duty)
+        f.AssignmentFactory(duty=duty)
+        self.assertEqual(0, Duty.objects.assignable().count())
+
     def testNoneIsAssignable(self):
         f.DutyFactory.create(multiple=0)
         self.assertEqual(0, Duty.objects.assignable().count())
@@ -146,6 +157,10 @@ class TestDuty(TestCase):
         f.AssignmentFactory(duty=d)
         self.assertEqual(1, Duty.objects.assignable().count())
 
+    def testOneDutyIsAssignableToVolunteer_NoAttributes(self):
+        f.DutyFactory.create()
+        v = f.VolunteerFactory()
+        self.assertEqual(1, Duty.objects.assignable_to(v).count())
 
 class TestCampaign(TestCase):
     def testHasSlug(self):
@@ -263,7 +278,6 @@ class TestAssignment(TestCase):
         with self.assertRaises(IntegrityError):
             f.AssignmentFactory.create(volunteer=a.volunteer,
                                        duty=a.duty)
-
 
 
 class TestActivity(TestCase):

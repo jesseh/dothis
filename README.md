@@ -18,6 +18,7 @@ A simple app to help get volunteers to commit to duties.
 * Refactor the trigger collect code.
 * write test for send\_unsent
 * add html version of email
+* Write more assignable_to tests.
 
 
 
