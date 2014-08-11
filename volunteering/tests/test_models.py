@@ -8,7 +8,7 @@ import factories as f
 
 from volunteering.models import (Activity, Assignment, Attribute, Campaign,
                                  Duty, Event, Location, Sendable, Trigger,
-                                 Message)
+                                 Message, Volunteer)
 
 
 class TestAttribute(TestCase):
@@ -23,6 +23,10 @@ class TestAttribute(TestCase):
 
 
 class TestVolunteer(TestCase):
+    def testVolunteerFactory(self):
+        v = f.VolunteerFactory()
+        self.assertTrue(Volunteer.objects.filter(id=v.id).exists())
+
     def testSettingAnAttribute(self):
         v = f.VolunteerFactory.create(surname='tester')
         a = f.AttributeFactory.create(name='an attr')
@@ -162,6 +166,7 @@ class TestDuty(TestCase):
         v = f.VolunteerFactory()
         self.assertEqual(1, Duty.objects.assignable_to(v).count())
 
+
 class TestCampaign(TestCase):
     def testHasSlug(self):
         c = Campaign(slug='a slug')
@@ -264,6 +269,67 @@ class TestCampaign(TestCase):
             volunteer1.name(), volunteer1.email_address)
 
         self.assertEqual(expected, campaign.recipient_names())
+
+    def testPercentAssigned_NoDuties(self):
+        campaign = f.CampaignFactory()
+        self.assertEqual(0, campaign.percent_assigned())
+
+    def testPercentAssigned_IncreasinglyAssigned(self):
+        duty1 = f.FullDutyFactory(multiple=2)
+        duty2 = f.FullDutyFactory(multiple=2)
+        campaign = f.CampaignFactory()
+        campaign.events.add(duty1.event)
+        campaign.events.add(duty2.event)
+        volunteer1 = f.VolunteerFactory()
+        volunteer2 = f.VolunteerFactory()
+        self.assertEqual(0, campaign.percent_assigned())
+        f.AssignmentFactory(duty=duty1, volunteer=volunteer1)
+        self.assertEqual(25, campaign.percent_assigned())
+        f.AssignmentFactory(duty=duty1, volunteer=volunteer2)
+        self.assertEqual(50, campaign.percent_assigned())
+        f.AssignmentFactory(duty=duty2, volunteer=volunteer1)
+        self.assertEqual(75, campaign.percent_assigned())
+        f.AssignmentFactory(duty=duty2, volunteer=volunteer2)
+        self.assertEqual(100, campaign.percent_assigned())
+
+    def testVolunteersNeeded_NoDuties(self):
+        campaign = f.CampaignFactory()
+        self.assertEqual(0, campaign.volunteers_needed())
+
+    def testVolunteersNeeded_OneDutyWithMultiple(self):
+        campaign = f.CampaignFactory()
+        duty = f.FullDutyFactory(multiple=5)
+        campaign.events.add(duty.event)
+        self.assertEqual(5, campaign.volunteers_needed())
+
+    def testVolunteersNeeded_MultipleDutyWithMultiple(self):
+        campaign = f.CampaignFactory()
+        duty1 = f.FullDutyFactory(multiple=5)
+        duty2 = f.FullDutyFactory(multiple=5)
+        campaign.events.add(duty1.event)
+        campaign.events.add(duty2.event)
+        self.assertEqual(10, campaign.volunteers_needed())
+
+    def testVolunteersAssigned_NoDuties(self):
+        campaign = f.CampaignFactory()
+        self.assertEqual(0, campaign.volunteers_assigned())
+
+    def testVolunteersAssigned_OneDutyWithMultiple(self):
+        campaign = f.CampaignFactory()
+        duty = f.FullDutyFactory(multiple=5)
+        f.AssignmentFactory(duty=duty)
+        campaign.events.add(duty.event)
+        self.assertEqual(1, campaign.volunteers_assigned())
+
+    def testVolunteersAssigned_MultipleDutyWithMultiple(self):
+        campaign = f.CampaignFactory()
+        duty1 = f.FullDutyFactory(multiple=5)
+        duty2 = f.FullDutyFactory(multiple=5)
+        campaign.events.add(duty1.event)
+        campaign.events.add(duty2.event)
+        f.AssignmentFactory(duty=duty1)
+        f.AssignmentFactory(duty=duty2)
+        self.assertEqual(2, campaign.volunteers_assigned())
 
 
 class TestAssignment(TestCase):

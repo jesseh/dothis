@@ -34,6 +34,7 @@ class VolunteerFactory(DjangoModelFactory):
     email_address = 'zeb@zebra.net'
     home_phone = '123456'
     mobile_phone = '654321'
+    note = 'A note.'
 
 
 class ActivityFactory(DjangoModelFactory):

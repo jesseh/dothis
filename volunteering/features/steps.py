@@ -15,7 +15,7 @@ from helpers import (add_a_model, set_field_on_admin_page, setup_session,
                      assert_volunteer_does_not_see_duties,
                      assert_volunteer_is_assigned_duty)
 from dothis.features.helpers import (assert_was_created, login_as_the_admin,
-                                     the, submit)
+                                     the, submit, show_browser)
 
 
 @before.each_scenario
@@ -172,3 +172,8 @@ def then_he_visits_the_group1_list_page(step, model_name):
 @step(u'And it says "([^"]*)"')
 def and_it_says_group1(step, search_string):
     assert_page_contains(search_string)
+
+
+@step(u'^And it shows the browser$')
+def show_the_browser(step):
+    show_browser()

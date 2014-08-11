@@ -19,6 +19,7 @@ A simple app to help get volunteers to commit to duties.
 * write test for send\_unsent
 * add html version of email
 * Write more assignable_to tests.
+* Add note to : I am so sorry I cannot help. I am deaf and not feeling confident to having to communicate with different people.http://nnls-coordinator.herokuapp.com/admin/volunteering/volunteer/1867/
 
 
 

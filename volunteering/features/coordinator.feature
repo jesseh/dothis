@@ -65,10 +65,18 @@ Feature: Administering Campaigns
     Then he visits the "attribute" list page
     And it says "kitchen staff"
 
+    When he adds a "family"
+    And sets the "external_id" to be "FAM"
+    And submits the form
+    Then he visits the "family" list page
+    And it says "FAM"
+
     When he adds a "volunteer"
     And sets the "first_name" to be "Ron"
     And sets the "surname" to be "Ronaldson"
+    And sets the "family" to choose "FAM"
     And sets the "attributes" to select "kitchen staff"
+    And sets the "note" to be "Likes to cook."
     And submits the form
     Then he visits the "volunteer" list page
     And it says "Ron"
@@ -76,22 +84,27 @@ Feature: Administering Campaigns
     And it says "kitchen staff"
 
     When he adds an "assignment"
-    And sets the "volunteer" to choose "Ron Ronaldson"
-    And sets the "Duty" to choose "Referee on Sports day at Playing fields"
+    And sets the "volunteer" to choose "Ronaldson, Ron ()"
+    And sets the "duty" to choose "Referee on Sports day at Playing fields (01:00 - 02:00)"
     And submits the form
     Then he visits the "assignment" list page
-    And it says "Ron Ronaldson -> Referee on Sports day at Playing fields"
+    And it says "Ron Ronaldson -&gt; Referee on Sports day at Playing fields"
 
     When he adds a "campaign"
     And sets the "name" to be "Holidays"
-    And sets the "name" to be "Holidays"
-    And sets the "events" to select "Opening ceremony"
+    And sets the "slug" to be "holidays"
+    And sets the "events" to select "Sports day (2014-01-01)"
+    And submits the form
     Then he visits the "campaign" list page
     And it says "Holidays"
 
     When he adds a "message"
-    And sets the "campaign" to be "holidays"
-    And sets the "assign_state" to be "all"
+    And sets the "name" to be "message 1"
+    And sets the "subject" to be "The subject"
+    And sets the "body" to be "The message body"
+    And submits the form
+    Then he visits the "message" list page
+    And it says "message 1"
 
 
 

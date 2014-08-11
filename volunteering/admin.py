@@ -37,7 +37,7 @@ class VolunteerInline(admin.StackedInline):
     model = Volunteer
     fields = (('title', 'first_name', 'surname', 'dear_name'),
               ('email_address', 'home_phone', 'mobile_phone'),
-              'attributes',
+              'attributes', 'note',
               'slug')
     readonly_fields = ['slug']
     filter_horizontal = ['attributes']
@@ -59,7 +59,8 @@ admin.site.register(Attribute, AttributeAdmin)
 
 
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ['name', 'recipient_count']
+    list_display = ['name', 'recipient_count', 'volunteers_needed',
+                    'volunteers_assigned', 'percent_assigned']
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ['name', 'slug']
     filter_horizontal = ['events', 'locations', 'activities']
@@ -81,7 +82,7 @@ class VolunteerAdmin(admin.ModelAdmin):
     fields = ('family',
               ('title', 'first_name', 'surname', 'dear_name'),
               ('email_address', 'home_phone', 'mobile_phone'),
-              'attributes')
+              'note', 'attributes')
     list_display = ['slug', 'external_id', 'title', 'first_name', 'surname',
                     'dear_name', 'family_link', 'email_address', 'home_phone',
                     'mobile_phone', 'attributes_list']

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import F, Count, Q
+from django.db.models import F, Count, Q, Sum
 from django.template import Context, Template
 from django.template.defaultfilters import escape
 from django.utils.timezone import now as datetime_now
@@ -59,6 +59,20 @@ class Campaign(TimeStampedModel):
             qs = qs.filter(activity__campaign=self)
         qs = qs.distinct()
         return qs
+
+    def volunteers_needed(self):
+        return self.duties().aggregate(Sum('multiple'))['multiple__sum'] or 0
+
+    def volunteers_assigned(self):
+        return Assignment.objects.filter(duty__in=self.duties()).count()
+
+    def percent_assigned(self):
+        total = self.volunteers_needed()
+        assigned = self.volunteers_assigned()
+        if total > 0:
+            return 100 * assigned / total
+        else:
+            return 0
 
     def recipients(self, assigned=False, assignable=False):
         duties = self.duties
@@ -208,6 +222,7 @@ class Volunteer(models.Model):
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
     slug = models.CharField(max_length=10, unique=True, blank=True)
     last_summary_view = models.DateTimeField(null=True)
+    note = models.TextField(blank=True)
 
     class Meta:
         ordering = ['surname']
