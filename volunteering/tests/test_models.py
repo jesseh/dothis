@@ -272,7 +272,7 @@ class TestCampaign(TestCase):
 
     def testPercentAssigned_NoDuties(self):
         campaign = f.CampaignFactory()
-        self.assertEqual(0, campaign.percent_assigned())
+        self.assertEqual("0%", campaign.percent_assigned())
 
     def testPercentAssigned_IncreasinglyAssigned(self):
         duty1 = f.FullDutyFactory(multiple=2)
@@ -282,15 +282,15 @@ class TestCampaign(TestCase):
         campaign.events.add(duty2.event)
         volunteer1 = f.VolunteerFactory()
         volunteer2 = f.VolunteerFactory()
-        self.assertEqual(0, campaign.percent_assigned())
+        self.assertEqual("0%", campaign.percent_assigned())
         f.AssignmentFactory(duty=duty1, volunteer=volunteer1)
-        self.assertEqual(25, campaign.percent_assigned())
+        self.assertEqual("25%", campaign.percent_assigned())
         f.AssignmentFactory(duty=duty1, volunteer=volunteer2)
-        self.assertEqual(50, campaign.percent_assigned())
+        self.assertEqual("50%", campaign.percent_assigned())
         f.AssignmentFactory(duty=duty2, volunteer=volunteer1)
-        self.assertEqual(75, campaign.percent_assigned())
+        self.assertEqual("75%", campaign.percent_assigned())
         f.AssignmentFactory(duty=duty2, volunteer=volunteer2)
-        self.assertEqual(100, campaign.percent_assigned())
+        self.assertEqual("100%", campaign.percent_assigned())
 
     def testVolunteersNeeded_NoDuties(self):
         campaign = f.CampaignFactory()

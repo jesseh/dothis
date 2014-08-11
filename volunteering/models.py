@@ -69,10 +69,10 @@ class Campaign(TimeStampedModel):
     def percent_assigned(self):
         total = self.volunteers_needed()
         assigned = self.volunteers_assigned()
+        percent = 0
         if total > 0:
-            return 100 * assigned / total
-        else:
-            return 0
+            percent = 100 * assigned / total
+        return "%s%%" % percent
 
     def recipients(self, assigned=False, assignable=False):
         duties = self.duties
