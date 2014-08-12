@@ -79,19 +79,20 @@ admin.site.register(Campaign, CampaignAdmin)
 
 
 class VolunteerAdmin(admin.ModelAdmin):
-    fields = ('family',
+    fields = (('family', 'last_summary_view',),
               ('title', 'first_name', 'surname', 'dear_name'),
               ('email_address', 'home_phone', 'mobile_phone'),
               'note', 'attributes')
     list_display = ['slug', 'external_id', 'title', 'first_name', 'surname',
                     'dear_name', 'family_link', 'email_address', 'home_phone',
-                    'mobile_phone', 'attributes_list']
-    readonly_fields = ['attributes_list']
+                    'mobile_phone', 'attributes_list', 'last_summary_view']
+    readonly_fields = ['attributes_list', 'last_summary_view']
     search_fields = ['slug', 'first_name', 'surname', 'family__external_id',
                      'external_id']
-    list_filter = ['attributes']
+    list_filter = ['attributes', 'last_summary_view']
     filter_horizontal = ['attributes']
     inlines = [AssignmentInline]
+    date_hierarchy = 'last_summary_view'
 admin.site.register(Volunteer, VolunteerAdmin)
 
 
