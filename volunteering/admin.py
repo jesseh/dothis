@@ -46,9 +46,10 @@ class VolunteerInline(admin.StackedInline):
 
 class FamilyAdmin(admin.ModelAdmin):
     inlines = [VolunteerInline]
-    list_display = ['external_id', 'names']
+    list_display = ['external_id', 'hh_location_2014', 'names']
     fields = (('external_id', 'surnames'),)
     search_fields = ['external_id', 'volunteer__surname']
+    list_filter = ['hh_location_2014']
     readonly_fields = ['surnames']
 admin.site.register(Family, FamilyAdmin)
 

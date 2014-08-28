@@ -189,7 +189,14 @@ class Trigger(models.Model):
 
 
 class Family(models.Model):
+    REGENT_SUITE, SHUL = range(2)
+    SERVICE_LOCATIONS = (
+        (REGENT_SUITE, 'Regent Suite'),
+        (SHUL, 'Shul'),
+    )
     external_id = models.CharField(max_length=200, unique=True)
+    hh_location_2014 = models.IntegerField(choices=SERVICE_LOCATIONS,
+                                           null=True, blank=True)
 
     class Meta:
         ordering = ['external_id']
