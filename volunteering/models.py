@@ -74,19 +74,24 @@ class Campaign(TimeStampedModel):
             percent = 100 * assigned / total
         return "%s%%" % percent
 
-    def recipients(self, assigned=False, assignable=False):
+    def recipients(self, assigned=False, assignable=False, unassigned=False):
         duties = self.duties
         assigned_q = Q(assignment__duty__in=duties)
         assignable_q = Q(attributes__activity__duty__in=duties)
 
-        if assigned and assignable:
+        if unassigned and (assigned or assignable):
+            raise ValueError("At least assigned or assignable must be true.")
+        elif unassigned:
+            q_def = assignable_q & ~assigned_q
+        elif assigned and assignable:
             q_def = assigned_q | assignable_q
         elif assigned:
             q_def = assigned_q
         elif assignable:
             q_def = assignable_q
         else:
-            raise ValueError("At least assigned or assignable must be true.")
+            raise ValueError("At least assigned, assignable, or unassigned "
+                             "must be true.")
 
         return Volunteer.objects.filter(q_def).distinct()
 
@@ -137,25 +142,28 @@ class TriggerQuerySet(models.QuerySet):
         q_get_assignable = Q(fixed_assignment_state=Trigger.ASSIGNABLE)
         q_get_assigned_and_assignable = Q(
             fixed_assignment_state=Trigger.ASSIGNED_AND_ASSIGNABLE)
+        q_get_unassigned = Q(fixed_assignment_state=Trigger.UNASSIGNED)
 
         q_has_assigned = Q(campaign__events__duty__assignments__isnull=False)
 
         q_fixed_assigned = Q(q_get_assigned & q_has_assigned)
         q_fixed_assignable = Q(q_get_assignable)
         q_fixed_assigned_and_assignable = Q(q_get_assigned_and_assignable)
+        q_fixed_unassigned = Q(q_get_unassigned)
 
         return self. \
             filter(q_fixed_date). \
             filter(q_fixed_assigned | q_fixed_assignable |
-                   q_fixed_assigned_and_assignable)
+                   q_fixed_assigned_and_assignable | q_fixed_unassigned)
 
 
 class Trigger(models.Model):
-    ASSIGNED, ASSIGNABLE, ASSIGNED_AND_ASSIGNABLE = range(3)
+    ASSIGNED, ASSIGNABLE, ASSIGNED_AND_ASSIGNABLE, UNASSIGNED = range(4)
     ASSIGNMENT_STATES = (
-        (ASSIGNED, 'Assigned'),
-        (ASSIGNABLE, 'Assignable'),
-        (ASSIGNED_AND_ASSIGNABLE, 'Assigned and assignable'),
+        (ASSIGNED, 'With an assigned duty'),
+        (ASSIGNABLE, 'Assignable to a duty'),
+        (ASSIGNED_AND_ASSIGNABLE, 'All recipients'),
+        (UNASSIGNED, 'No assigned duties'),
     )
 
     campaign = models.ForeignKey(Campaign, null=True, blank=True)
@@ -186,6 +194,22 @@ class Trigger(models.Model):
 
     def __unicode__(self):
         return "%s: %s" % (self.campaign, self.message)
+
+    def assigned(self):
+        return self.fixed_assignment_state == Trigger.ASSIGNED or \
+            self.fixed_assignment_state == Trigger.ASSIGNED_AND_ASSIGNABLE
+
+    def assignable(self):
+        return self.fixed_assignment_state == Trigger.ASSIGNABLE or \
+            self.fixed_assignment_state == Trigger.ASSIGNED_AND_ASSIGNABLE
+
+    def unassigned(self):
+        return self.fixed_assignment_state == Trigger.UNASSIGNED
+
+    def recipients(self):
+            return self.campaign.recipients(assigned=self.assigned(),
+                                            assignable=self.assignable(),
+                                            unassigned=self.unassigned())
 
 
 class Family(models.Model):
@@ -433,26 +457,18 @@ class Sendable(TimeStampedModel):
     @classmethod
     def collect_from_fixed_triggers(cls, fixed_date):
         new_sendables_count = 0
-        for trigger in Trigger.objects.triggered(fixed_date):
-            print("Collecting %s" % trigger)
-            assigned = trigger.fixed_assignment_state == Trigger.ASSIGNED or \
-                trigger.fixed_assignment_state == \
-                Trigger.ASSIGNED_AND_ASSIGNABLE
-            assignable = trigger.fixed_assignment_state == Trigger.ASSIGNABLE or \
-                trigger.fixed_assignment_state == \
-                Trigger.ASSIGNED_AND_ASSIGNABLE
+        for t in Trigger.objects.triggered(fixed_date):
+            print("Collecting %s" % t)
 
-            recipients = trigger.campaign.recipients(assigned=assigned,
-                                                     assignable=assignable)
-            duties = trigger.campaign.duties()
+            duties = t.campaign.duties()
 
-            for volunteer in recipients:
+            for volunteer in t.recipients():
                 print("  Collecting %s" % volunteer)
                 for duty in duties:
-                    if (not assignable) or Duty.objects.assignable_to(volunteer). \
+                    if (not t.assignable()) or Duty.objects.assignable_to(volunteer). \
                             filter(id=duty.id).exists():
                         s, created = Sendable.objects.get_or_create(
-                            trigger=trigger, volunteer=volunteer,
+                            trigger=t, volunteer=volunteer,
                             assignment=None, send_date=fixed_date)
                         if created:
                             logger.info("Collected '%s'" % s)
