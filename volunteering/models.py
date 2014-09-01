@@ -254,6 +254,7 @@ class Volunteer(models.Model):
     slug = models.CharField(max_length=10, unique=True, blank=True)
     last_summary_view = models.DateTimeField(null=True)
     note = models.TextField(blank=True)
+    temporary_change = models.BooleanField(default=False, db_index=True)
 
     class Meta:
         ordering = ['surname']

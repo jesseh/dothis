@@ -23,6 +23,10 @@ A simple app to help get volunteers to commit to duties.
 
 
 
+# Further Dev Ideas
+
+* a way to temporarily disable people
+
 
 ## Intro
 
