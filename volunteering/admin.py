@@ -80,7 +80,7 @@ admin.site.register(Campaign, CampaignAdmin)
 
 
 class VolunteerAdmin(admin.ModelAdmin):
-    fields = (('family', 'last_summary_view',),
+    fields = (('family', 'external_id', 'last_summary_view',),
               ('title', 'first_name', 'surname', 'dear_name'),
               ('email_address', 'home_phone', 'mobile_phone'),
               'note', 'temporary_change', 'attributes')
