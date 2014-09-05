@@ -213,7 +213,7 @@ class Trigger(models.Model):
 
 
 class Family(models.Model):
-    REGENT_SUITE, SHUL = range(2)
+    REGENT_SUITE, SHUL = (1, 2)
     SERVICE_LOCATIONS = (
         (REGENT_SUITE, 'Regent Suite'),
         (SHUL, 'Shul'),
