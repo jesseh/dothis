@@ -29,3 +29,4 @@ django-zurb-foundation==5.1.1
 factory-boy==2.4.1
 django-mailviews==0.6.3
 djrill==1.1.1
+django-import-export==0.2.3

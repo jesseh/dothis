@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'dothis',
 
     # External
+    'import_export',
     'lettuce.django',
     'django_extensions',
     'foundation',

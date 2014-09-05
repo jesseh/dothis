@@ -1,4 +1,9 @@
 from django.contrib import admin
+
+from import_export.admin import ExportMixin
+from import_export.resources import ModelResource
+from import_export import fields
+
 from models import (Activity, Assignment, Attribute, Campaign, Duty, Event,
                     Family, Location, Message, Trigger, Volunteer, Sendable)
 
@@ -120,8 +125,41 @@ class DutyEditableAdmin(DutyAdmin):
 admin.site.register(DutyEditable, DutyEditableAdmin)
 
 
-class AssignmentAdmin(admin.ModelAdmin):
-    pass
+class AssignmentResource(ModelResource):
+    event = fields.Field(column_name='event',
+                         attribute='duty__event__name')
+    event_date = fields.Field(column_name='event date',
+                              attribute='duty__event__date')
+    activity = fields.Field(column_name='activity',
+                            attribute='duty__activity__name')
+    location = fields.Field(column_name='location',
+                            attribute='duty__location__name')
+    start_time = fields.Field(column_name='start time',
+                              attribute='duty__start_time')
+    end_time = fields.Field(column_name='end time',
+                            attribute='duty__end_time')
+    volunteer = fields.Field(column_name='volunteer')
+    mobile_phone = fields.Field(column_name='mobile phone',
+                                attribute='volunteer__mobile_phone')
+    home_phone = fields.Field(column_name='home phone',
+                              attribute='volunteer__home_phone')
+    email_address = fields.Field(column_name='email address',
+                                 attribute='volunteer__email_address')
+    ticket_location = fields.Field(
+        column_name='ticket location',
+        attribute='volunteer__family__hh_location_2014')
+
+    class Meta:
+        model = Assignment
+        fields = []
+
+    def dehydrate_volunteer(self, assignment):
+        return str(assignment.volunteer)
+
+
+class AssignmentAdmin(ExportMixin, admin.ModelAdmin):
+    list_display = ('id', 'volunteer', 'duty')
+    resource_class = AssignmentResource
 admin.site.register(Assignment, AssignmentAdmin)
 
 
