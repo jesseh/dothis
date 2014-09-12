@@ -160,6 +160,8 @@ class AssignmentResource(ModelResource):
 
 class AssignmentAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ('id', 'volunteer', 'duty')
+    list_filter = ['duty__activity', 'duty__event', 'duty__location',
+                   'duty__start_time']
     resource_class = AssignmentResource
 admin.site.register(Assignment, AssignmentAdmin)
 
