@@ -441,6 +441,16 @@ class Assignment(TimeStampedModel):
             kwargs={'volunteer_slug': self.volunteer.slug,
                     'duty_id': self.duty_id})
 
+    def ticket_location(self):
+        return self.volunteer.family.hh_location_2014
+
+    def duty_link(self):
+        return '<a href="%s">%s</a>' % (
+            reverse("admin:volunteering_duty_change", args=(self.duty_id,)),
+            escape(str(self.duty)))
+    duty_link.allow_tags = True
+    duty_link.short_description = "Duty"
+
 
 class Sendable(TimeStampedModel):
     send_date = models.DateField(db_index=True)

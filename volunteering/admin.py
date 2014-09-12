@@ -14,8 +14,9 @@ class DutyInline(admin.TabularInline):
     extra = 0
 
 
-class AssignmentInline(admin.StackedInline):
+class AssignmentInline(admin.TabularInline):
     model = Assignment
+    readonly_fields = ['ticket_location']
     extra = 0
 
 
@@ -161,11 +162,11 @@ class AssignmentResource(ModelResource):
 
 
 class AssignmentAdmin(ExportMixin, admin.ModelAdmin):
-    list_display = ('id', 'volunteer', 'duty', 'assigned_location')
+    list_display = ('id', 'volunteer', 'duty_link', 'assigned_location')
     list_filter = ['duty__activity', 'duty__event', 'duty__location',
                    'assigned_location', 'duty__start_time']
-    list_editable = ['assigned_location']
     resource_class = AssignmentResource
+    list_select_related = True
 admin.site.register(Assignment, AssignmentAdmin)
 
 
