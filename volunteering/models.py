@@ -426,6 +426,8 @@ class Duty(models.Model):
 class Assignment(TimeStampedModel):
     volunteer = models.ForeignKey(Volunteer, db_index=True)
     duty = models.ForeignKey(Duty, db_index=True)
+    assigned_location = models.ForeignKey(Location, null=True, blank=True,
+                                          db_index=True)
 
     class Meta:
         unique_together = (("volunteer", "duty"),)

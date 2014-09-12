@@ -134,6 +134,8 @@ class AssignmentResource(ModelResource):
                             attribute='duty__activity__name')
     location = fields.Field(column_name='location',
                             attribute='duty__location__name')
+    assigned_location = fields.Field(column_name='assigned location',
+                                     attribute='assigned_location__name')
     start_time = fields.Field(column_name='start time',
                               attribute='duty__start_time')
     end_time = fields.Field(column_name='end time',
@@ -159,9 +161,10 @@ class AssignmentResource(ModelResource):
 
 
 class AssignmentAdmin(ExportMixin, admin.ModelAdmin):
-    list_display = ('id', 'volunteer', 'duty')
+    list_display = ('id', 'volunteer', 'duty', 'assigned_location')
     list_filter = ['duty__activity', 'duty__event', 'duty__location',
-                   'duty__start_time']
+                   'assigned_location', 'duty__start_time']
+    list_editable = ['assigned_location']
     resource_class = AssignmentResource
 admin.site.register(Assignment, AssignmentAdmin)
 
