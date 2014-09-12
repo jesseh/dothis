@@ -374,9 +374,10 @@ class TestAssignment(TestCase):
             f.AssignmentFactory.create(volunteer=a.volunteer,
                                        duty=a.duty)
 
-    def testServiceLocation(self):
+    @unittest.SkipTest
+    def testHHServiceLocation(self):
         a = f.AssignmentFactory.create()
-        self.assertEqual(a.service_location(),
+        self.assertEqual(a.hh_service_location(),
                          a.volunteer.family.hh_location_2014.name)
 
 

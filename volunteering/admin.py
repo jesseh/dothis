@@ -16,7 +16,7 @@ class DutyInline(admin.TabularInline):
 
 class AssignmentInline(admin.TabularInline):
     model = Assignment
-    readonly_fields = ['ticket_location']
+    readonly_fields = ['hh_service_location']
     extra = 0
 
 
@@ -148,7 +148,7 @@ class AssignmentResource(ModelResource):
                               attribute='volunteer__home_phone')
     email_address = fields.Field(column_name='email address',
                                  attribute='volunteer__email_address')
-    ticket_location = fields.Field(column_name='ticket_location')
+    hh_service_location = fields.Field(column_name='hh_service_location')
 
     class Meta:
         model = Assignment
@@ -157,7 +157,7 @@ class AssignmentResource(ModelResource):
     def dehydrate_volunteer(self, assignment):
         return str(assignment.volunteer)
 
-    def dehydrate_ticket_location(self, assignment):
+    def dehydrate_hh_service_location(self, assignment):
         return assignment.volunteer.family.get_hh_location_2014_display()
 
 

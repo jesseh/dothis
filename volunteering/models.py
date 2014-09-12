@@ -441,8 +441,8 @@ class Assignment(TimeStampedModel):
             kwargs={'volunteer_slug': self.volunteer.slug,
                     'duty_id': self.duty_id})
 
-    def ticket_location(self):
-        return self.volunteer.family.hh_location_2014
+    def hh_service_location(self):
+        return self.volunteer.family.get_hh_location_2014_display()
 
     def duty_link(self):
         return '<a href="%s">%s</a>' % (
