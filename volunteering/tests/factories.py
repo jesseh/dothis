@@ -4,7 +4,7 @@ from factory.django import DjangoModelFactory
 
 from volunteering.models import (Volunteer, Family, Attribute, Duty, Activity,
                                  Location, Event, Assignment, Campaign,
-                                 Message, Trigger, Sendable)
+                                 Message, TriggerByDate, Sendable)
 
 
 class AttributeFactory(DjangoModelFactory):
@@ -95,9 +95,9 @@ class MessageFactory(DjangoModelFactory):
     body = factory.Sequence(lambda n: 'message body {0}'.format(n))
 
 
-class TriggerFactory(DjangoModelFactory):
+class TriggerByDateFactory(DjangoModelFactory):
     class Meta:
-        model = Trigger
+        model = TriggerByDate
 
     campaign = factory.SubFactory(CampaignFactory)
     message = factory.SubFactory(MessageFactory)
@@ -108,7 +108,7 @@ class SendableFactory(DjangoModelFactory):
     class Meta:
         model = Sendable
 
-    trigger = factory.SubFactory(TriggerFactory)
+    trigger = factory.SubFactory(TriggerByDateFactory)
     volunteer = factory.SubFactory(VolunteerFactory)
     send_date = date.today()
 

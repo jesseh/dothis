@@ -5,7 +5,8 @@ from import_export.resources import ModelResource
 from import_export import fields
 
 from models import (Activity, Assignment, Attribute, Campaign, Duty, Event,
-                    Family, Location, Message, Trigger, Volunteer, Sendable)
+                    Family, Location, Message, TriggerByDate, Volunteer,
+                    Sendable, TriggerByAssignment, TriggerByEvent)
 
 
 class DutyInline(admin.TabularInline):
@@ -24,19 +25,23 @@ TRIGGER_FIELDSETS = (
     (None,
      {'fields': ('message',)}),
     ('Send on a fixed date',
-     {'fields': ('fixed_date', 'fixed_assignment_state')}),
-    ('Send before the event',
-     {'fields': ('event_based_days_before',
-                 'event_based_assignment_state')}),
-    ('Send after the volunteer was assigned the duty',
-     {'fields': ('assignment_based_days_after',)}),
+     {'fields': ('fixed_date', 'assignment_state')}),
     )
 
 
-class TriggerInline(admin.StackedInline):
-    model = Trigger
+class TriggerByDateInline(admin.TabularInline):
+    model = TriggerByDate
     extra = 0
-    fieldsets = TRIGGER_FIELDSETS
+
+
+class TriggerByAssignmentInline(admin.TabularInline):
+    model = TriggerByAssignment
+    extra = 0
+
+
+class TriggerByEventInline(admin.TabularInline):
+    model = TriggerByEvent
+    extra = 0
 
 
 class VolunteerInline(admin.StackedInline):
@@ -81,7 +86,8 @@ class CampaignAdmin(admin.ModelAdmin):
                    })
                  )
     readonly_fields = ['recipient_names']
-    inlines = [TriggerInline]
+    inlines = [TriggerByDateInline, TriggerByAssignmentInline,
+               TriggerByEventInline]
 admin.site.register(Campaign, CampaignAdmin)
 
 
@@ -194,15 +200,6 @@ admin.site.register(Event, EventAdmin)
 class MessageAdmin(admin.ModelAdmin):
     pass
 admin.site.register(Message, MessageAdmin)
-
-
-class TriggerAdmin(admin.ModelAdmin):
-    fieldsets = TRIGGER_FIELDSETS
-    list_display = ['campaign', 'message', 'fixed_date',
-                    'fixed_assignment_state', 'event_based_days_before',
-                    'event_based_assignment_state',
-                    'assignment_based_days_after']
-admin.site.register(Trigger, TriggerAdmin)
 
 
 class SendableAdmin(admin.ModelAdmin):

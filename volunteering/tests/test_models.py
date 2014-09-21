@@ -7,8 +7,8 @@ from django.test import TestCase
 import factories as f
 
 from volunteering.models import (Activity, Assignment, Attribute, Campaign,
-                                 Duty, Event, Location, Sendable, Trigger,
-                                 Message, Volunteer)
+                                 Duty, Event, Location, Sendable, TriggerBase,
+                                 TriggerByDate, Message, Volunteer)
 
 
 class TestAttribute(TestCase):
@@ -478,9 +478,9 @@ class TestSendable(TestCase):
         a = f.AttributeFactory()
         v.attributes.add(a)
         d.activity.attributes.add(a)
-        f.TriggerFactory.create_batch(
+        f.TriggerByDateFactory.create_batch(
             3, fixed_date=fix_to_date,
-            fixed_assignment_state=Trigger.ASSIGNABLE, campaign=c)
+            assignment_state=TriggerBase.ASSIGNABLE, campaign=c)
         result = Sendable.collect_from_fixed_triggers(fix_to_date)
         self.assertEqual(3, result)
         all_qs = Sendable.objects.all().order_by('id')
@@ -497,8 +497,9 @@ class TestSendable(TestCase):
         v.attributes.add(a)
         d.activity.attributes.add(a)
         f.AssignmentFactory(volunteer=v, duty=d)
-        f.TriggerFactory.create(
-            fixed_date=fix_to_date, fixed_assignment_state=Trigger.ASSIGNABLE,
+        f.TriggerByDateFactory.create(
+            fixed_date=fix_to_date,
+            assignment_state=TriggerBase.ASSIGNABLE,
             campaign=c)
         result = Sendable.collect_from_fixed_triggers(fix_to_date)
         self.assertEqual(0, result)
@@ -519,8 +520,9 @@ class TestSendable(TestCase):
         d2.activity.attributes.add(a)
 
         f.AssignmentFactory(volunteer=v, duty=d)
-        f.TriggerFactory.create(
-            fixed_date=fix_to_date, fixed_assignment_state=Trigger.UNASSIGNED,
+        f.TriggerByDateFactory.create(
+            fixed_date=fix_to_date,
+            assignment_state=TriggerBase.UNASSIGNED,
             campaign=c)
         result = Sendable.collect_from_fixed_triggers(fix_to_date)
         self.assertEqual(1, result)
@@ -537,8 +539,9 @@ class TestSendable(TestCase):
         a = f.AttributeFactory()
         v.attributes.add(a)
         d.activity.attributes.add(a)
-        f.TriggerFactory.create_batch(
-            3, fixed_date=fix_to_date, fixed_assignment_state=Trigger.ASSIGNED,
+        f.TriggerByDateFactory.create_batch(
+            3, fixed_date=fix_to_date,
+            assignment_state=TriggerBase.ASSIGNED,
             campaign=c)
         result = Sendable.collect_from_fixed_triggers(fix_to_date)
         self.assertEqual(0, result)
@@ -546,36 +549,39 @@ class TestSendable(TestCase):
         self.assertQuerysetEqual(all_qs, [])
 
 
-class TestTrigger(TestCase):
-    def testTriggerFactory(self):
-        t = f.TriggerFactory()
-        self.assertTrue(Trigger.objects.filter(id=t.id).exists())
+class TestTriggerByDate(TestCase):
+    def testTriggerByDateFactory(self):
+        t = f.TriggerByDateFactory()
+        self.assertTrue(TriggerByDate.objects.filter(id=t.id).exists())
 
-    def testGetFixedDateTriggersSetForADateAllAssignmentStates(self):
+    def testGetSetForADateAllAssignmentStates(self):
         fix_to_date = date(2005, 5, 5)
-        triggers = f.TriggerFactory.create_batch(3, fixed_date=fix_to_date)
-        f.TriggerFactory(fixed_date=date(2001, 1, 1))
-        result = Trigger.objects.triggered(fix_to_date).order_by('id')
+        triggers = f.TriggerByDateFactory.create_batch(3,
+                                                       fixed_date=fix_to_date)
+        f.TriggerByDateFactory(fixed_date=date(2001, 1, 1))
+        result = TriggerByDate.objects.triggered(fix_to_date).order_by('id')
         self.assertQuerysetEqual(result, [repr(t) for t in triggers])
 
-    def testGetFixedDateTriggersSetForADateAssignedWithNoAssigned(self):
+    def testGetSetForADateAssignedWithNoAssigned(self):
         fix_to_date = date(2005, 5, 5)
-        f.TriggerFactory.create_batch(
-            3, fixed_date=fix_to_date, fixed_assignment_state=Trigger.ASSIGNED)
-        result = Trigger.objects.triggered(fix_to_date).order_by('id')
+        f.TriggerByDateFactory.create_batch(
+            3, fixed_date=fix_to_date,
+            assignment_state=TriggerBase.ASSIGNED)
+        result = TriggerByDate.objects.triggered(fix_to_date).order_by('id')
         self.assertQuerysetEqual(result, [])
 
-    def testGetFixedDateTriggersSetForADateAssignedWithAssigned(self):
+    def testGetSetForADateAssignedWithAssigned(self):
         fix_to_date = date(2005, 5, 5)
         d = f.FullDutyFactory()
         c = f.CampaignFactory()
         c.events.add(d.event)
         v = f.VolunteerFactory()
         f.AssignmentFactory(volunteer=v, duty=d)
-        triggers = f.TriggerFactory.create_batch(
-            3, fixed_date=fix_to_date, fixed_assignment_state=Trigger.ASSIGNED,
+        triggers = f.TriggerByDateFactory.create_batch(
+            3, fixed_date=fix_to_date,
+            assignment_state=TriggerBase.ASSIGNED,
             campaign=c)
-        result = Trigger.objects.triggered(fix_to_date).order_by('id')
+        result = TriggerByDate.objects.triggered(fix_to_date).order_by('id')
         self.assertQuerysetEqual(result, [repr(t) for t in triggers])
 
     # Skipped until I figure out how to use annotations for this.
@@ -587,12 +593,12 @@ class TestTrigger(TestCase):
     #     v = f.VolunteerFactory()
     #     f.AssignmentFactory(volunteer=v, duty=d)
     #     f.TriggerFactory.create_batch(3, fixed_date=fix_to_date,
-    #                                 fixed_assignment_state=Trigger.ASSIGNABLE,
+    #                                 assignment_state=Trigger.ASSIGNABLE,
     #                                 campaign=c)
     #     result = Trigger.objects.triggered(fix_to_date).order_by('id')
     #     self.assertQuerysetEqual(result, [])
 
-    def testGetFixedDateTriggersSetForADateAssignableWithAssignable(self):
+    def testGetSetForADateAssignableWithAssignable(self):
         fix_to_date = date(2005, 5, 5)
         c = f.CampaignFactory()
         d = f.FullDutyFactory()
@@ -602,10 +608,10 @@ class TestTrigger(TestCase):
         v.attributes.add(a)
         d.activity.attributes.add(a)
         f.AssignmentFactory(volunteer=v, duty=d)
-        triggers = f.TriggerFactory.create_batch(
+        triggers = f.TriggerByDateFactory.create_batch(
             3, fixed_date=fix_to_date,
-            fixed_assignment_state=Trigger.ASSIGNABLE, campaign=c)
-        result = Trigger.objects.triggered(fix_to_date).order_by('id')
+            assignment_state=TriggerBase.ASSIGNABLE, campaign=c)
+        result = TriggerByDate.objects.triggered(fix_to_date).order_by('id')
         self.assertQuerysetEqual(result, [repr(t) for t in triggers])
 
 
