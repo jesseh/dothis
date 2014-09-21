@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericTabularInline
 
 from import_export.admin import ExportMixin
 from import_export.resources import ModelResource
@@ -203,8 +204,8 @@ admin.site.register(Message, MessageAdmin)
 
 
 class SendableAdmin(admin.ModelAdmin):
-    list_display = ['send_date', 'trigger', 'volunteer', 'assignment',
-                    'sent_date', 'send_failed']
-    list_filter = ['send_failed', 'trigger']
+    list_display = ['send_date', 'volunteer', 'assignment',
+                    'trigger_detail', 'send_failed']
+    list_filter = ['send_failed']
     date_hierarchy = 'send_date'
 admin.site.register(Sendable, SendableAdmin)

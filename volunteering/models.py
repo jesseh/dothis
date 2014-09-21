@@ -483,6 +483,9 @@ class Sendable(TimeStampedModel):
     def __unicode__(self):
         return "%s -> %s: %s" % (self.volunteer, self.trigger, self.send_date)
 
+    def trigger_detail(self):
+        return str(self.trigger)
+
     @classmethod
     def collect_from_fixed_triggers(cls, fixed_date):
         new_sendables_count = 0
