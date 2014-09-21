@@ -51,16 +51,19 @@ class Campaign(TimeStampedModel):
         self.status = ActivatorModel.INACTIVE_STATUS
         self.deactivate_date = datetime_now()
 
-    def duties(self):
-        qs = Duty.objects.all()
+    def related_duties_q(self):
+        q_objects = []
+
         if self.events.exists():
-            qs = qs.filter(event__campaign=self)
+            q_objects.append(Q(event__campaign=self))
         if self.locations.exists():
-            qs = qs.filter(location__campaign=self)
+            q_objects.append(Q(location__campaign=self))
         if self.activities.exists():
-            qs = qs.filter(activity__campaign=self)
-        qs = qs.distinct()
-        return qs
+            q_objects.append(Q(activity__campaign=self))
+        return Q(*q_objects)
+
+    def duties(self):
+        return Duty.objects.filter(self.related_duties_q()).distinct()
 
     def volunteers_needed(self):
         return self.duties().aggregate(Sum('multiple'))['multiple__sum'] or 0
@@ -487,26 +490,46 @@ class Sendable(TimeStampedModel):
         return str(self.trigger)
 
     @classmethod
+    def create_or_ignore(cls, trigger, volunteer, assignment, fixed_date):
+        trigger_content_type = ContentType.objects.get_for_model(trigger)
+
+        # create a sendable undless it already exists.
+        s, created = Sendable.objects.get_or_create(
+            trigger_id=trigger.id, trigger_type=trigger_content_type,
+            volunteer=volunteer, assignment=None,
+            send_date=fixed_date)
+
+        # and note if it was created.
+        if created:
+            logger.info("Collected '%s'" % s)
+        return created
+
+    @classmethod
     def collect_from_fixed_triggers(cls, fixed_date):
         new_sendables_count = 0
-        trigger_type = ContentType.objects.get_for_model(TriggerByDate)
+
+        # Get all the triggers for the day
         for t in TriggerByDate.objects.triggered(fixed_date):
             print("Collecting %s" % t)
 
-            duties = t.campaign.duties()
+            # What duties are related to the campaign of this trigger (cache
+            # this)?
+            # REMOVE duties = t.campaign.duties()
+            campaign_duties_q = t.campaign.related_duties_q()
 
+            # Loop through the recipients
             for volunteer in t.recipients():
                 print("  Collecting %s" % volunteer)
-                for duty in duties:
-                    if (not t.assignable()) or Duty.objects.assignable_to(volunteer). \
-                            filter(id=duty.id).exists():
-                        s, created = Sendable.objects.get_or_create(
-                            trigger_id=t.id, trigger_type=trigger_type,
-                            volunteer=volunteer, assignment=None,
-                            send_date=fixed_date)
-                        if created:
-                            logger.info("Collected '%s'" % s)
-                            new_sendables_count += 1
+
+                # if assignability does not matter or if the volunteer can be
+                # assigned to the duty
+                if (not t.assignable()) or \
+                        Duty.objects.assignable_to(volunteer). \
+                        filter(campaign_duties_q).exists():
+                    created = Sendable.create_or_ignore(t, volunteer, None,
+                                                        fixed_date)
+                    if created:
+                        new_sendables_count += 1
         return new_sendables_count
 
     @classmethod

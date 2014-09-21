@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.contrib.contenttypes.admin import GenericTabularInline
 
 from import_export.admin import ExportMixin
 from import_export.resources import ModelResource
