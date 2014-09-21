@@ -1,4 +1,4 @@
--e git+https://github.com/django/django.git@b4c80238a2b6c3f9fb7437d216082315c601055b#egg=django
+Django==1.7
 WebOb==1.4
 WebTest==2.0.15
 beautifulsoup4==4.3.2
