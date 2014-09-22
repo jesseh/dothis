@@ -335,6 +335,10 @@ class Volunteer(models.Model):
     def attributes_list(self):
         return ", ".join(self.attributes.values_list('name', flat=True))
 
+    def ordered_assignments(self):
+        return self.assignment_set.all().order_by("duty__event__date",
+                                                  "duty__start_time")
+
 
 class Event(models.Model):
     name = models.CharField(max_length=200, unique=True)

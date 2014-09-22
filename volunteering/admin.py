@@ -203,7 +203,7 @@ admin.site.register(Message, MessageAdmin)
 
 
 class SendableAdmin(admin.ModelAdmin):
-    list_display = ['send_date', 'volunteer', 'assignment',
+    list_display = ['send_date', 'sent_date', 'volunteer', 'assignment',
                     'trigger_detail', 'send_failed']
     list_filter = ['send_failed']
     date_hierarchy = 'send_date'
