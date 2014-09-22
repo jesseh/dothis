@@ -509,7 +509,8 @@ class Sendable(TimeStampedModel):
         new_sendables_count = 0
 
         # Get all the triggers for the day
-        for t in TriggerByDate.objects.triggered(fixed_date):
+        triggers = TriggerByDate.objects.triggered(fixed_date).distinct()
+        for t in triggers:
             print("Collecting %s" % t)
 
             # What duties are related to the campaign of this trigger (cache
