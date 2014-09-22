@@ -538,38 +538,42 @@ class Sendable(TimeStampedModel):
         sent_count = 0
         for unsent in Sendable.objects.filter(
                 sent_date__isnull=True).filter(send_failed=False):
-            message = unsent.trigger.message
-            context_dict = {'volunteer': unsent.volunteer,
-                            'assignment': unsent.assignment}
-
-            body = message.rendered_body(context_dict)
-
-            email_params = {
-                'subject': message.rendered_subject(context_dict),
-                'to': [unsent.volunteer.email_address],
-                'from_email': settings.FROM_ADDRESS,
-            }
-
-            if message.body_is_html:
-                email = EmailMultiAlternatives(**email_params)
-                email.attach_alternative(body, "text/html")
-                email.auto_text = True
-            else:
-                email = EmailMessage(**email_params)
-                email.body = body
-                email.auto_html = True
-
-            name_tag = ("name - %s" % message.name)[:50]
-            trigger_tag = ("trigger - %s" % unsent.trigger.id)[:50]
-            email.tags = [name_tag, trigger_tag]
-            logger.info("Sending %s" % email_params)
-            print("Sending %s" % email_params)
-            try:
-                email.send(fail_silently=False)
-                unsent.sent_date = date.today()
+            if unsent.send_email():
                 sent_count += 1
-            except MandrillAPIError:
-                print("FAILED %s" % email_params)
-                unsent.send_failed = True
-            unsent.save()
         return sent_count
+
+    def send_email(self):
+        message = self.trigger.message
+        context_dict = {'volunteer': self.volunteer,
+                        'assignment': self.assignment}
+
+        body = message.rendered_body(context_dict)
+
+        email_params = {
+            'subject': message.rendered_subject(context_dict),
+            'to': [self.volunteer.email_address],
+            'from_email': settings.FROM_ADDRESS,
+        }
+
+        if message.body_is_html:
+            email = EmailMultiAlternatives(**email_params)
+            email.attach_alternative(body, "text/html")
+            email.auto_text = True
+        else:
+            email = EmailMessage(**email_params)
+            email.body = body
+            email.auto_html = True
+
+        name_tag = ("name - %s" % message.name)[:50]
+        trigger_tag = ("trigger - %s" % self.trigger.id)[:50]
+        email.tags = [name_tag, trigger_tag]
+        logger.info("Sending %s" % email_params)
+        print("Sending %s" % email_params)
+        try:
+            email.send(fail_silently=False)
+            self.sent_date = date.today()
+        except MandrillAPIError:
+            print("FAILED %s" % email_params)
+            self.send_failed = True
+        self.save()
+        return not self.send_failed
