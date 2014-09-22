@@ -207,6 +207,9 @@ class SendableAdmin(admin.ModelAdmin):
                     'trigger_detail', 'send_failed']
     list_filter = ['send_failed']
     date_hierarchy = 'send_date'
+    search_fields = ['volunteer__first_name', 'volunteer__surname',
+                     'volunteer__family__external_id',
+                     'volunteer__external_id']
     actions = ['send_message']
 
     def send_message(self, request, queryset):
