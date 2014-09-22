@@ -207,4 +207,19 @@ class SendableAdmin(admin.ModelAdmin):
                     'trigger_detail', 'send_failed']
     list_filter = ['send_failed']
     date_hierarchy = 'send_date'
+    actions = ['send_message']
+
+    def send_message(self, request, queryset):
+        sent_count = 0
+        for sendable in queryset:
+            sendable.send_email()
+            sent_count += 1
+        if sent_count == 1:
+            message_bit = "1 message was"
+        else:
+            message_bit = "%s messages were" % sent_count
+        self.message_user(request, "%s sent." % message_bit)
+    send_message.short_description = "Send (or resend) the message"
+
+
 admin.site.register(Sendable, SendableAdmin)
