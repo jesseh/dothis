@@ -1,6 +1,6 @@
 import logging
 import random
-from datetime import date
+from datetime import date, timedelta
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -116,10 +116,20 @@ class Campaign(TimeStampedModel):
 
 
 class Message(models.Model):
+    EMAIL, SMS = range(2)
+    MODES = (
+        (EMAIL, 'email'),
+        (SMS, 'sms'),
+    )
+
     name = models.CharField(max_length=200)
-    subject = models.CharField(max_length=200)
+    mode = models.IntegerField(choices=MODES, default=EMAIL)
+    subject = models.CharField(max_length=200,
+                               help_text="not used for SMS")
     body = models.TextField(blank=True)
-    body_is_html = models.BooleanField(default=False)
+    body_is_html = models.BooleanField(
+        default=False,
+        help_text="not used for SMS")
 
     def _render(self, source, context_dict):
         t = Template(source)
@@ -136,7 +146,7 @@ class Message(models.Model):
         ordering = ['name']
 
     def __unicode__(self):
-        return self.name
+        return "%s (%s)" % (self.name, self.get_mode_display())
 
 
 class TriggerBase(models.Model):
@@ -162,19 +172,26 @@ class TriggerBase(models.Model):
         raise NotImplementedError
 
 
-class TriggerByAssignment(TriggerBase):
-    days_after = models.PositiveIntegerField(
-        help_text="Send the message this many days after the role "
-                  "was assigned to the volunteer (including them assigning "
-                  "it themself). '0' will send the day they are assigned.")
+class TriggerWithAssignmentStateMixin(models.Model):
 
+    class Meta:
+        abstract = True
 
-class TriggerByEvent(TriggerBase):
-    days_before = models.PositiveIntegerField(
-        help_text="Send the message this many days before the event.")
-    assignment_state = models.IntegerField(
-        choices=TriggerBase.ASSIGNMENT_STATES,
-        default=TriggerBase.ASSIGNED_AND_ASSIGNABLE)
+    def assigned(self):
+        return self.assignment_state == TriggerBase.ASSIGNED or \
+            self.assignment_state == TriggerBase.ASSIGNED_AND_ASSIGNABLE
+
+    def assignable(self):
+        return self.assignment_state == TriggerBase.ASSIGNABLE or \
+            self.assignment_state == TriggerBase.ASSIGNED_AND_ASSIGNABLE
+
+    def unassigned(self):
+        return self.assignment_state == TriggerBase.UNASSIGNED
+
+    def recipients(self):
+            return self.campaign.recipients(assigned=self.assigned(),
+                                            assignable=self.assignable(),
+                                            unassigned=self.unassigned())
 
 
 class TriggerQuerySet(models.QuerySet):
@@ -200,7 +217,22 @@ class TriggerQuerySet(models.QuerySet):
                    q_assigned_and_assignable | q_unassigned)
 
 
-class TriggerByDate(TriggerBase):
+class TriggerByAssignment(TriggerBase):
+    days_after = models.PositiveIntegerField(
+        help_text="Send the message this many days after the role "
+                  "was assigned to the volunteer (including them assigning "
+                  "it themself). '0' will send the day they are assigned.")
+
+
+class TriggerByEvent(TriggerWithAssignmentStateMixin, TriggerBase):
+    days_before = models.PositiveIntegerField(
+        help_text="Send the message this many days before the event.")
+    assignment_state = models.IntegerField(
+        choices=((TriggerBase.ASSIGNED, 'With an assigned duty'),),
+        default=TriggerBase.ASSIGNED)
+
+
+class TriggerByDate(TriggerWithAssignmentStateMixin, TriggerBase):
 
     fixed_date = models.DateField(
         null=True, blank=True, db_index=True,
@@ -211,22 +243,6 @@ class TriggerByDate(TriggerBase):
         default=TriggerBase.ASSIGNED_AND_ASSIGNABLE)
 
     objects = TriggerQuerySet.as_manager()
-
-    def assigned(self):
-        return self.assignment_state == TriggerBase.ASSIGNED or \
-            self.assignment_state == TriggerBase.ASSIGNED_AND_ASSIGNABLE
-
-    def assignable(self):
-        return self.assignment_state == TriggerBase.ASSIGNABLE or \
-            self.assignment_state == TriggerBase.ASSIGNED_AND_ASSIGNABLE
-
-    def unassigned(self):
-        return self.assignment_state == TriggerBase.UNASSIGNED
-
-    def recipients(self):
-            return self.campaign.recipients(assigned=self.assigned(),
-                                            assignable=self.assignable(),
-                                            unassigned=self.unassigned())
 
 
 class Family(models.Model):
@@ -336,8 +352,8 @@ class Volunteer(models.Model):
         return ", ".join(self.attributes.values_list('name', flat=True))
 
     def ordered_assignments(self):
-        return self.assignment_set.all().order_by("duty__event__date",
-                                                  "duty__start_time")
+        return self.assignment_set.all().order_by("-duty__event__date",
+                                                  "-duty__start_time")
 
 
 class Event(models.Model):
@@ -494,14 +510,14 @@ class Sendable(TimeStampedModel):
         return str(self.trigger)
 
     @classmethod
-    def create_or_ignore(cls, trigger, volunteer, assignment, fixed_date):
+    def create_or_ignore(cls, trigger, volunteer, assignment, send_date):
         trigger_content_type = ContentType.objects.get_for_model(trigger)
 
         # create a sendable undless it already exists.
         s, created = Sendable.objects.get_or_create(
             trigger_id=trigger.id, trigger_type=trigger_content_type,
-            volunteer=volunteer, assignment=None,
-            send_date=fixed_date)
+            volunteer=volunteer, assignment=assignment,
+            send_date=send_date)
 
         # and note if it was created.
         if created:
@@ -509,20 +525,45 @@ class Sendable(TimeStampedModel):
         return created
 
     @classmethod
+    def collect_from_event_only_assigned_triggers(cls, as_of_date):
+        new_sendables_count = 0
+        today = date.today()
+
+        for t in TriggerByEvent.objects.all():
+            print("Collecting event trigger: %s" % t)
+            applicable_event_date = as_of_date - timedelta(days=t.days_before)
+
+            trigger_content_type = ContentType.objects.get_for_model(t)
+            campaign_duties = t.campaign.duties().filter(
+                event__date__gte=applicable_event_date).filter(
+                event__date__gte=today)
+
+            assignments_to_send = Assignment.objects.filter(
+                duty__in=campaign_duties).exclude(
+                    sendable__assignment_id=F('id'),
+                    sendable__volunteer=F('volunteer'),
+                    sendable__trigger_id=t.id,
+                    sendable__trigger_type=trigger_content_type)
+
+            for assignment in assignments_to_send:
+                print("  Collecting assignment %s" % assignment)
+
+                # if assignability does not matter or if the volunteer can be
+                # assigned to the duty
+                created = Sendable.create_or_ignore(t, assignment.volunteer,
+                                                    assignment, as_of_date)
+                if created:
+                    new_sendables_count += 1
+        return new_sendables_count
+
+    @classmethod
     def collect_from_fixed_triggers(cls, fixed_date):
         new_sendables_count = 0
 
-        # Get all the triggers for the day
         triggers = TriggerByDate.objects.triggered(fixed_date).distinct()
         for t in triggers:
             print("Collecting %s" % t)
-
-            # What duties are related to the campaign of this trigger (cache
-            # this)?
-            # REMOVE duties = t.campaign.duties()
             campaign_duties_q = t.campaign.related_duties_q()
-
-            # Loop through the recipients
             for volunteer in t.recipients():
                 print("  Collecting %s" % volunteer)
 

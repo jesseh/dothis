@@ -17,3 +17,7 @@ class Command(BaseCommand):
 
         collected = models.Sendable.collect_from_fixed_triggers(send_date)
         self.stdout.write("%s messages collected" % collected)
+
+        collected = models.Sendable.collect_from_event_only_assigned_triggers(
+            send_date)
+        self.stdout.write("%s messages collected" % collected)

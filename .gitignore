@@ -5,3 +5,5 @@
 .coverage
 venv
 staticfiles
+.ipynb_checkpoints
+*.ipynb
