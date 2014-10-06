@@ -358,7 +358,8 @@ class Volunteer(models.Model):
 
 class Event(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    description = models.TextField(blank=True)
+    web_summary_description = models.TextField(blank=True)
+    assignment_message_description = models.TextField(blank=True, null=True)
     date = models.DateField(null=True, blank=True)
 
     class Meta:
@@ -371,7 +372,8 @@ class Event(models.Model):
 
 class Activity(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    description = models.TextField(blank=True)
+    web_summary_description = models.TextField(blank=True)
+    assignment_message_description = models.TextField(blank=True, null=True)
     attributes = models.ManyToManyField(Attribute, null=True, blank=True)
 
     class Meta:
@@ -386,7 +388,8 @@ class Activity(models.Model):
 
 class Location(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    description = models.TextField(blank=True)
+    web_summary_description = models.TextField(blank=True)
+    assignment_message_description = models.TextField(blank=True, null=True)
 
     class Meta:
         ordering = ['name']

@@ -1,7 +1,7 @@
 <h3>What</h3>
 <dl>
     <dt>{{ duty.activity.name }}</dt>
-    <dd>{{ duty.activity.description }}</dd>
+    <dd>{{ duty.activity.web_summary_description }}</dd>
 </dl>
 
 <h3>When</h3>
@@ -9,12 +9,12 @@
     <dt>{{ duty.event.name }}</dt>
     <dd>
         {{ duty.event.date }} {% if duty.times_string %} at {{ duty.times_string }}{% endif %}
-        <div>{{ duty.event.description }}</div>
+        <div>{{ duty.event.web_summary_description }}</div>
     </dd>
 </dl>
 
 <h3>Where</h3>
 <dl>
     <dt>{{ duty.location.name }}</dt>
-    <dd>{{ duty.location.description }}</dd>
+    <dd>{{ duty.location.web_summary_description }}</dd>
 </dl>

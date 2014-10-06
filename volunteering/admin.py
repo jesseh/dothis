@@ -177,7 +177,8 @@ admin.site.register(Assignment, AssignmentAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description', 'attributes_list']
+    list_display = ['name', 'attributes_list', 'web_summary_description',
+                    'assignment_message_description']
     readonly_fields = ['attributes_list']
     list_filter = ['attributes']
     filter_horizontal = ['attributes']
@@ -185,13 +186,15 @@ admin.site.register(Activity, ActivityAdmin)
 
 
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description']
+    list_display = ['name', 'web_summary_description',
+                    'assignment_message_description']
     pass
 admin.site.register(Location, LocationAdmin)
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('date', 'name', 'description')
+    list_display = ('date', 'name', 'web_summary_description',
+                    'assignment_message_description')
     list_display_links = ('name',)
     inlines = [DutyInline]
 admin.site.register(Event, EventAdmin)
