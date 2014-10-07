@@ -384,7 +384,9 @@ class TestAssignment(TestCase):
 class TestActivity(TestCase):
     def setUp(self):
         self.a = f.ActivityFactory.build(
-            name="the name", description="the short description")
+            name="the name",
+            web_summary_description="the web summary description",
+            assignment_message_description="assignment message description")
 
     def testHasAName(self):
         self.assertEqual(self.a.name, 'the name')
@@ -394,15 +396,22 @@ class TestActivity(TestCase):
         with self.assertRaises(IntegrityError):
             Activity.objects.create(name='the name')
 
-    def testHasADescription(self):
-        self.assertEqual(self.a.description, 'the short description')
+    def testHasAWebSummaryDescription(self):
+        self.assertEqual(self.a.web_summary_description,
+                         'the web summary description')
+
+    def testHasAnAssignmentMessageDescription(self):
+        self.assertEqual(self.a.assignment_message_description,
+                         'assignment message description')
 
 
 class TestEvent(TestCase):
     def setUp(self):
-        self.a = Event(name="the name",
-                       description="the short description",
-                       date=date(2001, 1, 1))
+        self.a = Event(
+            name="the name",
+            web_summary_description="the web summary description",
+            assignment_message_description="assignment message description",
+            date=date(2001, 1, 1))
 
     def testHasAName(self):
         self.assertEqual(self.a.name, 'the name')
@@ -412,8 +421,13 @@ class TestEvent(TestCase):
         with self.assertRaises(IntegrityError):
             Event.objects.create(name='the name')
 
-    def testHasADescription(self):
-        self.assertEqual(self.a.description, 'the short description')
+    def testHasAWebSummaryDescription(self):
+        self.assertEqual(self.a.web_summary_description,
+                         'the web summary description')
+
+    def testHasAnAssignmentMessageDescription(self):
+        self.assertEqual(self.a.assignment_message_description,
+                         'assignment message description')
 
     def testHasADate(self):
         self.assertEqual(self.a.date, date(2001, 1, 1))
@@ -421,8 +435,10 @@ class TestEvent(TestCase):
 
 class TestLocation(TestCase):
     def setUp(self):
-        self.l = Location(name="the name",
-                          description="the short description")
+        self.l = Location(
+            name="the name",
+            web_summary_description="the web summary description",
+            assignment_message_description="assignment message description")
 
     def testHasAName(self):
         self.assertEqual(self.l.name, 'the name')
@@ -432,8 +448,13 @@ class TestLocation(TestCase):
         with self.assertRaises(IntegrityError):
             Location.objects.create(name='the name')
 
-    def testHasADescription(self):
-        self.assertEqual(self.l.description, 'the short description')
+    def testHasAWebSummaryDescription(self):
+        self.assertEqual(self.l.web_summary_description,
+                         'the web summary description')
+
+    def testHasAnAssignmentMessageDescription(self):
+        self.assertEqual(self.l.assignment_message_description,
+                         'assignment message description')
 
 
 class TestFamily(TestCase):

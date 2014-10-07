@@ -534,11 +534,13 @@ class Sendable(TimeStampedModel):
 
         for t in TriggerByEvent.objects.all():
             print("Collecting event trigger: %s" % t)
-            applicable_event_date = as_of_date - timedelta(days=t.days_before)
+            applicable_event_date = as_of_date + timedelta(days=t.days_before)
 
             trigger_content_type = ContentType.objects.get_for_model(t)
             campaign_duties = t.campaign.duties().filter(
-                event__date__gte=applicable_event_date).filter(
+                # event is the before the applicable event date
+                event__date__lte=applicable_event_date).filter(
+                # event is in the future
                 event__date__gte=today)
 
             assignments_to_send = Assignment.objects.filter(
