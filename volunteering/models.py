@@ -399,12 +399,15 @@ class Location(models.Model):
 
 
 class AssignableDutyManager(models.Manager):
-    def assignable(self):
+    def assignable(self, as_of_date=None):
+	if as_of_date is None:
+	    as_of_date = date.today() 
         return super(AssignableDutyManager, self). \
             get_queryset(). \
             annotate(num_assignments=Count('assignments')). \
             filter(num_assignments__lt=F('multiple')). \
-            filter(multiple__gt=0)
+            filter(multiple__gt=0). \
+            filter(Q(event__date__gte=as_of_date) | Q(event__date__isnull=True))
 
     def assignable_to(self, volunteer):
         return self.assignable(). \

@@ -132,6 +132,16 @@ class TestDuty(TestCase):
             Duty(activity=d.activity, location=d.location, event=d.event,
                  start_time=d.start_time, end_time=d.end_time).save()
 
+    def testOneOnTodayIsAssignable(self):
+	past_event = f.EventFactory(date=date(2111,1,1))
+        f.DutyFactory.create(event=past_event)
+        self.assertEqual(1, Duty.objects.assignable(as_of_date=date(2111,1,1)).count())
+
+    def testOneInThePastIsNotAssignable(self):
+	past_event = f.EventFactory(date=date(2000,1,1))
+        f.DutyFactory.create(event=past_event)
+        self.assertEqual(0, Duty.objects.assignable(as_of_date=date(2000,1,2)).count())
+
     def testOneOfOneIsAssignable(self):
         f.DutyFactory.create()
         self.assertEqual(1, Duty.objects.assignable().count())

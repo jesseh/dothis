@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -29,6 +31,13 @@ class testSummaryView(TestCase):
         self.client.get(self.url)
         d2 = Volunteer.objects.get(id=self.v.id).last_summary_view
         self.assertTrue(d1 < d2)
+
+    def testSummaryContentDoesNotIncludePastActiveDuties(self):
+        past_event = f.EventFactory(date=date(2000,1,1))
+        self.d = f.DutyFactory.create(
+            event=past_event, location=self.l, activity=self.a)
+        response = self.client.get(self.url)
+        self.assertNotContains(response, self.d.event.name)
 
     def testSummaryContentIncludesActiveDuties(self):
         response = self.client.get(self.url)

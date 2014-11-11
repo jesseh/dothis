@@ -48,7 +48,7 @@ class EventFactory(DjangoModelFactory):
     class Meta:
         model = Event
     name = factory.Sequence(lambda n: 'an event {0}'.format(n))
-    date = date(2014, 1, 1)
+    date = date(2054, 1, 1)
 
 
 class LocationFactory(DjangoModelFactory):

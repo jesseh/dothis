@@ -7,3 +7,4 @@ venv
 staticfiles
 .ipynb_checkpoints
 *.ipynb
+*.swp
