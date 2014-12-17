@@ -441,6 +441,7 @@ class TestEvent(TestCase):
 
     def testHasADate(self):
         self.assertEqual(self.a.date, date(2001, 1, 1))
+ #   def testCopyEvent(self):
 
 
 class TestLocation(TestCase):

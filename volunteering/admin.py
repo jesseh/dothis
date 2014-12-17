@@ -192,11 +192,21 @@ class LocationAdmin(admin.ModelAdmin):
 admin.site.register(Location, LocationAdmin)
 
 
+def make_event_copies(modeladmin, request, queryset):
+    for event in queryset:
+        e = Event(name="copy of " + event.name)
+#                   web_summary_description=event.web_summary_description,
+#                   assignment_message_description=event.assignment_message_description)
+        e.save()
+make_event_copies.short_description = "Copy event(s)"
+
+
 class EventAdmin(admin.ModelAdmin):
     list_display = ('date', 'name', 'web_summary_description',
                     'assignment_message_description')
     list_display_links = ('name',)
     inlines = [DutyInline]
+    actions = [make_event_copies]
 admin.site.register(Event, EventAdmin)
 
 

@@ -4,7 +4,6 @@ Seed data in the database.
 import csv
 from datetime import date, time
 from StringIO import StringIO
-from pprint import pformat
 
 from django.core.management.base import BaseCommand
 from django.utils.encoding import smart_text
@@ -47,7 +46,8 @@ class Command(BaseCommand):
             {'name': "Chol Ha'Moed Shabbat", 'date': date(2014, 10, 11)},
             {'name': "Erev Rosh HaShanah", 'date': date(2014, 9, 24)},
             {'name': "Erev Rosh HaShanah 2", 'date': date(2014, 9, 25)},
-            {'name': "Erev Shabbat - Shabbat Shuvah", 'date': date(2014, 9, 26)},
+            {'name': "Erev Shabbat - Shabbat Shuvah",
+             'date': date(2014, 9, 26)},
             {'name': "Erev Shabbat Bereishit", 'date': date(2014, 10, 17)},
             {'name': "Erev Shmini Atzeret", 'date': date(2014, 10, 15)},
             {'name': "Erev Simchat Torah", 'date': date(2014, 10, 16)},
@@ -62,7 +62,8 @@ class Command(BaseCommand):
             {'name': "Succot 1", 'date': date(2014, 10, 9)},
             {'name': "Succot 1, Succot 2", 'date': date(2014, 10, 9)},
             {'name': "Succot 2", 'date': date(2014, 10, 10)},
-            {'name': "Succot 2/Erev Chol Ha'Moed Shabbat", 'date': date(2014, 10, 10)},
+            {'name': "Succot 2/Erev Chol Ha'Moed Shabbat",
+             'date': date(2014, 10, 10)},
             {'name': "Yom Kippur", 'date': date(2014, 10, 4)},
         ]
 
@@ -78,12 +79,15 @@ class Command(BaseCommand):
 
     def activity_data(self):
         return [
-            {'name': 'Security supervisor', 'attributes': self.lookup_attributes(['security supervisor'])},
-            {'name': 'Security team member', 'attributes': self.lookup_attributes(['security able'])},
-            {'name': 'Steward', 'attributes': self.lookup_attributes(['steward able'])},
-            {'name': 'Youth steward', 'attributes': self.lookup_attributes(['b\'nei mitzvah'])},
+            {'name': 'Security supervisor',
+             'attributes': self.lookup_attributes(['security supervisor'])},
+            {'name': 'Security team member',
+             'attributes': self.lookup_attributes(['security able'])},
+            {'name': 'Steward',
+             'attributes': self.lookup_attributes(['steward able'])},
+            {'name': 'Youth steward',
+             'attributes': self.lookup_attributes(['b\'nei mitzvah'])},
         ]
-
 
     def location_data(self):
         return [{'name': 'Regent Suite'},
@@ -91,8 +95,9 @@ class Command(BaseCommand):
                 {'name': 'Manor House'},
                 {'name': 'Akiva'},
                 {'name': 'Shul Hall'},
+                {'name': 'To be determined'},
                 {'name': 'location to be determined',
-                 'description': 'We need to recruit volunteers before the allocation of people to ' + \
+                 'web_summary_description': 'We need to recruit volunteers before the allocation of people to ' + \
                  'venues. As a result we\'ll align the locations at a later date and will let you ' + \
                  'know where to go then.'}
                ]
@@ -109,7 +114,8 @@ class Command(BaseCommand):
                 'event': event,
                 'activity': activity,
                 'location': location,
-                'start_time': time(*([int(t) for t in duty['Start Time'].split(':')])),
+                'start_time': time(*([int(t) for t in duty['Start Time']\
+                        .split(':')])),
                 'end_time': time(*([int(t) for t in duty['End Time'].split(':')])),
                 'multiple': int(duty['Multiple']),
                 'coordinator_note': duty['Coordinator note'],

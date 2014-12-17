@@ -358,9 +358,9 @@ class Volunteer(models.Model):
 
 class Event(models.Model):
     name = models.CharField(max_length=200, unique=True)
+    date = models.DateField(null=True, blank=True)
     web_summary_description = models.TextField(blank=True)
     assignment_message_description = models.TextField(blank=True, null=True)
-    date = models.DateField(null=True, blank=True)
 
     class Meta:
         unique_together = (("name", "date"))
@@ -400,8 +400,8 @@ class Location(models.Model):
 
 class AssignableDutyManager(models.Manager):
     def assignable(self, as_of_date=None):
-	if as_of_date is None:
-	    as_of_date = date.today() 
+        if as_of_date is None:
+            as_of_date = date.today()
         return super(AssignableDutyManager, self). \
             get_queryset(). \
             annotate(num_assignments=Count('assignments')). \
