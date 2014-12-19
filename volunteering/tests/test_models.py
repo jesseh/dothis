@@ -133,14 +133,14 @@ class TestDuty(TestCase):
                  start_time=d.start_time, end_time=d.end_time).save()
 
     def testOneOnTodayIsAssignable(self):
-	past_event = f.EventFactory(date=date(2111,1,1))
+        past_event = f.EventFactory(date=date(2111, 1, 1))
         f.DutyFactory.create(event=past_event)
-        self.assertEqual(1, Duty.objects.assignable(as_of_date=date(2111,1,1)).count())
+        self.assertEqual(1, Duty.objects.assignable(as_of_date=date(2111, 1, 1)).count())
 
     def testOneInThePastIsNotAssignable(self):
-	past_event = f.EventFactory(date=date(2000,1,1))
+        past_event = f.EventFactory(date=date(2000, 1, 1))
         f.DutyFactory.create(event=past_event)
-        self.assertEqual(0, Duty.objects.assignable(as_of_date=date(2000,1,2)).count())
+        self.assertEqual(0, Duty.objects.assignable(as_of_date=date(2000, 1, 2)).count())
 
     def testOneOfOneIsAssignable(self):
         f.DutyFactory.create()
@@ -441,7 +441,6 @@ class TestEvent(TestCase):
 
     def testHasADate(self):
         self.assertEqual(self.a.date, date(2001, 1, 1))
- #   def testCopyEvent(self):
 
 
 class TestLocation(TestCase):

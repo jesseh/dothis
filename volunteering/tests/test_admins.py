@@ -27,4 +27,21 @@ class testMakeEventCopies(TestCase):
         make_event_copies(None, None, qs)
         self.assertTrue(Event.objects.get(name="copy of " + name_text))
 
+    def testCopyingCarriesWebSummaryDescription(self):
+        description_text = "some description"
+        e = f.EventFactory.create(web_summary_description=description_text)
+        qs = Event.objects.filter(id=e.id)
+        make_event_copies(None, None, qs)
+        self.assertEquals(
+            Event.objects.filter(
+                web_summary_description=description_text).count(), 2)
 
+    def testCopyingCarriesAssignmentMessageDescription(self):
+        description_text = "some description"
+        e = f.EventFactory.create(
+            assignment_message_description=description_text)
+        qs = Event.objects.filter(id=e.id)
+        make_event_copies(None, None, qs)
+        self.assertEquals(
+            Event.objects.filter(
+                assignment_message_description=description_text).count(), 2)
