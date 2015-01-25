@@ -194,11 +194,7 @@ admin.site.register(Location, LocationAdmin)
 
 def make_event_copies(modeladmin, request, queryset):
     for event in queryset:
-        e = Event(
-            name="copy of " + event.name,
-            web_summary_description=event.web_summary_description,
-            assignment_message_description=event.assignment_message_description)
-        e.save()
+        event.create_deep_copy()
 make_event_copies.short_description = "Copy event(s)"
 
 

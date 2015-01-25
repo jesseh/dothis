@@ -18,21 +18,21 @@ class testMakeEventCopies(TestCase):
         qs = Event.objects.all()
         make_event_copies(None, None, qs)
         event_count = Event.objects.count()
-        self.assertEquals(event_count, 2)
+        self.assertEqual(event_count, 2)
 
-    def testCopyingPrependsToTheName(self):
+    def testCopyingKeepsTheSameName(self):
         name_text = "orig name"
         f.EventFactory.create(name=name_text)
         qs = Event.objects.filter(name=name_text)
         make_event_copies(None, None, qs)
-        self.assertTrue(Event.objects.get(name="copy of " + name_text))
+        self.assertEqual(Event.objects.filter(name=name_text).count(), 2)
 
     def testCopyingCarriesWebSummaryDescription(self):
         description_text = "some description"
         e = f.EventFactory.create(web_summary_description=description_text)
         qs = Event.objects.filter(id=e.id)
         make_event_copies(None, None, qs)
-        self.assertEquals(
+        self.assertEqual(
             Event.objects.filter(
                 web_summary_description=description_text).count(), 2)
 
@@ -42,6 +42,15 @@ class testMakeEventCopies(TestCase):
             assignment_message_description=description_text)
         qs = Event.objects.filter(id=e.id)
         make_event_copies(None, None, qs)
-        self.assertEquals(
+        self.assertEqual(
             Event.objects.filter(
                 assignment_message_description=description_text).count(), 2)
+
+    def testCopyingReplicatesDuties(self):
+        e = f.EventFactory.create()
+        f.FullDutyFactory.create(event=e)
+        f.FullDutyFactory.create(event=e)
+        qs = Event.objects.filter(id=e.id)
+        make_event_copies(None, None, qs)
+        for event in Event.objects.all():
+            self.assertEqual(event.duty_set.count(), 2)

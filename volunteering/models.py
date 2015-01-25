@@ -357,7 +357,7 @@ class Volunteer(models.Model):
 
 
 class Event(models.Model):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200)
     date = models.DateField(null=True, blank=True)
     web_summary_description = models.TextField(blank=True, default="")
     assignment_message_description = models.TextField(blank=True, default="")
@@ -368,6 +368,15 @@ class Event(models.Model):
 
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.date)
+
+    def create_deep_copy(self):
+        copy = Event(
+            name=self.name,
+            web_summary_description=self.web_summary_description,
+            assignment_message_description=self.assignment_message_description)
+        copy.save()
+        for duty in self.duty_set.all():
+            duty.copy_for_event(copy)
 
 
 class Activity(models.Model):
@@ -407,7 +416,8 @@ class AssignableDutyManager(models.Manager):
             annotate(num_assignments=Count('assignments')). \
             filter(num_assignments__lt=F('multiple')). \
             filter(multiple__gt=0). \
-            filter(Q(event__date__gte=as_of_date) | Q(event__date__isnull=True))
+            filter(Q(event__date__gte=as_of_date) |
+                   Q(event__date__isnull=True))
 
     def assignable_to(self, volunteer):
         return self.assignable(). \
@@ -464,6 +474,16 @@ class Duty(models.Model):
 
     def unassigned_count(self):
         return self.multiple - self.assignment_set.count()
+
+    def copy_for_event(self, event):
+        Duty(activity=self.activity,
+             event=event,
+             location=self.location,
+             start_time=self.start_time,
+             end_time=self.end_time,
+             multiple=self.multiple,
+             details=self.details,
+             coordinator_note=self.coordinator_note).save()
 
 
 class Assignment(TimeStampedModel):

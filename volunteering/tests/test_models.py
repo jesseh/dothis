@@ -135,12 +135,14 @@ class TestDuty(TestCase):
     def testOneOnTodayIsAssignable(self):
         past_event = f.EventFactory(date=date(2111, 1, 1))
         f.DutyFactory.create(event=past_event)
-        self.assertEqual(1, Duty.objects.assignable(as_of_date=date(2111, 1, 1)).count())
+        self.assertEqual(1, Duty.objects.assignable(
+            as_of_date=date(2111, 1, 1)).count())
 
     def testOneInThePastIsNotAssignable(self):
         past_event = f.EventFactory(date=date(2000, 1, 1))
         f.DutyFactory.create(event=past_event)
-        self.assertEqual(0, Duty.objects.assignable(as_of_date=date(2000, 1, 2)).count())
+        self.assertEqual(0, Duty.objects.assignable(
+            as_of_date=date(2000, 1, 2)).count())
 
     def testOneOfOneIsAssignable(self):
         f.DutyFactory.create()
@@ -425,11 +427,6 @@ class TestEvent(TestCase):
 
     def testHasAName(self):
         self.assertEqual(self.a.name, 'the name')
-
-    def testNameIsUnique(self):
-        self.a.save()
-        with self.assertRaises(IntegrityError):
-            Event.objects.create(name='the name')
 
     def testHasAWebSummaryDescription(self):
         self.assertEqual(self.a.web_summary_description,
