@@ -361,6 +361,7 @@ class Event(models.Model):
     date = models.DateField(null=True, blank=True)
     web_summary_description = models.TextField(blank=True, default="")
     assignment_message_description = models.TextField(blank=True, default="")
+    is_done = models.BooleanField(default=False, db_index=True)
 
     class Meta:
         unique_together = (("name", "date"))

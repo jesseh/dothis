@@ -29,25 +29,10 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
-        migrations.RemoveField(
-            model_name='campaignduty',
-            name='campaign',
-        ),
-        migrations.RemoveField(
-            model_name='campaignduty',
-            name='duty',
-        ),
         migrations.AddField(
             model_name='campaign',
             name='campaign',
             field=models.ManyToManyField(to=b'volunteering.Event', null=True, through='volunteering.CampaignEvent', blank=True),
             preserve_default=True,
-        ),
-        migrations.RemoveField(
-            model_name='duty',
-            name='campaign',
-        ),
-        migrations.DeleteModel(
-            name='CampaignDuty',
         ),
     ]

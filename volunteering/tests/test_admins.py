@@ -1,12 +1,19 @@
 from django.test import TestCase
 
-from volunteering.admin import make_event_copies
+from volunteering.admin import make_event_copies, make_events_done
 from volunteering.models import Event
 
 import factories as f
 
 
-class testMakeEventCopies(TestCase):
+class testEventActions(TestCase):
+
+    def testMakeEventsDone(self):
+        f.EventFactory.create_batch(2)
+        qs = Event.objects.all()
+        self.assertEqual(Event.objects.filter(is_done=True).count(), 0)
+        make_events_done(None, None, qs)
+        self.assertEqual(Event.objects.filter(is_done=True).count(), 2)
 
     def testCopyWithNothing(self):
         qs = Event.objects.none()
@@ -19,6 +26,13 @@ class testMakeEventCopies(TestCase):
         make_event_copies(None, None, qs)
         event_count = Event.objects.count()
         self.assertEqual(event_count, 2)
+
+    def testCopyMultiple(self):
+        f.EventFactory.create_batch(3)
+        qs = Event.objects.all()
+        make_event_copies(None, None, qs)
+        event_count = Event.objects.count()
+        self.assertEqual(event_count, 6)
 
     def testCopyingKeepsTheSameName(self):
         name_text = "orig name"

@@ -439,6 +439,9 @@ class TestEvent(TestCase):
     def testHasADate(self):
         self.assertEqual(self.a.date, date(2001, 1, 1))
 
+    def testDefaultsToNotDone(self):
+        self.assertFalse(self.a.is_done)
+
 
 class TestLocation(TestCase):
     def setUp(self):

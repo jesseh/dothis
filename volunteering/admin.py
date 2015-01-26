@@ -192,6 +192,11 @@ class LocationAdmin(admin.ModelAdmin):
 admin.site.register(Location, LocationAdmin)
 
 
+def make_events_done(modeladmin, request, queryset):
+    queryset.update(is_done=True)
+make_events_done.short_description = "Mark event(s) as done"
+
+
 def make_event_copies(modeladmin, request, queryset):
     for event in queryset:
         event.create_deep_copy()
@@ -199,11 +204,12 @@ make_event_copies.short_description = "Copy event(s)"
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('date', 'name', 'web_summary_description',
+    list_display = ('date', 'name', 'is_done', 'web_summary_description',
                     'assignment_message_description')
     list_display_links = ('name',)
+    list_filter = ['is_done']
     inlines = [DutyInline]
-    actions = [make_event_copies]
+    actions = [make_event_copies, make_events_done]
 admin.site.register(Event, EventAdmin)
 
 

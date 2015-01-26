@@ -69,21 +69,6 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.CreateModel(
-            name='CampaignDuty',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', django_extensions.db.fields.CreationDateTimeField(default=django.utils.timezone.now, verbose_name='created', editable=False, blank=True)),
-                ('modified', django_extensions.db.fields.ModificationDateTimeField(default=django.utils.timezone.now, verbose_name='modified', editable=False, blank=True)),
-                ('campaign', models.ForeignKey(to='volunteering.Campaign')),
-            ],
-            options={
-                'ordering': (b'-modified', b'-created'),
-                'abstract': False,
-                'get_latest_by': b'modified',
-            },
-            bases=(models.Model,),
-        ),
-        migrations.CreateModel(
             name='Duty',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -97,21 +82,9 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.AddField(
-            model_name='campaignduty',
-            name='duty',
-            field=models.ForeignKey(to='volunteering.Duty'),
-            preserve_default=True,
-        ),
-        migrations.AddField(
             model_name='assignment',
             name='duty',
             field=models.ForeignKey(to='volunteering.Duty'),
-            preserve_default=True,
-        ),
-        migrations.AddField(
-            model_name='duty',
-            name='campaign',
-            field=models.ManyToManyField(to='volunteering.Campaign', null=True, through='volunteering.CampaignDuty', blank=True),
             preserve_default=True,
         ),
         migrations.CreateModel(

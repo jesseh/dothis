@@ -8,6 +8,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 import os
+import sys
 
 import dj_database_url
 
@@ -119,3 +120,8 @@ FROM_ADDRESS = "New North London Synagogue <office@nnls-masorti.org.uk>"
 from django.contrib import admin
 from djrill import DjrillAdminSite
 admin.site = DjrillAdminSite()
+
+# Test overrides
+
+if 'test' in sys.argv:
+    PASSWORD_HASHERS = ('django_plainpasswordhasher.PlainPasswordHasher', )
