@@ -111,10 +111,11 @@ admin.site.register(Volunteer, VolunteerAdmin)
 
 
 class DutyAdmin(admin.ModelAdmin):
-    list_display = ['id', 'activity', 'event', 'location', 'start_time',
-                    'end_time', 'multiple', 'unassigned_count',
+    list_display = ['id', 'event_is_active', 'activity', 'event', 'location',
+                    'start_time', 'end_time', 'multiple', 'unassigned_count',
                     'coordinator_note', 'details']
-    list_filter = ['activity', 'event', 'location', 'start_time']
+    list_filter = ['event__is_active', 'activity', 'event', 'location',
+                   'start_time']
     readonly_fields = ['unassigned_count']
     inlines = [AssignmentInline]
 admin.site.register(Duty, DutyAdmin)
@@ -192,9 +193,9 @@ class LocationAdmin(admin.ModelAdmin):
 admin.site.register(Location, LocationAdmin)
 
 
-def make_events_done(modeladmin, request, queryset):
-    queryset.update(is_done=True)
-make_events_done.short_description = "Mark event(s) as done"
+def make_events_not_active(modeladmin, request, queryset):
+    queryset.update(is_active=False)
+make_events_not_active.short_description = "Mark event(s) not active"
 
 
 def make_event_copies(modeladmin, request, queryset):
@@ -204,12 +205,12 @@ make_event_copies.short_description = "Copy event(s)"
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('date', 'name', 'is_done', 'web_summary_description',
+    list_display = ('date', 'name', 'is_active', 'web_summary_description',
                     'assignment_message_description')
     list_display_links = ('name',)
-    list_filter = ['is_done']
+    list_filter = ['is_active']
     inlines = [DutyInline]
-    actions = [make_event_copies, make_events_done]
+    actions = [make_event_copies, make_events_not_active]
 admin.site.register(Event, EventAdmin)
 
 

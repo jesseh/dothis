@@ -8,12 +8,12 @@ import factories as f
 
 class testEventActions(TestCase):
 
-    def testMakeEventsDone(self):
+    def testMakeEventsNotActive(self):
         f.EventFactory.create_batch(2)
         qs = Event.objects.all()
-        self.assertEqual(Event.objects.filter(is_done=True).count(), 0)
+        self.assertEqual(Event.objects.filter(is_active=True).count(), 0)
         make_events_done(None, None, qs)
-        self.assertEqual(Event.objects.filter(is_done=True).count(), 2)
+        self.assertEqual(Event.objects.filter(is_active=False).count(), 2)
 
     def testCopyWithNothing(self):
         qs = Event.objects.none()

@@ -361,7 +361,7 @@ class Event(models.Model):
     date = models.DateField(null=True, blank=True)
     web_summary_description = models.TextField(blank=True, default="")
     assignment_message_description = models.TextField(blank=True, default="")
-    is_done = models.BooleanField(default=False, db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
 
     class Meta:
         unique_together = (("name", "date"))
@@ -485,6 +485,10 @@ class Duty(models.Model):
              multiple=self.multiple,
              details=self.details,
              coordinator_note=self.coordinator_note).save()
+
+    def event_is_active(self):
+        return self.event and self.event.is_active
+    event_is_active.boolean = True
 
 
 class Assignment(TimeStampedModel):
