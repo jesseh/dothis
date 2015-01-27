@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from volunteering.admin import make_event_copies, make_events_done
+from volunteering.admin import make_event_copies, make_events_not_active
 from volunteering.models import Event
 
 import factories as f
@@ -11,8 +11,8 @@ class testEventActions(TestCase):
     def testMakeEventsNotActive(self):
         f.EventFactory.create_batch(2)
         qs = Event.objects.all()
-        self.assertEqual(Event.objects.filter(is_active=True).count(), 0)
-        make_events_done(None, None, qs)
+        self.assertEqual(Event.objects.filter(is_active=False).count(), 0)
+        make_events_not_active(None, None, qs)
         self.assertEqual(Event.objects.filter(is_active=False).count(), 2)
 
     def testCopyWithNothing(self):
