@@ -54,6 +54,7 @@ class Campaign(TimeStampedModel):
     def related_duties_q(self):
         q_objects = []
 
+        q_objects.append(Q(event__is_active=True))
         if self.events.exists():
             q_objects.append(Q(event__campaign=self))
         if self.locations.exists():
@@ -602,13 +603,12 @@ class Sendable(TimeStampedModel):
 
                 # if assignability does not matter or if the volunteer can be
                 # assigned to the duty
-                if (not t.assignable()) or \
-                        Duty.objects.assignable_to(volunteer). \
-                        filter(campaign_duties_q).exists():
-                    created = Sendable.create_or_ignore(t, volunteer, None,
-                                                        fixed_date)
-                    if created:
-                        new_sendables_count += 1
+                created = None
+                if (not t.assignable()) and Duty.objects.assignable_to(volunteer).filter(event__is_active=True).exists():
+                    created = Sendable.create_or_ignore(t, volunteer, None, fixed_date)
+                elif Duty.objects.assignable_to(volunteer).filter(campaign_duties_q).exists():
+                    created = Sendable.create_or_ignore(t, volunteer, None, fixed_date)
+                if created: new_sendables_count += 1
         return new_sendables_count
 
     @classmethod
