@@ -114,7 +114,7 @@ CSVIMPORT_MODELS = ['volunteering.Volunteer']
 SERVER_EMAIL = "office@nnls-masorti.org.uk"
 MANDRILL_API_KEY = os.environ.get('MANDRILL_API_KEY', "fake_mandril_api_key")
 EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
-FROM_ADDRESS = "New North London Synagogue <office@nnls-masorti.org.uk>"
+FROM_ADDRESS = "New North London Security Team <security@nnls-masorti.org.uk>"
 
 # Djrill is a Mandril connection. It must override the admin.site early on.
 from django.contrib import admin
