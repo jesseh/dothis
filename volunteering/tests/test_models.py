@@ -596,66 +596,22 @@ class TestSendable(TestCase):
         self.assertQuerysetEqual(all_qs, [v, v, v],
                                  transform=lambda s: s.volunteer)
 
-#     def testSendable_EventCollectSendablesAssignableButAlreadyAssigned(self):
-#         fix_to_date = date(2005, 5, 5)
-#         c = f.CampaignFactory()
-#         d = f.FullDutyFactory()
-#         c.events.add(d.event)
-#         v = f.VolunteerFactory()
-#         a = f.AttributeFactory()
-#         v.attributes.add(a)
-#         d.activity.attributes.add(a)
-#         f.AssignmentFactory(volunteer=v, duty=d)
-#         f.TriggerByEventFactory.create(
-#             fixed_date=fix_to_date,
-#             assignment_state=TriggerBase.ASSIGNABLE,
-#             campaign=c)
-#         result = Sendable.collect_from_fixed_triggers(fix_to_date)
-#         self.assertEqual(0, result)
-#         all_qs = Sendable.objects.all()
-#         self.assertQuerysetEqual(all_qs, [])
-
-#     def testSendable_EventCollectSndblsUnassignedButAssignedOnce(self):
-#         fix_to_date = date(2005, 5, 5)
-#         c = f.CampaignFactory()
-#         d, d2 = f.FullDutyFactory.create_batch(2)
-#         c.events.add(d.event)
-#         c.events.add(d2.event)
-#         v, v2, _ = f.VolunteerFactory.create_batch(3)
-#         a = f.AttributeFactory()
-#         v.attributes.add(a)
-#         v2.attributes.add(a)
-#         d.activity.attributes.add(a)
-#         d2.activity.attributes.add(a)
-
-#         f.AssignmentFactory(volunteer=v, duty=d)
-#         f.TriggerByEventFactory.create(
-#             fixed_date=fix_to_date,
-#             assignment_state=TriggerBase.UNASSIGNED,
-#             campaign=c)
-#         result = Sendable.collect_from_fixed_triggers(fix_to_date)
-#         self.assertEqual(1, result)
-#         all_qs = Sendable.objects.all()
-#         self.assertQuerysetEqual(all_qs, [v2],
-#                                  transform=lambda s: s.volunteer)
-
-#     def testSendable_EventCollectSendablesAssigned(self):
-#         fix_to_date = date(2005, 5, 5)
-#         c = f.CampaignFactory()
-#         d = f.FullDutyFactory()
-#         c.events.add(d.event)
-#         v = f.VolunteerFactory()
-#         a = f.AttributeFactory()
-#         v.attributes.add(a)
-#         d.activity.attributes.add(a)
-#         f.TriggerByEventFactory.create_batch(
-#             3, fixed_date=fix_to_date,
-#             assignment_state=TriggerBase.ASSIGNED,
-#             campaign=c)
-#         result = Sendable.collect_from_fixed_triggers(fix_to_date)
-#         self.assertEqual(0, result)
-#         all_qs = Sendable.objects.all()
-#         self.assertQuerysetEqual(all_qs, [])
+    def testSendable_EventCollectSendablesAssigned(self):
+        fix_to_date = date(2005, 5, 5)
+        c = f.CampaignFactory()
+        d = f.FullDutyFactory()
+        c.events.add(d.event)
+        v = f.VolunteerFactory()
+        a = f.AttributeFactory()
+        v.attributes.add(a)
+        d.activity.attributes.add(a)
+        f.TriggerByEventFactory.create_batch(
+            3, assignment_state=TriggerBase.ASSIGNED,
+            campaign=c)
+        result = Sendable.collect_from_fixed_triggers(fix_to_date)
+        self.assertEqual(0, result)
+        all_qs = Sendable.objects.all()
+        self.assertQuerysetEqual(all_qs, [])
 
 
 class TestTriggerByDate(TestCase):
