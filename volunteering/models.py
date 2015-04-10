@@ -637,6 +637,7 @@ class Sendable(TimeStampedModel):
         email_params = {
             'subject': message.rendered_subject(context_dict),
             'to': [self.volunteer.email_address],
+            'bcc': settings.BCC_ADDRESSES,
             'from_email': settings.FROM_ADDRESS,
         }
 
