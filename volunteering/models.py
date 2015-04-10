@@ -37,7 +37,8 @@ class Attribute(models.Model):
 class Campaign(TimeStampedModel):
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField()
-    events = models.ManyToManyField('Event', null=True, blank=True)
+    events = models.ManyToManyField('Event', null=True, blank=True,
+                                    limit_choices_to={'is_active': True})
     locations = models.ManyToManyField('Location', null=True, blank=True)
     activities = models.ManyToManyField('Activity', null=True, blank=True)
 
