@@ -604,11 +604,17 @@ class Sendable(TimeStampedModel):
                 # if assignability does not matter or if the volunteer can be
                 # assigned to the duty
                 created = None
-                if (not t.assignable()) and Duty.objects.assignable_to(volunteer).filter(event__is_active=True).exists():
-                    created = Sendable.create_or_ignore(t, volunteer, None, fixed_date)
-                elif Duty.objects.assignable_to(volunteer).filter(campaign_duties_q).exists():
-                    created = Sendable.create_or_ignore(t, volunteer, None, fixed_date)
-                if created: new_sendables_count += 1
+                if (not t.assignable()) \
+                    and Duty.objects.assignable_to(volunteer) \
+                            .filter(event__is_active=True).exists():
+                    created = Sendable.create_or_ignore(t, volunteer, None,
+                                                        fixed_date)
+                elif Duty.objects.assignable_to(volunteer) \
+                                 .filter(campaign_duties_q).exists():
+                    created = Sendable.create_or_ignore(t, volunteer, None,
+                                                        fixed_date)
+                if created:
+                    new_sendables_count += 1
         return new_sendables_count
 
     @classmethod
