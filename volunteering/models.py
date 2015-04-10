@@ -272,7 +272,7 @@ class Family(models.Model):
         return ", ".join(sorted(names))
 
 
-class Volunteer(models.Model):
+class Volunteer(TimeStampedModel):
     title = models.CharField(max_length=200, blank=True)
     first_name = models.CharField(max_length=200, blank=True, db_index=True)
     surname = models.CharField(max_length=200, db_index=True)
