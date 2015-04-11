@@ -16,25 +16,12 @@ A simple app to help get volunteers to commit to duties.
 
 ## Todo
 
-* Check if still assignable in assignment.
-* Limit the signups per roll and add error handling in the form.
-* Finish the email sending (send today, send when scheduled)
-* Set up the cron job
-* Put the real Mandrill api key in to Heroku.
+* Trigger by assignment.
 * Output reports.
-* Collapse the recipients list on the campaign pages using fieldsets.
-* Add a self-service flat on trigger and assignment to distinguish between who did the assignment.
 * Refactor the trigger collect code.
 * write test for send\_unsent
-* add html version of email
 * Write more assignable_to tests.
-* Add note to : I am so sorry I cannot help. I am deaf and not feeling confident to having to communicate with different people.http://nnls-coordinator.herokuapp.com/admin/volunteering/volunteer/1867/
 
-
-
-# Further Dev Ideas
-
-* a way to temporarily disable people
 
 
 ## Intro
