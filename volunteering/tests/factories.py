@@ -124,6 +124,15 @@ class TriggerByEventFactory(DjangoModelFactory):
     days_before = 0
 
 
+class TriggerByAssignmentFactory(DjangoModelFactory):
+    class Meta:
+        model = TriggerByAssignment
+
+    campaign = factory.SubFactory(CampaignFactory)
+    message = factory.SubFactory(MessageFactory)
+    days_after = 0
+
+
 class SendableFactory(DjangoModelFactory):
     class Meta:
         model = Sendable
