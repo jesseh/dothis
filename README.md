@@ -18,7 +18,6 @@ A simple app to help get volunteers to commit to duties.
 
 * Trigger by assignment.
 * Output reports.
-* Refactor the trigger collect code.
 * write test for send\_unsent
 * Write more assignable_to tests.
 
