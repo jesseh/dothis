@@ -493,11 +493,23 @@ class Duty(models.Model):
     event_is_active.boolean = True
 
 
+class AssignmentManager(models.Manager):
+    def to_send_for_duties(self, duties, trigger_id, trigger_content_type):
+        return super(AssignmentManager, self).get_queryset() \
+            .filter(duty__in=duties) \
+            .exclude(sendable__assignment_id=F('id'),
+                     sendable__volunteer=F('volunteer'),
+                     sendable__trigger_id=trigger_id,
+                     sendable__trigger_type=trigger_content_type)
+
+
 class Assignment(TimeStampedModel):
     volunteer = models.ForeignKey(Volunteer, db_index=True)
     duty = models.ForeignKey(Duty, db_index=True)
     assigned_location = models.ForeignKey(Location, null=True, blank=True,
                                           db_index=True)
+
+    objects = AssignmentManager()
 
     class Meta:
         unique_together = (("volunteer", "duty"),)
@@ -573,14 +585,8 @@ class Sendable(TimeStampedModel):
                 # event is in the future
                 event__date__gte=today)
 
-            assignments_to_send = Assignment.objects.filter(
-                duty__in=campaign_duties).exclude(
-                    sendable__assignment_id=F('id'),
-                    sendable__volunteer=F('volunteer'),
-                    sendable__trigger_id=t.id,
-                    sendable__trigger_type=trigger_content_type)
-
-            for assignment in assignments_to_send:
+            for assignment in Assignment.objects.to_send_for_duties(
+                    campaign_duties, t.id, trigger_content_type):
                 print("  Collecting assignment %s" % assignment)
 
                 # if assignability does not matter or if the volunteer can be
