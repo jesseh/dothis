@@ -1,5 +1,5 @@
 import unittest
-from datetime import date, time
+from datetime import date, time, timedelta
 
 from django.db import IntegrityError
 from django.test import TestCase
@@ -186,18 +186,27 @@ class TestCampaign(TestCase):
 
     def testDuties(self):
         campaign = f.CampaignFactory()
-        duty1 = f.FullDutyFactory()
-        duty2 = f.FullDutyFactory()
-        duty3 = f.FullDutyFactory()
-        duty4 = f.FullDutyFactory()
-        campaign.events.add(duty1.event)
-        campaign.events.add(duty2.event)
-        campaign.events.add(duty3.event)
-        campaign.events.add(duty4.event)
+        duties = f.FullDutyFactory.create_batch(4)
+        campaign.events.add(*[d.event for d in duties])
+        campaign = f.CampaignFactory()
 
         qs = campaign.duties().order_by('id')
-        expected = [duty1, duty2, duty3, duty4]
-        self.assertQuerysetEqual(qs, [repr(d) for d in expected])
+        self.assertQuerysetEqual(qs, [repr(d) for d in duties])
+
+    def testDutiesWithinTimespan(self):
+        campaign = f.CampaignFactory()
+        duties = f.FullDutyFactory.create_batch(4)
+        at_date = date(2000, 1, 1)
+        for i, d in enumerate(duties):
+            e = d.event
+            e.date = at_date + timedelta(i)
+            e.save()
+            campaign.events.add(e)
+
+        start = at_date + timedelta(1)
+        end = at_date + timedelta(2)
+        qs = campaign.duties_within_timespan(start, end).order_by('id')
+        self.assertQuerysetEqual(qs, [repr(d) for d in duties[1:3]])
 
     def testRecipientsViaAssignable(self):
         campaign = f.CampaignFactory()
