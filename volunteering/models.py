@@ -67,6 +67,10 @@ class Campaign(TimeStampedModel):
     def duties(self):
         return Duty.objects.filter(self.related_duties_q()).distinct()
 
+    def duties_within_timespan(self, start, end):
+            return self.duties().filter(event__date__gte=start) \
+                                .filter(event__date__lte=end)
+
     def volunteers_needed(self):
         return self.duties().aggregate(Sum('multiple'))['multiple__sum'] or 0
 
@@ -577,23 +581,16 @@ class Sendable(TimeStampedModel):
         for t in TriggerByEvent.objects.all():
             print("Collecting event trigger: %s" % t)
             applicable_event_date = as_of_date + timedelta(days=t.days_before)
-
             trigger_content_type = ContentType.objects.get_for_model(t)
-            campaign_duties = t.campaign.duties().filter(
-                # event is the before the applicable event date
-                event__date__lte=applicable_event_date).filter(
-                # event is in the future
-                event__date__gte=today)
+            campaign_duties = t.campaign.duties_within_timespan(
+                today, applicable_event_date)
+            assignments = Assignment.objects.to_send_for_duties(
+                campaign_duties, t.id, trigger_content_type)
 
-            for assignment in Assignment.objects.to_send_for_duties(
-                    campaign_duties, t.id, trigger_content_type):
+            for assignment in assignments:
                 print("  Collecting assignment %s" % assignment)
-
-                # if assignability does not matter or if the volunteer can be
-                # assigned to the duty
-                created = Sendable.create_or_ignore(t, assignment.volunteer,
-                                                    assignment, as_of_date)
-                if created:
+                if Sendable.create_or_ignore(t, assignment.volunteer,
+                                             assignment, as_of_date):
                     new_sendables_count += 1
         return new_sendables_count
 
@@ -621,10 +618,9 @@ class Sendable(TimeStampedModel):
         triggers = TriggerByDate.objects.triggered(fixed_date).distinct()
         for t in triggers:
             print("Collecting fixed date trigger: %s" % t)
-            # campaign_duties_q = t.campaign.related_duties_q()
+
             for volunteer in t.recipients():
                 print("  Collecting %s" % volunteer)
-
                 if Sendable._duty_and_trigger_has_to_send(t, volunteer):
                     if Sendable.create_or_ignore(t, volunteer, None,
                                                  fixed_date):
