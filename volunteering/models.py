@@ -592,30 +592,37 @@ class Sendable(TimeStampedModel):
         return new_sendables_count
 
     @classmethod
+    def _duty_and_trigger_has_to_send(cls, trigger, volunteer):
+        # if assignability does not matter or if the volunteer can be
+        # assigned to the duty
+        return (
+            (
+                (not trigger.assignable())
+                and Duty.objects.assignable_to(volunteer)
+                        .filter(event__is_active=True)
+                        .exists()
+            ) or (
+                Duty.objects.assignable_to(volunteer)
+                    .filter(trigger.campaign.related_duties_q())
+                    .exists()
+            )
+        )
+
+    @classmethod
     def collect_from_fixed_triggers(cls, fixed_date):
         new_sendables_count = 0
 
         triggers = TriggerByDate.objects.triggered(fixed_date).distinct()
         for t in triggers:
-            print("Collecting %s" % t)
-            campaign_duties_q = t.campaign.related_duties_q()
+            print("Collecting fixed date trigger: %s" % t)
+            # campaign_duties_q = t.campaign.related_duties_q()
             for volunteer in t.recipients():
                 print("  Collecting %s" % volunteer)
 
-                # if assignability does not matter or if the volunteer can be
-                # assigned to the duty
-                created = None
-                if (not t.assignable()) \
-                    and Duty.objects.assignable_to(volunteer) \
-                            .filter(event__is_active=True).exists():
-                    created = Sendable.create_or_ignore(t, volunteer, None,
-                                                        fixed_date)
-                elif Duty.objects.assignable_to(volunteer) \
-                                 .filter(campaign_duties_q).exists():
-                    created = Sendable.create_or_ignore(t, volunteer, None,
-                                                        fixed_date)
-                if created:
-                    new_sendables_count += 1
+                if Sendable._duty_and_trigger_has_to_send(t, volunteer):
+                    if Sendable.create_or_ignore(t, volunteer, None,
+                                                 fixed_date):
+                        new_sendables_count += 1
         return new_sendables_count
 
     @classmethod
