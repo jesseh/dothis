@@ -13,14 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         send_date = date.today()
-        self.stdout.write("Collecting and sending for %s" % send_date)
-
-        collected = models.Sendable.collect_from_fixed_triggers(send_date)
-        self.stdout.write("%s messages collected" % collected)
-
-        collected = models.Sendable.collect_from_event_only_assigned_triggers(
-            send_date)
-        self.stdout.write("%s messages collected" % collected)
-
+        self.stdout.write("Collecting for %s\n" % send_date)
+        models.Sendable.collect_all(send_date, self.stdout)
         sent = models.Sendable.send_unsent()
-        self.stdout.write("%s messages sent" % sent)
+        self.stdout.write("%s messages sent\n" % sent)

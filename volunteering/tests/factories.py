@@ -5,7 +5,7 @@ from factory.django import DjangoModelFactory
 from volunteering.models import (Volunteer, Family, Attribute, Duty, Activity,
                                  Location, Event, Assignment, Campaign,
                                  Message, TriggerByEvent, TriggerByDate,
-                                 Sendable)
+                                 TriggerByAssignment, Sendable)
 
 
 class AttributeFactory(DjangoModelFactory):

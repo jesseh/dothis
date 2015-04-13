@@ -200,7 +200,7 @@ class TriggerWithAssignmentStateMixin(models.Model):
                                             unassigned=self.unassigned())
 
 
-class TriggerQuerySet(models.QuerySet):
+class DateTriggerQuerySet(models.QuerySet):
     def triggered(self, trigger_date):
         q_fixed_date = Q(fixed_date=trigger_date)
 
@@ -248,7 +248,7 @@ class TriggerByDate(TriggerWithAssignmentStateMixin, TriggerBase):
         choices=TriggerBase.ASSIGNMENT_STATES,
         default=TriggerBase.ASSIGNED_AND_ASSIGNABLE)
 
-    objects = TriggerQuerySet.as_manager()
+    objects = DateTriggerQuerySet.as_manager()
 
 
 class Family(models.Model):
@@ -626,6 +626,43 @@ class Sendable(TimeStampedModel):
                                                  fixed_date):
                         new_sendables_count += 1
         return new_sendables_count
+
+    @classmethod
+    def collect_from_assignment(cls, fixed_date):
+        new_sendables_count = 0
+
+        triggers = TriggerByAssignment.objects.all()
+        for trigger in triggers:
+            on_date = fixed_date - timedelta(trigger.days_after)
+            for assignment in Assignment.objects.filter(
+                    duty__event__campaign=trigger.campaign
+            ).filter(created__gte=on_date, created__lt=on_date+timedelta(1)):
+                if Sendable.create_or_ignore(trigger, assignment.volunteer,
+                                             assignment, fixed_date):
+                    new_sendables_count += 1
+
+        return new_sendables_count
+
+    @classmethod
+    def collect_all(cls, fixed_date, my_stdout):
+        total = 0
+
+        my_stdout.write("Collecting fixed date triggers: ")
+        count = Sendable.collect_from_fixed_triggers(fixed_date)
+        my_stdout.write("%d\n" % count)
+        total += count
+
+        my_stdout.write("Collecting assignment triggers.")
+        count = Sendable.collect_from_assignment(fixed_date)
+        my_stdout.write("%d\n" % count)
+        total += count
+
+        my_stdout.write("Collecting event triggers.")
+        count = Sendable.collect_from_event_only_assigned_triggers(fixed_date)
+        my_stdout.write("%d\n" % count)
+        total += count
+
+        my_stdout.write("%s messages collected\n" % total)
 
     @classmethod
     def send_unsent(self):

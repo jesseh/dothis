@@ -1,5 +1,6 @@
 import unittest
-from datetime import date, time, timedelta
+from datetime import date, time, datetime, timedelta
+import pytz
 
 from django.db import IntegrityError
 from django.test import TestCase
@@ -8,7 +9,8 @@ import factories as f
 
 from volunteering.models import (Activity, Assignment, Attribute, Campaign,
                                  Duty, Event, Location, Sendable, TriggerBase,
-                                 TriggerByDate, Message, Volunteer)
+                                 TriggerByDate, TriggerByAssignment, Message,
+                                 Volunteer)
 
 
 class TestAttribute(TestCase):
@@ -689,6 +691,49 @@ class TestSendable(TestCase):
         all_qs = Sendable.objects.all()
         self.assertQuerysetEqual(all_qs, [])
 
+    def testCollectFromAssignment_NoneAssigned(self):
+        c, d, v, a, fix_to_date = self.setup_sendable_test()
+        result = Sendable.collect_from_assignment(fix_to_date)
+
+        self.assertEqual(0, result)
+        all_qs = Sendable.objects.all()
+        self.assertQuerysetEqual(all_qs, [])
+
+    def testCollectFromAssignment_OnlyAssignedOnRightDayNoOffset(self):
+        c, d, v, a, fix_to_date = self.setup_sendable_test()
+        v2, v3, v4 = f.VolunteerFactory.create_batch(3)
+        when = datetime.combine(fix_to_date, time(1, 0, 0, 0, pytz.utc))
+        f.AssignmentFactory(volunteer=v, duty=d, created=when - timedelta(1))
+        f.AssignmentFactory(volunteer=v2, duty=d, created=when)
+        f.AssignmentFactory(volunteer=v3, duty=d, created=when)
+        f.AssignmentFactory(volunteer=v4, duty=d, created=when + timedelta(1))
+        f.TriggerByAssignmentFactory.create(campaign=c)
+
+        result = Sendable.collect_from_assignment(fix_to_date)
+
+        self.assertEqual(2, result)
+        all_qs = Sendable.objects.all().order_by('id')
+        self.assertQuerysetEqual(all_qs, [v3, v2],
+                                 transform=lambda s: s.volunteer)
+
+    def testCollectFromAssignment_WithDaysBefore(self):
+        c, d, v, a, fix_to_date = self.setup_sendable_test()
+        v2, v3, v4 = f.VolunteerFactory.create_batch(3)
+        when = datetime.combine(fix_to_date, time(1, 0, 0, 0, pytz.utc))
+        f.AssignmentFactory(volunteer=v, duty=d, created=when)
+        f.AssignmentFactory(volunteer=v2, duty=d, created=when - timedelta(1))
+        f.AssignmentFactory(volunteer=v3, duty=d, created=when - timedelta(2))
+        f.AssignmentFactory(volunteer=v4, duty=d, created=when - timedelta(3))
+
+        f.TriggerByAssignmentFactory.create(campaign=c, days_after=2)
+
+        result = Sendable.collect_from_assignment(fix_to_date)
+
+        self.assertEqual(1, result)
+        all_qs = Sendable.objects.all().order_by('id')
+        self.assertQuerysetEqual(all_qs, [v3],
+                                 transform=lambda s: s.volunteer)
+
 
 class TestTriggerByDate(TestCase):
     def testTriggerByDateFactory(self):
@@ -754,6 +799,11 @@ class TestTriggerByDate(TestCase):
             assignment_state=TriggerBase.ASSIGNABLE, campaign=c)
         result = TriggerByDate.objects.triggered(fix_to_date).order_by('id')
         self.assertQuerysetEqual(result, [repr(t) for t in triggers])
+
+class TestTriggerByAssignment(TestCase):
+    def testTriggerByAssignmentFactory(self):
+        t = f.TriggerByAssignmentFactory()
+        self.assertTrue(TriggerByAssignment.objects.filter(id=t.id).exists())
 
 
 class TestMessage(TestCase):
