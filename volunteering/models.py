@@ -1,6 +1,7 @@
 import logging
 import random
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime, time
+import pytz
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -634,9 +635,11 @@ class Sendable(TimeStampedModel):
         triggers = TriggerByAssignment.objects.all()
         for trigger in triggers:
             on_date = fixed_date - timedelta(trigger.days_after)
+            on_datetime = datetime.combine(on_date, time(0, 0, 0, 0, pytz.utc))
             for assignment in Assignment.objects.filter(
                     duty__event__campaign=trigger.campaign
-            ).filter(created__gte=on_date, created__lt=on_date+timedelta(1)):
+            ).filter(created__gte=on_datetime,
+                     created__lt=on_datetime+timedelta(1)):
                 if Sendable.create_or_ignore(trigger, assignment.volunteer,
                                              assignment, fixed_date):
                     new_sendables_count += 1
