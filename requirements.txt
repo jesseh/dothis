@@ -32,3 +32,4 @@ djrill==1.1.1
 django-import-export==0.2.3
 twilio==3.6.7
 pytz==2015.2
+django-grappelli==2.6.4

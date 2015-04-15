@@ -7,6 +7,7 @@ urlpatterns = patterns(
     '',
     url(r'^$', TemplateView.as_view(
         template_name='dothis/home.html'), name='home'),
+    url(r'^grappelli/', include('grappelli.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^volunteering/', include('volunteering.urls',
                                    namespace='volunteering')),

@@ -30,6 +30,8 @@ TEMPLATE_DEBUG = True
 # Application definition
 
 INSTALLED_APPS = (
+    'grappelli',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -57,6 +59,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+)
+
+TEMPLATE_CONTEXT_PROCESSORs = (
+    "django.core.context_processors.request",
 )
 
 ROOT_URLCONF = 'dothis.urls'
@@ -116,6 +122,9 @@ MANDRILL_API_KEY = os.environ.get('MANDRILL_API_KEY', "fake_mandril_api_key")
 EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
 FROM_ADDRESS = "New North London Security Team <security@nnls-masorti.org.uk>"
 BCC_ADDRESSES = [FROM_ADDRESS, "a@heitler.com"]
+
+# Grappelli config
+GRAPPELLI_ADMIN_TITLE = 'NNLS Volunteer Coordinator'
 
 # Djrill is a Mandril connection. It must override the admin.site early on.
 from django.contrib import admin
