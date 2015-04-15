@@ -193,24 +193,40 @@ class LocationAdmin(admin.ModelAdmin):
 admin.site.register(Location, LocationAdmin)
 
 
-def make_events_not_active(modeladmin, request, queryset):
+def activate_events(modeladmin, request, queryset):
+    queryset.update(is_active=True)
+activate_events.short_description = "Activate events"
+
+
+def deactivate_events(modeladmin, request, queryset):
     queryset.update(is_active=False)
-make_events_not_active.short_description = "Mark event(s) not active"
+deactivate_events.short_description = "Deactivate events"
 
 
-def make_event_copies(modeladmin, request, queryset):
+def archive_events(modeladmin, request, queryset):
+    queryset.update(is_archived=True)
+archive_events.short_description = "Archive events"
+
+
+def unarchive_events(modeladmin, request, queryset):
+    queryset.update(is_archived=False)
+unarchive_events.short_description = "Unarchive events"
+
+
+def copy_events(modeladmin, request, queryset):
     for event in queryset:
         event.create_deep_copy()
-make_event_copies.short_description = "Copy event(s)"
+copy_events.short_description = "Copy events"
 
 
 class EventAdmin(admin.ModelAdmin):
     list_display = ('date', 'name', 'is_active', 'web_summary_description',
                     'assignment_message_description')
     list_display_links = ('name',)
-    list_filter = ['is_active']
+    list_filter = ['is_archived', 'is_active']
     inlines = [DutyInline]
-    actions = [make_event_copies, make_events_not_active]
+    actions = [copy_events, activate_events, deactivate_events, archive_events,
+               unarchive_events]
 admin.site.register(Event, EventAdmin)
 
 

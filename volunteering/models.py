@@ -39,7 +39,7 @@ class Campaign(TimeStampedModel):
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField()
     events = models.ManyToManyField('Event', null=True, blank=True,
-                                    limit_choices_to={'is_active': True})
+                                    limit_choices_to={'is_archived': False})
     locations = models.ManyToManyField('Location', null=True, blank=True)
     activities = models.ManyToManyField('Activity', null=True, blank=True)
 
@@ -358,7 +358,11 @@ class Event(models.Model):
     date = models.DateField(null=True, blank=True)
     web_summary_description = models.TextField(blank=True, default="")
     assignment_message_description = models.TextField(blank=True, default="")
-    is_active = models.BooleanField(default=True, db_index=True)
+    is_active = models.BooleanField(
+        default=True, db_index=True, help_text="Not available to volunteers.")
+    is_archived = models.BooleanField(
+        default=False, db_index=True,
+        help_text="Exclude from future campaigns.")
 
     class Meta:
         unique_together = (("name", "date"))

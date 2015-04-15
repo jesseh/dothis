@@ -16,10 +16,13 @@ A simple app to help get volunteers to commit to duties.
 
 ## Todo
 
-* Trigger by assignment.
+* Action to activate events.
 * Output reports.
 * write test for send\_unsent
-* Write more assignable_to tests.
+* Write more assignable\_to tests.
+* Event copies should start as inactive.
+* Create action to make events active.
+* Make campaigns archivable
 
 
 
