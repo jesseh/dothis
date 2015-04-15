@@ -129,7 +129,6 @@ class DutyAdmin(admin.ModelAdmin):
                     'coordinator_note', 'details']
     list_filter = ['event__is_active', 'activity', 'event', 'location',
                    'start_time']
-    change_list_template = "admin/change_list_filter_sidebar.html"
     readonly_fields = ['unassigned_count']
     inlines = [AssignmentInline]
 admin.site.register(Duty, DutyAdmin)
