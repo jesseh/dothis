@@ -1,6 +1,7 @@
-import unittest
 from datetime import date, time, datetime, timedelta
 import pytz
+from sys import stdout
+import unittest
 
 from django.db import IntegrityError
 from django.test import TestCase
@@ -135,45 +136,53 @@ class TestDuty(TestCase):
                  start_time=d.start_time, end_time=d.end_time).save()
 
     def testOneOnTodayIsAssignable(self):
+        volunteer = f.VolunteerFactory()
         past_event = f.EventFactory(date=date(2111, 1, 1))
         f.DutyFactory.create(event=past_event)
-        self.assertEqual(1, Duty.objects.assignable(
+        self.assertEqual(1, Duty.objects.assignable_to(volunteer,
             as_of_date=date(2111, 1, 1)).count())
 
     def testOneInThePastIsNotAssignable(self):
+        volunteer = f.VolunteerFactory()
         past_event = f.EventFactory(date=date(2000, 1, 1))
         f.DutyFactory.create(event=past_event)
-        self.assertEqual(0, Duty.objects.assignable(
+        self.assertEqual(0, Duty.objects.assignable_to(volunteer,
             as_of_date=date(2000, 1, 2)).count())
 
     def testOneOfOneIsAssignable(self):
+        volunteer = f.VolunteerFactory()
         f.DutyFactory.create()
-        self.assertEqual(1, Duty.objects.assignable().count())
+        self.assertEqual(1, Duty.objects.assignable_to(volunteer).count())
 
     def testOneOfOneIsAssignableWhenMultiple2And1Assignment(self):
+        volunteer = f.VolunteerFactory()
         duty = f.DutyFactory.create(multiple=2)
         f.AssignmentFactory(duty=duty)
-        self.assertEqual(1, Duty.objects.assignable().count())
+        self.assertEqual(1, Duty.objects.assignable_to(volunteer).count())
 
     def testNoneIsAssignableWhenMultiple2And2Assignments(self):
+        volunteer = f.VolunteerFactory()
         duty = f.DutyFactory.create(multiple=2)
         f.AssignmentFactory(duty=duty)
         f.AssignmentFactory(duty=duty)
-        self.assertEqual(0, Duty.objects.assignable().count())
+        self.assertEqual(0, Duty.objects.assignable_to(volunteer).count())
 
     def testNoneIsAssignable(self):
+        volunteer = f.VolunteerFactory()
         f.DutyFactory.create(multiple=0)
-        self.assertEqual(0, Duty.objects.assignable().count())
+        self.assertEqual(0, Duty.objects.assignable_to(volunteer).count())
 
     def testOneIsAlreadyAssigned(self):
+        volunteer = f.VolunteerFactory()
         d = f.DutyFactory.create(multiple=1)
         f.AssignmentFactory(duty=d)
-        self.assertEqual(0, Duty.objects.assignable().count())
+        self.assertEqual(0, Duty.objects.assignable_to(volunteer).count())
 
     def testOneIsAlreadyAssignedOfTwo(self):
+        volunteer = f.VolunteerFactory()
         d = f.DutyFactory.create(multiple=2)
         f.AssignmentFactory(duty=d)
-        self.assertEqual(1, Duty.objects.assignable().count())
+        self.assertEqual(1, Duty.objects.assignable_to(volunteer).count())
 
     def testOneDutyIsAssignableToVolunteer_NoAttributes(self):
         f.DutyFactory.create()
@@ -733,6 +742,26 @@ class TestSendable(TestCase):
         all_qs = Sendable.objects.all().order_by('id')
         self.assertQuerysetEqual(all_qs, [v3],
                                  transform=lambda s: s.volunteer)
+
+    def testCollectAll_OneToCollectFromEachTrigger(self):
+        c, d, v, a, fix_to_date = self.setup_sendable_test()
+        fix_to_datetime = datetime.combine(fix_to_date, time(1, 0, 0, 0, pytz.utc))
+
+        f.TriggerByAssignmentFactory.create(campaign=c, days_after=0)
+        f.TriggerByEventFactory.create(assignment_state=TriggerBase.ASSIGNED,
+                                       campaign=c)
+        f.TriggerByDateFactory.create(fixed_date=fix_to_date,
+            assignment_state=TriggerBase.ASSIGNED, campaign=c)
+
+        f.AssignmentFactory(volunteer=v, duty=d, created=fix_to_datetime)
+
+        result = Sendable.collect_all(fix_to_date, stdout)
+
+        self.assertEqual(3, result)
+        all_qs = Sendable.objects.all().order_by('id')
+        self.assertQuerysetEqual(all_qs, [v, v, v],
+                                 transform=lambda s: s.volunteer)
+
 
 
 class TestTriggerByDate(TestCase):

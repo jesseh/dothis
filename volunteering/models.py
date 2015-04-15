@@ -57,12 +57,16 @@ class Campaign(TimeStampedModel):
         q_objects = []
 
         q_objects.append(Q(event__is_active=True))
+
         if self.events.exists():
             q_objects.append(Q(event__campaign=self))
+
         if self.locations.exists():
             q_objects.append(Q(location__campaign=self))
+
         if self.activities.exists():
             q_objects.append(Q(activity__campaign=self))
+
         return Q(*q_objects)
 
     def duties(self):
@@ -92,7 +96,8 @@ class Campaign(TimeStampedModel):
         assignable_q = Q(attributes__activity__duty__in=duties)
 
         if unassigned and (assigned or assignable):
-            raise ValueError("At least assigned or assignable must be true.")
+            raise ValueError("If unassigned, then neither assigned \
+                             nor assignable should be true.")
         elif unassigned:
             q_def = assignable_q & ~assigned_q
         elif assigned and assignable:
@@ -184,21 +189,22 @@ class TriggerWithAssignmentStateMixin(models.Model):
     class Meta:
         abstract = True
 
-    def assigned(self):
+    def _for_assigned(self):
         return self.assignment_state == TriggerBase.ASSIGNED or \
             self.assignment_state == TriggerBase.ASSIGNED_AND_ASSIGNABLE
 
-    def assignable(self):
+    def _for_assignable(self):
         return self.assignment_state == TriggerBase.ASSIGNABLE or \
             self.assignment_state == TriggerBase.ASSIGNED_AND_ASSIGNABLE
 
-    def unassigned(self):
+    def _for_unassigned(self):
         return self.assignment_state == TriggerBase.UNASSIGNED
 
     def recipients(self):
-            return self.campaign.recipients(assigned=self.assigned(),
-                                            assignable=self.assignable(),
-                                            unassigned=self.unassigned())
+            return self.campaign.recipients(
+                assigned=self._for_assigned(),
+                assignable=self._for_assignable(),
+                unassigned=self._for_unassigned())
 
 
 class DateTriggerQuerySet(models.QuerySet):
@@ -415,24 +421,54 @@ class Location(models.Model):
         return self.name
 
 
-class AssignableDutyManager(models.Manager):
-    def assignable(self, as_of_date=None):
+class DutyManager(models.Manager):
+
+    def _in_campaign_q(self, campaign):
+        q_objects = []
+
+        q_objects.append(Q(event__is_active=True))
+
+        if campaign.events.exists():
+            q_objects.append(Q(event__campaign=campaign))
+
+        if campaign.locations.exists():
+            q_objects.append(Q(location__campaign=campaign))
+
+        if campaign.activities.exists():
+            q_objects.append(Q(activity__campaign=campaign))
+
+        return Q(*q_objects)
+
+    def assignable_to(self, volunteer, as_of_date=None):
         if as_of_date is None:
             as_of_date = date.today()
-        return super(AssignableDutyManager, self). \
-            get_queryset(). \
-            annotate(num_assignments=Count('assignments')). \
-            filter(num_assignments__lt=F('multiple')). \
-            filter(multiple__gt=0). \
-            filter(Q(event__date__gte=as_of_date) |
-                   Q(event__date__isnull=True))
 
-    def assignable_to(self, volunteer):
-        return self.assignable(). \
-            filter(
-                Q(activity__attributes__volunteer=volunteer) |
-                Q(activity__attributes__isnull=True)
-            ).exclude(assignment__volunteer=volunteer)
+        return (
+            super(DutyManager, self).
+            get_queryset().
+            annotate(num_assignments=Count('assignments')).
+            filter(num_assignments__lt=F('multiple')).
+            filter(multiple__gt=0).
+            filter(Q(event__is_active=True) |
+                   Q(event__is_active__isnull=True)).
+            filter(Q(event__date__gte=as_of_date) |
+                   Q(event__date__isnull=True)).
+            filter(Q(activity__attributes__volunteer=volunteer) |
+                   Q(activity__attributes__isnull=True)).
+            exclude(assignment__volunteer=volunteer)
+        )
+
+    def assigned_to(self, volunteer):
+        return super(DutyManager, self).get_queryset(). \
+            filter(assignment__volunteer=volunteer)
+
+    def assignable_to_in_campaign(self, campaign, volunteer, as_of_date=None):
+        return self.assignable_to(volunteer, as_of_date). \
+            filter(self._in_campaign_q(campaign))
+
+    def assigned_to_in_campaign(self, campaign, volunteer, as_of_date=None):
+        return self.assigned_to(volunteer). \
+            filter(self._in_campaign_q(campaign))
 
 
 class Duty(models.Model):
@@ -451,7 +487,7 @@ class Duty(models.Model):
     details = models.TextField(blank=True)
     coordinator_note = models.TextField(blank=True)
 
-    objects = AssignableDutyManager()
+    objects = DutyManager()
 
     class Meta:
         unique_together = (("activity", "event", "location", "start_time",
@@ -597,20 +633,36 @@ class Sendable(TimeStampedModel):
 
     @classmethod
     def _duty_and_trigger_has_to_send(cls, trigger, volunteer):
-        # if assignability does not matter or if the volunteer can be
-        # assigned to the duty
-        return (
-            (
-                (not trigger.assignable())
-                and Duty.objects.assignable_to(volunteer)
-                        .filter(event__is_active=True)
-                        .exists()
-            ) or (
-                Duty.objects.assignable_to(volunteer)
-                    .filter(trigger.campaign.related_duties_q())
-                    .exists()
+        campaign = trigger.campaign
+        if trigger.assignment_state == TriggerBase.ASSIGNED:
+            return (Duty.
+                    objects.assigned_to_in_campaign(campaign, volunteer).
+                    exists())
+        elif trigger.assignment_state == TriggerBase.ASSIGNABLE:
+            return (Duty.objects.
+                    assignable_to_in_campaign(campaign, volunteer).
+                    exists())
+        elif trigger.assignment_state == TriggerBase.ASSIGNED_AND_ASSIGNABLE:
+            return (Duty.objects.assigned_to_in_campaign(campaign, volunteer).
+                    exists()
+                    or
+                    Duty.
+                    objects.assignable_to_in_campaign(campaign, volunteer).
+                    exists()
+                    )
+        elif trigger.assignment_state == TriggerBase.UNASSIGNED:
+            return (
+                (not Duty.objects.
+                    assigned_to_in_campaign(campaign, volunteer).
+                    exists())
+                and
+                Duty.objects.
+                assignable_to_in_campaign(campaign, volunteer).
+                exists()
             )
-        )
+        else:
+            raise ValueError("Trigger assignment state \
+                             not handled by Sendable.")
 
     @classmethod
     def collect_from_fixed_triggers(cls, fixed_date):
@@ -650,22 +702,20 @@ class Sendable(TimeStampedModel):
     def collect_all(cls, fixed_date, my_stdout):
         total = 0
 
-        my_stdout.write("Collecting fixed date triggers: ")
         count = Sendable.collect_from_fixed_triggers(fixed_date)
-        my_stdout.write("%d\n" % count)
+        my_stdout.write("Collected fixed date triggers: %d\n" % count)
         total += count
 
-        my_stdout.write("Collecting assignment triggers.")
         count = Sendable.collect_from_assignment(fixed_date)
-        my_stdout.write("%d\n" % count)
+        my_stdout.write("Collected assignment triggers: %d\n" % count)
         total += count
 
-        my_stdout.write("Collecting event triggers.")
         count = Sendable.collect_from_event_only_assigned_triggers(fixed_date)
-        my_stdout.write("%d\n" % count)
+        my_stdout.write("Collected event triggers: %d\n" % count)
         total += count
 
         my_stdout.write("%s messages collected\n" % total)
+        return total
 
     @classmethod
     def send_unsent(self):
