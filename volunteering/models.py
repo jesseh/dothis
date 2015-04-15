@@ -410,11 +410,9 @@ class DutyManager(models.Manager):
     def _in_campaign_q(self, campaign):
         q_objects = []
 
-        q_objects.append(Q(event__is_active=True) |
-                         Q(event__is_active__isnull=True))
-
         if campaign.events.exists():
             q_objects.append(Q(event__campaign=campaign))
+            q_objects.append(Q(event__is_active=True))
 
         if campaign.locations.exists():
             q_objects.append(Q(location__campaign=campaign))
