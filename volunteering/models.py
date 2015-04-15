@@ -53,24 +53,8 @@ class Campaign(TimeStampedModel):
         self.status = ActivatorModel.INACTIVE_STATUS
         self.deactivate_date = datetime_now()
 
-    def related_duties_q(self):
-        q_objects = []
-
-        q_objects.append(Q(event__is_active=True))
-
-        if self.events.exists():
-            q_objects.append(Q(event__campaign=self))
-
-        if self.locations.exists():
-            q_objects.append(Q(location__campaign=self))
-
-        if self.activities.exists():
-            q_objects.append(Q(activity__campaign=self))
-
-        return Q(*q_objects)
-
     def duties(self):
-        return Duty.objects.filter(self.related_duties_q()).distinct()
+        return Duty.objects.in_campaign(self).distinct()
 
     def duties_within_timespan(self, start, end):
             return self.duties().filter(event__date__gte=start) \
@@ -466,8 +450,12 @@ class DutyManager(models.Manager):
         return self.assignable_to(volunteer, as_of_date). \
             filter(self._in_campaign_q(campaign))
 
-    def assigned_to_in_campaign(self, campaign, volunteer, as_of_date=None):
+    def assigned_to_in_campaign(self, campaign, volunteer):
         return self.assigned_to(volunteer). \
+            filter(self._in_campaign_q(campaign))
+
+    def in_campaign(self, campaign):
+        return super(DutyManager, self).get_queryset(). \
             filter(self._in_campaign_q(campaign))
 
 
