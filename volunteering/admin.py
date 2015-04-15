@@ -101,15 +101,18 @@ admin.site.register(Campaign, CampaignAdmin)
 
 
 class VolunteerAdmin(admin.ModelAdmin):
-    fields = (('family', 'external_id', 'last_summary_view',),
-              ('title', 'first_name', 'surname', 'dear_name'),
-              ('email_address', 'home_phone', 'mobile_phone'),
-              'note', 'temporary_change', 'attributes')
+    fields = ('title', 'first_name', 'surname', 'family', 'dear_name',
+        'email_address', 'home_phone', 'mobile_phone', 'external_id',
+        'last_summary_view', 'temporary_change', 'note', 'attributes')
     list_display = ['first_name', 'surname', 'title',
                     'family_link', 'email_address', 'home_phone',
                     'mobile_phone', 'attributes_list', 'temporary_change',
                     'last_summary_view']
     readonly_fields = ['attributes_list', 'last_summary_view']
+    raw_id_fields = ['family']
+    related_lookup_fields = {
+        'fk': ['family'],
+    }
     search_fields = ['slug', 'first_name', 'surname', 'family__external_id',
                      'external_id']
     list_filter = ['attributes', 'temporary_change', 'last_summary_view']

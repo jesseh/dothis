@@ -267,6 +267,9 @@ class Family(models.Model):
         names = [v.name() for v in self.volunteer_set.all()]
         return ", ".join(sorted(names))
 
+    def related_label(self):
+        return u"%s (%s)" % (self.names(), self.external_id)
+
 
 class Volunteer(TimeStampedModel):
     title = models.CharField(max_length=200, blank=True)
