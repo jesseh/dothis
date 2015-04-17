@@ -115,12 +115,28 @@ class VolunteerAdmin(admin.ModelAdmin):
     }
     search_fields = ['slug', 'first_name', 'surname', 'family__external_id',
                      'external_id']
-    list_filter = ['attributes', 'temporary_change', 'last_summary_view']
+    list_filter = ['attributes', 'temporary_change', 'last_summary_view',
+                   'attributes__activity', 'assignment__duty']
     change_list_template = "admin/change_list_filter_sidebar.html"
     filter_horizontal = ['attributes']
     inlines = [AssignmentInline]
     date_hierarchy = 'last_summary_view'
 admin.site.register(Volunteer, VolunteerAdmin)
+
+
+class VolunteerAdded(Volunteer):
+    class Meta:
+        proxy = True
+        verbose_name_plural = "Recently added volunteers"
+
+
+class VolunteerAddedAdmin(VolunteerAdmin):
+    list_display = ['created', 'first_name', 'surname', 'title',
+                    'family_link', 'email_address', 'home_phone',
+                    'mobile_phone', 'attributes_list', 'temporary_change',]
+    ordering = ('-created',)
+    date_hierarchy = None
+admin.site.register(VolunteerAdded, VolunteerAddedAdmin)
 
 
 class DutyAdmin(admin.ModelAdmin):
