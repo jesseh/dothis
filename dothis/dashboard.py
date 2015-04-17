@@ -26,13 +26,20 @@ class CustomIndexDashboard(Dashboard):
             column=1,
             collapsible=False,
             children=[
-                ['Events (excluding archived)', 'volunteering/event/?is_archived__exact=0', False],
-                ['Duties for quick updating', 'volunteering/dutyeditable/', False],
-                ['Volunteers with temporary changes', 'volunteering/volunteer/?temporary_change__exact=1', False],
-                ['Recently added volunteers', 'volunteering/volunteeradded/', False],
-                ['Security supervisors', 'volunteering/volunteer/?attributes__id__exact=1', False],
-                ['Security-able volunteers', 'volunteering/volunteer/?attributes__id__exact=2', False],
-                ['Steward-able volunteers', 'volunteering/volunteer/?attributes__id__exact=3', False],
+                ['Events (excluding archived)',
+                 'volunteering/event/?is_archived__exact=0', False],
+                ['Duties for quick updating',
+                 'volunteering/dutyeditable/', False],
+                ['Volunteers with temporary changes',
+                 'volunteering/volunteer/?temporary_change__exact=1', False],
+                ['Recently added volunteers',
+                 'volunteering/volunteeradded/', False],
+                ['Security supervisors',
+                 'volunteering/volunteer/?attributes__id__exact=1', False],
+                ['Security-able volunteers',
+                 'volunteering/volunteer/?attributes__id__exact=2', False],
+                ['Steward-able volunteers',
+                 'volunteering/volunteer/?attributes__id__exact=3', False],
             ]
         ))
 
