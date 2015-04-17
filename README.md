@@ -17,6 +17,7 @@ A simple app to help get volunteers to commit to duties.
 ## Todo
 
 * Action to activate events.
+* Pluralize the model name for familys
 * Output reports.
 * write test for send\_unsent
 * Write more assignable\_to tests.
