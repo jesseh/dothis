@@ -94,6 +94,21 @@ class TestVolunteer(TestCase):
             volunteer.family_link(),
             '<a href="/admin/volunteering/family/\d*/">FM\d*</a>')
 
+    def testContactMethods_none(self):
+        volunteer = f.VolunteerFactory(home_phone="", mobile_phone="",
+                                       email_address="")
+        self.assertEqual([], volunteer.contact_methods())
+
+    def testContactMethods_all(self):
+        volunteer = f.VolunteerFactory(mobile_phone='123', home_phone='456',
+                                       email_address='a@b.c')
+        self.assertEqual(['home: 456', 'mobile: 123', 'a@b.c'], volunteer.contact_methods())
+
+    def testContactMethods_only_two(self):
+        volunteer = f.VolunteerFactory(home_phone='456', mobile_phone="",
+                                       email_address='a@b.c')
+        self.assertEqual(['home: 456', 'a@b.c'], volunteer.contact_methods())
+
     def testHasClaimed_IsFalseWhenFalse(self):
         volunteer = f.VolunteerFactory()
         duty = f.DutyFactory()

@@ -327,6 +327,16 @@ class Volunteer(TimeStampedModel):
     family_link.allow_tags = True
     family_link.short_description = "Family"
 
+    def contact_methods(self):
+        methods = []
+        if self.home_phone != "":
+            methods.append("home: %s" % self.home_phone)
+        if self.mobile_phone != "":
+            methods.append("mobile: %s" % self.mobile_phone)
+        if self.email_address != "":
+            methods.append(self.email_address)
+        return methods
+
     def generate_slug(self):
         length = SLUG_LENGTH + 1
         while True:
@@ -382,6 +392,10 @@ class Event(models.Model):
         copy.save()
         for duty in self.duty_set.all():
             duty.copy_for_event(copy)
+
+    def get_absolute_url(self):
+        return reverse('volunteering:event_report',
+                       kwargs={'event_id': self.id})
 
 
 class Activity(models.Model):
