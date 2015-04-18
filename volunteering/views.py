@@ -6,9 +6,11 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 from volunteering.models import (Assignment, Duty, Volunteer, Family,
-                                 Attribute)
+                                 Attribute, Event)
 
 
 def importer(request):
@@ -103,3 +105,21 @@ class AssignmentView(TemplateView):
 
         Assignment.objects.create(volunteer=volunteer, duty=duty)
         return redirect(request.path, permanent=False)
+
+
+class EventReportView(TemplateView):
+
+    template_name = 'volunteering/event_report.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(EventReportView, self).get_context_data(**kwargs)
+
+        event = Event.objects.get(id=kwargs['event_id'])
+
+        context['event'] = event
+        context['generated_datetime'] = datetime.now()
+        return context
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(EventReportView, self).dispatch(*args, **kwargs)

@@ -1,0 +1,55 @@
+{% load staticfiles %}
+
+{% block css %}
+{% endblock css %}
+
+{% block base_body %}
+<div>
+    <div>
+        <h1>{{ event.name }} on {{ event.date }}</h1>
+        <p>Event report as of {{ generated_datetime }}</p>
+
+    </div>
+</div>
+<br>
+
+{% for duty in event.duty_set.all %}
+<div>
+    <h2>{{ duty.activity }} </h2>
+    <div>
+        Where: {{ duty.location }}<br>
+        When: {{ duty.times_string }}<br>
+        {% if duty.unassigned_count == 0 %}
+        All {{ duty.assignment_set.count }} volunteers assigned
+        {% else %}
+        {{ duty.assignment_set.count }} volunteers assigned, <b>, {{ duty.unassigned_count }} more needed.<b><br>
+        {% endif %}
+    </div>
+{% if duty.details %}<b>Details:</b> {{ duty.details }}{% endif %}
+
+{% if duty.coordinator_note %}<b>Coordinator note:</b> {{ duty.coordinator_note|safe }} {% endif %}
+
+</div>
+
+<div>
+    <ul>
+    {% for assignment in duty.assignment_set.all %}
+        <li>
+        {% with volunteer=assignment.volunteer %}
+            <b>{{ volunteer.name }}</b>
+            {% if assignment.assigned_location %}
+            (assigned to {{ assignment.assigned_location }})
+            {% endif %}
+            {% if volunteer.home_phone %}h: {{ volunteer.home_phone }} {% endif %}
+            {% if volunteer.mobile_phone %}m: {{ volunteer.mobile_phone }} {% endif %}
+            {% if volunteer.email_address %}@: {{ volunteer.email_address }} {% endif %}
+        {% endwith %}
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+<hr>
+<br>
+{% endfor %}
+
+{% endblock base_body %}

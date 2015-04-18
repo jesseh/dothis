@@ -189,6 +189,13 @@ class TestDuty(TestCase):
         v = f.VolunteerFactory()
         self.assertEqual(1, Duty.objects.assignable_to(v).count())
 
+    def testAssignmentList(self):
+        volunteers = f.VolunteerFactory.create_batch(3)
+        d = f.DutyFactory.create(multiple=3)
+        for v in volunteers:
+            f.AssignmentFactory(duty=d, volunteer=v)
+        self.assertEqual(volunteers, d.assigned_volunteers())
+
 
 class TestCampaign(TestCase):
     def testHasSlug(self):

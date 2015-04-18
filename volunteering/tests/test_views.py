@@ -2,6 +2,7 @@ from datetime import date
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 import factories as f
 
@@ -33,7 +34,7 @@ class testSummaryView(TestCase):
         self.assertTrue(d1 < d2)
 
     def testSummaryContentDoesNotIncludePastActiveDuties(self):
-        past_event = f.EventFactory(date=date(2000,1,1))
+        past_event = f.EventFactory(date=date(2000, 1, 1))
         self.d = f.DutyFactory.create(
             event=past_event, location=self.l, activity=self.a)
         response = self.client.get(self.url)
@@ -127,3 +128,19 @@ class testAssignmentView(TestCase):
 
     def testNoPermissionToSeeAssignmentUnlessDutyIsAssignableOrAssigned(self):
         pass
+
+
+class testEventReportView(TestCase):
+    def setUp(self):
+        self.event = f.EventFactory.create()
+        self.url = reverse('volunteering:event_report', kwargs={'event_id':
+                                                                self.event.id})
+
+    def testGet_must_be_logged_in(self):
+        response = self.client.get(self.url)
+        self.assertEqual(302, response.status_code)
+        User.objects.create_superuser('testuser', 'testuser@test.com',
+                                      'testpw')
+        self.client.login(username='testuser', password='testpw')
+        response = self.client.get(self.url)
+        self.assertEqual(200, response.status_code)

@@ -510,6 +510,9 @@ class Duty(models.Model):
         else:
             return ''
 
+    def assigned_volunteers(self):
+        return list(Volunteer.objects.filter(assignment__duty=self))
+
     def unassigned_count(self):
         return self.multiple - self.assignment_set.count()
 
