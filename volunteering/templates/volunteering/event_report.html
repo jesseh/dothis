@@ -22,10 +22,10 @@
         {% if duty.unassigned_count == 0 %}
         All {{ duty.assignment_set.count }} volunteers assigned
         {% else %}
-        {{ duty.assignment_set.count }} volunteers assigned, <b>, {{ duty.unassigned_count }} more needed.<b><br>
+        {{ duty.assignment_set.count }} volunteers assigned, <b>{{ duty.unassigned_count }} more needed.<\b><br>
         {% endif %}
     </div>
-{% if duty.details %}<b>Details:</b> {{ duty.details }}{% endif %}
+{% if duty.details %}<b>Details:</b> {{ duty.details|safe }}{% endif %}
 
 {% if duty.coordinator_note %}<b>Coordinator note:</b> {{ duty.coordinator_note|safe }} {% endif %}
 
