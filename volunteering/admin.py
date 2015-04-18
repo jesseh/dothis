@@ -259,11 +259,6 @@ class EventAdmin(admin.ModelAdmin):
     inlines = [DutyInline]
     actions = [copy_events, activate_events, deactivate_events, archive_events,
                unarchive_events]
-    class Media:
-        js = [
-            '/static/grappelli/tinymce/jscripts/tiny_mce/tiny_mce.js',
-            '/static/tinymce_setup.js',
-        ]
 admin.site.register(Event, EventAdmin)
 
 
