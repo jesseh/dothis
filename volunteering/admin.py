@@ -268,11 +268,7 @@ admin.site.register(Event, EventAdmin)
 
 
 class MessageAdmin(admin.ModelAdmin):
-    class Media:
-        js = [
-            '/static/grappelli/tinymce/jscripts/tiny_mce/tiny_mce.js',
-            '/static/tinymce_setup.js',
-        ]
+    pass
 admin.site.register(Message, MessageAdmin)
 
 
