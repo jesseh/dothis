@@ -585,6 +585,11 @@ class Assignment(TimeStampedModel):
     duty_link.allow_tags = True
     duty_link.short_description = "Duty"
 
+    def actual_location(self):
+        if self.assigned_location is None:
+            return self.duty.location
+        return self.assigned_location
+
 
 class Sendable(TimeStampedModel):
     send_date = models.DateField(db_index=True)

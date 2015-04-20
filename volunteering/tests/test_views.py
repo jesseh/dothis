@@ -129,6 +129,16 @@ class testAssignmentView(TestCase):
     def testNoPermissionToSeeAssignmentUnlessDutyIsAssignableOrAssigned(self):
         pass
 
+    def testLocation_NoOverrideLocation(self):
+        assignment = Assignment.objects.create(volunteer=self.v, duty=self.d)
+        self.assertEqual(self.d.location, assignment.actual_location())
+
+    def testLocation_WithOverrideLocation(self):
+        other_location = f.LocationFactory.create()
+        assignment = Assignment.objects.create(
+            volunteer=self.v, duty=self.d, assigned_location=other_location)
+        self.assertEqual(other_location, assignment.actual_location())
+
 
 class testEventReportView(TestCase):
     def setUp(self):
