@@ -13,8 +13,7 @@ urlpatterns = patterns(
     url(r'^$', TemplateView.as_view(
         template_name='dothis/home.html'), name='home'),
     url(r'^grappelli/', include('grappelli.urls')),
-    url(r'^admin/', include(admin.site.urls)),
-
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     # From Djrill
     url("admin/email/senders/",
         admin.site.admin_view(DjrillSendersListView.as_view()),
@@ -29,6 +28,7 @@ urlpatterns = patterns(
     url("admin/email/urls/",
         admin.site.admin_view(DjrillUrlListView.as_view()),
         name="djrill_urls"),
+    url(r'^admin/', include(admin.site.urls)),
 
     url(r'^volunteering/', include('volunteering.urls',
                                    namespace='volunteering')),
