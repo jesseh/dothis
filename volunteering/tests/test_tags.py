@@ -8,7 +8,7 @@ import factories as f
 
 class TestEventReport(TestCase):
     def testEventReport_RendersTheEventName_GivenAnEvent(self):
-        event = f.EventFactory()
+        event = f.EventFactory.build()
         template = Template(
             "{% load volunteering_tags %} {% event_report event %}")
         rendered = template.render(Context({'event': event}))
@@ -59,10 +59,10 @@ class TestVolunteeredFor(TestCase):
 
 class TestAssignmentDetail(TestCase):
     def testAssignmentDetail_SaysTheDetails(self):
-        event = f.EventFactory(name="yada")
-        volunteer = f.VolunteerFactory()
-        duty = f.DutyFactory(event=event)
-        assignment = f.AssignmentFactory(volunteer=volunteer, duty=duty)
+        event = f.EventFactory.build(name="yada")
+        volunteer = f.VolunteerFactory.build()
+        duty = f.DutyFactory.build(event=event)
+        assignment = f.AssignmentFactory.build(volunteer=volunteer, duty=duty)
         template = Template(
             "{% load volunteering_tags %} {% assignment_detail assignment %}")
         rendered = template.render(Context({'assignment': assignment}))
@@ -84,10 +84,10 @@ class TestDutyVolunteers(TestCase):
         self.assertIn(v2.name(), rendered)
 
     def testDutyVolunteers_SaysNothingIfOnlyOneVolunteer(self):
-        event = f.EventFactory(name="yada")
-        v1 = f.VolunteerFactory()
-        duty = f.DutyFactory(event=event)
-        f.AssignmentFactory(volunteer=v1, duty=duty)
+        event = f.EventFactory.build(name="yada")
+        v1 = f.VolunteerFactory.build()
+        duty = f.DutyFactory.build(event=event)
+        f.AssignmentFactory.build(volunteer=v1, duty=duty)
 
         template = Template(
             "{% load volunteering_tags %} {% duty_volunteers duty %}")
