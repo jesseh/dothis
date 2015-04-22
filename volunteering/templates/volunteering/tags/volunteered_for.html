@@ -1,0 +1,7 @@
+{% load volunteering_tags %}
+<ul>
+{% for assignment in volunteer.ordered_assignments %} 
+    <li>{% assignment_detail assignment %}</li>
+    <br>
+{% endfor %}
+</ul>
