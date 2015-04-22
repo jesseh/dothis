@@ -21,6 +21,7 @@ from djrill.exceptions import MandrillAPIError
 SLUG_LENGTH = 8
 SLUG_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'
 TIME_FORMAT = "%H:%M"
+LOAD_TEMPLATE_TAGS = "{% load volunteering_tags %}"
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +129,7 @@ class Message(models.Model):
         help_text="not used for SMS")
 
     def _render(self, source, context_dict):
+        source = LOAD_TEMPLATE_TAGS + source
         t = Template(source)
         c = Context(context_dict)
         return t.render(c)
