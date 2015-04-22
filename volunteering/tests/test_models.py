@@ -573,6 +573,12 @@ class TestSendable(TestCase):
         return c, d, v, a, fix_to_date
 
 
+    def testSendEmail_NoAssignment(self):
+        sendable = f.SendableFactory()
+        # The email should not send, nor should it raise an exception.
+        self.assertTrue(sendable.send_email())
+
+
     def testSendable_DateCollectSendablesAssignable(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
 

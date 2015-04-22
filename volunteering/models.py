@@ -756,10 +756,10 @@ class Sendable(TimeStampedModel):
         return sent_count
 
     def send_email(self, verbose=False):
-        duty = getattr(self.assignment, 'duty', None)
-        event = getattr(duty, 'event', None)
+        duty     = getattr(self.assignment, 'duty', None)
+        event    = getattr(duty, 'event', None)
         activity = getattr(duty, 'activity', None)
-        location = self.assignment.actual_location()
+        location = getattr(self.assignment, 'actual_location', None)
 
         context_dict = {'volunteer': self.volunteer,
                         'assignment': self.assignment,
