@@ -1,0 +1,20 @@
+{% extends "foundation/base.html" %}
+{% load foundation_tags %}
+{% load staticfiles %}
+{% load volunteering_tags %}
+
+{% block css %}
+{% foundation_css 'foundation-icons' %}
+<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+{% endblock css %}
+
+{% block title %}
+Event Report
+{% endblock %}
+
+
+{% block base_body %}
+
+{% event_report event %}
+
+{% endblock base_body %}
