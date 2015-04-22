@@ -1,0 +1,7 @@
+{% if duty.has_multiple_volunteers %}
+<ul>
+    {% for volunteer in duty.assigned_volunteers %}
+    <li>{{ volunteer.name }}</li>
+    {% endfor %}
+</ul>
+{% endif %}

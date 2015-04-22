@@ -18,3 +18,8 @@ def volunteered_for(volunteer):
 @register.inclusion_tag('volunteering/tags/assignment_detail.html')
 def assignment_detail(assignment):
     return {'assignment': assignment}
+
+
+@register.inclusion_tag('volunteering/tags/duty_volunteers.html')
+def duty_volunteers(duty):
+    return {'duty': duty}

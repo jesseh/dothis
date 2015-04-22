@@ -532,6 +532,9 @@ class Duty(models.Model):
     def unassigned_count(self):
         return self.multiple - self.assignment_set.count()
 
+    def has_multiple_volunteers(self):
+        return Volunteer.objects.filter(assignment__duty=self).count() > 1
+
     def copy_for_event(self, event):
         Duty(activity=self.activity,
              event=event,
@@ -753,10 +756,20 @@ class Sendable(TimeStampedModel):
         return sent_count
 
     def send_email(self, verbose=False):
-        message = self.trigger.message
-        context_dict = {'volunteer': self.volunteer,
-                        'assignment': self.assignment}
+        duty = getattr(self.assignment, 'duty', None)
+        event = getattr(duty, 'event', None)
+        activity = getattr(duty, 'activity', None)
+        location = self.assignment.actual_location()
 
+        context_dict = {'volunteer': self.volunteer,
+                        'assignment': self.assignment,
+                        'duty': duty,
+                        'event': event,
+                        'activity': activity,
+                        'location': location,
+                        }
+
+        message = self.trigger.message
         body = message.rendered_body(context_dict)
 
         email_params = {
@@ -775,6 +788,7 @@ class Sendable(TimeStampedModel):
             email.body = body
             email.auto_html = True
 
+        # Tags are a mandril feature.
         name_tag = ("name - %s" % message.name)[:50]
         trigger_tag = ("trigger - %s" % self.trigger.id)[:50]
         email.tags = [name_tag, trigger_tag]

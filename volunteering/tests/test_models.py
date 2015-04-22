@@ -211,6 +211,22 @@ class TestDuty(TestCase):
             f.AssignmentFactory(duty=d, volunteer=v)
         self.assertEqual(volunteers, d.assigned_volunteers())
 
+    def testHasMultipleAssigned_WithNoAssignments(self):
+        d = f.DutyFactory.create(multiple=3)
+        self.assertFalse(d.has_multiple_volunteers())
+
+    def testHasMultipleAssigned_WithOneAssignment(self):
+        d = f.DutyFactory.create(multiple=3)
+        f.AssignmentFactory(duty=d)
+        self.assertFalse(d.has_multiple_volunteers())
+
+    def testHasMultipleAssigned_WithManyAssignment(self):
+        d = f.DutyFactory.create(multiple=3)
+        f.AssignmentFactory.create_batch(2, duty=d)
+        self.assertTrue(d.has_multiple_volunteers())
+
+
+
 
 class TestCampaign(TestCase):
     def testHasSlug(self):

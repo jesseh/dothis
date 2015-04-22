@@ -67,3 +67,29 @@ class TestAssignmentDetail(TestCase):
             "{% load volunteering_tags %} {% assignment_detail assignment %}")
         rendered = template.render(Context({'assignment': assignment}))
         self.assertIn(event.name, rendered)
+
+
+class TestDutyVolunteers(TestCase):
+    def testDutyVolunteers_SaysTheVolunteers(self):
+        event = f.EventFactory(name="yada")
+        v1, v2 = f.VolunteerFactory.create_batch(2)
+        duty = f.DutyFactory(event=event)
+        f.AssignmentFactory(volunteer=v1, duty=duty)
+        f.AssignmentFactory(volunteer=v2, duty=duty)
+
+        template = Template(
+            "{% load volunteering_tags %} {% duty_volunteers duty %}")
+        rendered = template.render(Context({'duty': duty}))
+        self.assertIn(v1.name(), rendered)
+        self.assertIn(v2.name(), rendered)
+
+    def testDutyVolunteers_SaysNothingIfOnlyOneVolunteer(self):
+        event = f.EventFactory(name="yada")
+        v1 = f.VolunteerFactory()
+        duty = f.DutyFactory(event=event)
+        f.AssignmentFactory(volunteer=v1, duty=duty)
+
+        template = Template(
+            "{% load volunteering_tags %} {% duty_volunteers duty %}")
+        rendered = template.render(Context({'duty': duty}))
+        self.assertEqual("", rendered.strip())
