@@ -7,13 +7,6 @@ import factories as f
 
 
 class TestEventReport(TestCase):
-    def testEventReport_RendersTheEventName_GivenAnAssignment(self):
-        assignment = f.AssignmentFactory()
-        template = Template(
-            "{% load volunteering_tags %} {% event_report assignment %}")
-        rendered = template.render(Context({'assignment': assignment}))
-        self.assertIn('Event report', rendered)
-
     def testEventReport_RendersTheEventName_GivenAnEvent(self):
         event = f.EventFactory()
         template = Template(
@@ -21,15 +14,15 @@ class TestEventReport(TestCase):
         rendered = template.render(Context({'event': event}))
         self.assertIn('Event report', rendered)
 
-    def testEventReport_RendersAllTheVolunteerNamesRelatedToThatAssignmentAndDuty(self):
+    def testEventReport_RendersAllVolunteerNamesRelatedToTheEvent(self):
         v1, v2 = f.VolunteerFactory.create_batch(2)
         event = f.EventFactory()
         duty = f.DutyFactory(event=event)
-        assignment = f.AssignmentFactory(volunteer=v1, duty=duty)
+        f.AssignmentFactory(volunteer=v1, duty=duty)
         f.AssignmentFactory(volunteer=v2, duty=duty)
         template = Template(
-            "{% load volunteering_tags %} {% event_report assignment %}")
-        rendered = template.render(Context({'assignment': assignment}))
+            "{% load volunteering_tags %} {% event_report event %}")
+        rendered = template.render(Context({'event': event}))
         self.assertIn(v1.first_name, rendered)
         self.assertIn(v2.first_name, rendered)
 
@@ -37,11 +30,11 @@ class TestEventReport(TestCase):
         v1, v2 = f.VolunteerFactory.create_batch(2)
         event = f.EventFactory()
         duty1, duty2 = f.DutyFactory.create_batch(2, event=event)
-        assignment = f.AssignmentFactory(volunteer=v1, duty=duty1)
+        f.AssignmentFactory(volunteer=v1, duty=duty1)
         f.AssignmentFactory(volunteer=v2, duty=duty2)
         template = Template(
-            "{% load volunteering_tags %} {% event_report assignment %}")
-        rendered = template.render(Context({'assignment': assignment}))
+            "{% load volunteering_tags %} {% event_report event %}")
+        rendered = template.render(Context({'event': event}))
         self.assertIn(v1.first_name, rendered)
         self.assertIn(v2.first_name, rendered)
 
