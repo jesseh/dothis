@@ -10,5 +10,5 @@ class Command(BaseCommand):
     help = 'Send any unsent ones'
 
     def handle(self, *args, **options):
-        sent = models.Sendable.send_unsent()
+        sent = models.Sendable.send_unsent(verbose=True)
         self.stdout.write("%s messages sent" % sent)

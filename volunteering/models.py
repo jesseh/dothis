@@ -629,12 +629,13 @@ class Sendable(TimeStampedModel):
         return created
 
     @classmethod
-    def collect_from_event_only_assigned_triggers(cls, as_of_date):
+    def collect_from_event_only_assigned_triggers(cls, as_of_date, verbose=False):
         new_sendables_count = 0
         today = date.today()
 
         for t in TriggerByEvent.objects.all():
-            print("Collecting event trigger: %s" % t)
+            if verbose:
+                print("Collecting event trigger: %s" % t)
             applicable_event_date = as_of_date + timedelta(days=t.days_before)
             trigger_content_type = ContentType.objects.get_for_model(t)
             campaign_duties = t.campaign.duties_within_timespan(
@@ -643,7 +644,8 @@ class Sendable(TimeStampedModel):
                 campaign_duties, t.id, trigger_content_type)
 
             for assignment in assignments:
-                print("  Collecting assignment %s" % assignment)
+                if verbose:
+                    print("  Collecting assignment %s" % assignment)
                 if Sendable.create_or_ignore(t, assignment.volunteer,
                                              assignment, as_of_date):
                     new_sendables_count += 1
@@ -683,15 +685,17 @@ class Sendable(TimeStampedModel):
                              not handled by Sendable.")
 
     @classmethod
-    def collect_from_fixed_triggers(cls, fixed_date):
+    def collect_from_fixed_triggers(cls, fixed_date, verbose=False):
         new_sendables_count = 0
 
         triggers = TriggerByDate.objects.triggered(fixed_date).distinct()
         for t in triggers:
-            print("Collecting fixed date trigger: %s" % t)
+            if verbose:
+                print("Collecting fixed date trigger: %s" % t)
 
             for volunteer in t.recipients():
-                print("  Collecting %s" % volunteer)
+                if verbose:
+                    print("  Collecting %s" % volunteer)
                 if Sendable._duty_and_trigger_has_to_send(t, volunteer):
                     if Sendable.create_or_ignore(t, volunteer, None,
                                                  fixed_date):
@@ -699,7 +703,7 @@ class Sendable(TimeStampedModel):
         return new_sendables_count
 
     @classmethod
-    def collect_from_assignment(cls, fixed_date):
+    def collect_from_assignment(cls, fixed_date, verbose=False):
         new_sendables_count = 0
 
         triggers = TriggerByAssignment.objects.all()
@@ -717,34 +721,38 @@ class Sendable(TimeStampedModel):
         return new_sendables_count
 
     @classmethod
-    def collect_all(cls, fixed_date, my_stdout):
+    def collect_all(cls, fixed_date, my_stdout, verbose=False):
         total = 0
 
-        count = Sendable.collect_from_fixed_triggers(fixed_date)
-        my_stdout.write("Collected fixed date triggers: %d\n" % count)
+        count = Sendable.collect_from_fixed_triggers(fixed_date, verbose)
+        if verbose:
+            my_stdout.write("Collected fixed date triggers: %d\n" % count)
         total += count
 
-        count = Sendable.collect_from_assignment(fixed_date)
-        my_stdout.write("Collected assignment triggers: %d\n" % count)
+        count = Sendable.collect_from_assignment(fixed_date, verbose)
+        if verbose:
+            my_stdout.write("Collected assignment triggers: %d\n" % count)
         total += count
 
-        count = Sendable.collect_from_event_only_assigned_triggers(fixed_date)
-        my_stdout.write("Collected event triggers: %d\n" % count)
+        count = Sendable.collect_from_event_only_assigned_triggers(fixed_date, verbose)
+        if verbose:
+            my_stdout.write("Collected event triggers: %d\n" % count)
         total += count
 
-        my_stdout.write("%s messages collected\n" % total)
+        if verbose:
+            my_stdout.write("%s messages collected\n" % total)
         return total
 
     @classmethod
-    def send_unsent(self):
+    def send_unsent(self, verbose=False):
         sent_count = 0
         for unsent in Sendable.objects.filter(
                 sent_date__isnull=True).filter(send_failed=False):
-            if unsent.send_email():
+            if unsent.send_email(verbose):
                 sent_count += 1
         return sent_count
 
-    def send_email(self):
+    def send_email(self, verbose=False):
         message = self.trigger.message
         context_dict = {'volunteer': self.volunteer,
                         'assignment': self.assignment}
@@ -771,7 +779,8 @@ class Sendable(TimeStampedModel):
         trigger_tag = ("trigger - %s" % self.trigger.id)[:50]
         email.tags = [name_tag, trigger_tag]
         logger.info("Sending %s" % email_params)
-        print("Sending %s" % email_params)
+        if verbose:
+            print("Sending %s" % email_params)
         try:
             email.send(fail_silently=False)
             self.sent_date = date.today()

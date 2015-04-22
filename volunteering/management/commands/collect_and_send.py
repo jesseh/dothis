@@ -14,6 +14,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         send_date = date.today()
         self.stdout.write("Collecting for %s\n" % send_date)
-        models.Sendable.collect_all(send_date, self.stdout)
-        sent = models.Sendable.send_unsent()
+        models.Sendable.collect_all(send_date, self.stdout, verbose=True)
+        sent = models.Sendable.send_unsent(verbose=True)
         self.stdout.write("%s messages sent\n" % sent)
