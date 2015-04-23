@@ -450,6 +450,23 @@ class TestAssignment(TestCase):
         self.assertEqual(a.hh_service_location(),
                          a.volunteer.family.hh_location_2014.name)
 
+    def testActualLocation_withAssignedLocation(self):
+        l = f.LocationFactory()
+        a = f.AssignmentFactory.build(assigned_location=l)
+        self.assertEqual(l, a.actual_location())
+
+    def testActualLocation_withAssignedLocation(self):
+        l = f.LocationFactory()
+        a = f.AssignmentFactory.build()
+        a.duty.location = l
+        self.assertEqual(l, a.actual_location())
+
+    def testActualLocation_withNoLocation(self):
+        l = f.LocationFactory()
+        a = f.AssignmentFactory.build()
+        a.duty.location = None
+        self.assertIsNone(a.actual_location())
+
 
 class TestActivity(TestCase):
     def setUp(self):

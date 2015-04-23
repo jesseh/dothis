@@ -759,7 +759,10 @@ class Sendable(TimeStampedModel):
         duty     = getattr(self.assignment, 'duty', None)
         event    = getattr(duty, 'event', None)
         activity = getattr(duty, 'activity', None)
-        location = getattr(self.assignment, 'actual_location', None)
+        if self.assignment is not None:
+            location = self.assignment.actual_location()
+        else:
+            location = None
 
         context_dict = {'volunteer': self.volunteer,
                         'assignment': self.assignment,
