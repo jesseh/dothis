@@ -154,3 +154,19 @@ class testEventReportView(TestCase):
         self.client.login(username='testuser', password='testpw')
         response = self.client.get(self.url)
         self.assertEqual(200, response.status_code)
+
+
+class testEmailContentView(TestCase):
+    def setUp(self):
+        self.sendable = f.SendableFactory.create()
+        self.url = reverse('volunteering:email_content',
+                           kwargs={'sendable_id': self.sendable.id})
+
+    def testGet_must_be_logged_in(self):
+        response = self.client.get(self.url)
+        self.assertEqual(302, response.status_code)
+        User.objects.create_superuser('testuser', 'testuser@test.com',
+                                      'testpw')
+        self.client.login(username='testuser', password='testpw')
+        response = self.client.get(self.url)
+        self.assertEqual(200, response.status_code)

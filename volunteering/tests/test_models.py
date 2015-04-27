@@ -761,8 +761,54 @@ class TestSendable(TestCase):
         all_qs = Sendable.objects.all()
         self.assertQuerysetEqual(all_qs, [])
 
+    def testSendable_EventCollectSendablesAssigned_ButEventInPast(self):
+        c, d, v, a, fix_to_date = self.setup_sendable_test()
+
+        f.AssignmentFactory(volunteer=v, duty=d)
+
+        d.event.date = fix_to_date - timedelta(days=1)
+        d.event.save()
+
+        f.TriggerByEventFactory.create_batch(
+            3, assignment_state=TriggerBase.ASSIGNED,
+            campaign=c)
+        result = Sendable.collect_from_event_only_assigned_triggers(fix_to_date)
+        self.assertEqual(0, result)
+        all_qs = Sendable.objects.all()
+        self.assertQuerysetEqual(all_qs, [])
+
     def testCollectFromAssignment_NoneAssigned(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
+        f.TriggerByAssignmentFactory.create(campaign=c)
+
+        result = Sendable.collect_from_assignment(fix_to_date)
+
+        self.assertEqual(0, result)
+        all_qs = Sendable.objects.all()
+        self.assertQuerysetEqual(all_qs, [])
+
+    def testCollectFromAssignment_OneAssigned(self):
+        c, d, v, a, fix_to_date = self.setup_sendable_test()
+        when = datetime.combine(fix_to_date, time(1, 0, 0, 0, pytz.utc))
+        f.AssignmentFactory(volunteer=v, duty=d, created=when)
+        f.TriggerByAssignmentFactory.create(campaign=c)
+
+        result = Sendable.collect_from_assignment(fix_to_date)
+
+        self.assertEqual(1, result)
+        all_qs = Sendable.objects.all()
+        self.assertQuerysetEqual(all_qs, [v],
+                                 transform=lambda s: s.volunteer)
+
+    def testCollectFromAssignment_OneAssignedButEventInPast(self):
+        c, d, v, a, fix_to_date = self.setup_sendable_test()
+        when = datetime.combine(fix_to_date, time(1, 0, 0, 0, pytz.utc))
+        f.AssignmentFactory(volunteer=v, duty=d, created=when)
+        f.TriggerByAssignmentFactory.create(campaign=c)
+
+        d.event.date = fix_to_date - timedelta(days=1)
+        d.event.save()
+
         result = Sendable.collect_from_assignment(fix_to_date)
 
         self.assertEqual(0, result)

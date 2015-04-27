@@ -1,0 +1,27 @@
+{% extends "foundation/base.html" %}
+{% load foundation_tags %}
+
+{% block title %}
+    Email content
+{% endblock title %}
+
+{% block css %}
+    {% foundation_css 'foundation-icons' %}
+{% endblock css %}
+
+
+{% block base_body %}
+    <div class="row">
+      <div class="large-12 columns">
+        <h1>Email content</h1>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="large-12 columns">
+      	<div class="panel">
+            {{ body }}
+      	</div>
+      </div>
+    </div>
+{% endblock base_body %}

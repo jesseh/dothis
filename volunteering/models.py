@@ -613,6 +613,11 @@ class Sendable(TimeStampedModel):
     def __unicode__(self):
         return "%s -> %s: %s" % (self.volunteer, self.trigger, self.send_date)
 
+    def get_absolute_url(self):
+        return reverse(
+            'volunteering:email_content',
+            kwargs={'sendable_id': self.id})
+
     def trigger_detail(self):
         return str(self.trigger)
 
@@ -644,7 +649,8 @@ class Sendable(TimeStampedModel):
             campaign_duties = t.campaign.duties_within_timespan(
                 today, applicable_event_date)
             assignments = Assignment.objects.to_send_for_duties(
-                campaign_duties, t.id, trigger_content_type)
+                campaign_duties, t.id, trigger_content_type
+                ).filter(duty__event__date__gte=as_of_date)
 
             for assignment in assignments:
                 if verbose:
@@ -716,7 +722,8 @@ class Sendable(TimeStampedModel):
             for assignment in Assignment.objects.filter(
                     duty__event__campaign=trigger.campaign
             ).filter(created__gte=on_datetime,
-                     created__lt=on_datetime+timedelta(1)):
+                     created__lt=on_datetime+timedelta(1)
+            ).filter(duty__event__date__gte=fixed_date):
                 if Sendable.create_or_ignore(trigger, assignment.volunteer,
                                              assignment, fixed_date):
                     new_sendables_count += 1
@@ -755,7 +762,7 @@ class Sendable(TimeStampedModel):
                 sent_count += 1
         return sent_count
 
-    def send_email(self, verbose=False):
+    def _email_context_dict(self):
         duty     = getattr(self.assignment, 'duty', None)
         event    = getattr(duty, 'event', None)
         activity = getattr(duty, 'activity', None)
@@ -764,19 +771,23 @@ class Sendable(TimeStampedModel):
         else:
             location = None
 
-        context_dict = {'volunteer': self.volunteer,
-                        'assignment': self.assignment,
-                        'duty': duty,
-                        'event': event,
-                        'activity': activity,
-                        'location': location,
-                        }
+        return {'volunteer': self.volunteer,
+                'assignment': self.assignment,
+                'duty': duty,
+                'event': event,
+                'activity': activity,
+                'location': location,
+               }
 
+    def email_body(self):
+        return self.trigger.message.rendered_body(self._email_context_dict())
+
+    def send_email(self, verbose=False):
         message = self.trigger.message
-        body = message.rendered_body(context_dict)
+        body = self.email_body()
 
         email_params = {
-            'subject': message.rendered_subject(context_dict),
+            'subject': message.rendered_subject(self._email_context_dict()),
             'to': [self.volunteer.email_address],
             'bcc': settings.BCC_ADDRESSES,
             'from_email': settings.FROM_ADDRESS,

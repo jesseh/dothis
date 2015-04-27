@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from volunteering.models import (Assignment, Duty, Volunteer, Family,
-                                 Attribute, Event)
+                                 Attribute, Event, Sendable)
 
 
 def importer(request):
@@ -123,3 +123,20 @@ class EventReportView(TemplateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(EventReportView, self).dispatch(*args, **kwargs)
+
+
+class EmailContentView(TemplateView):
+
+    template_name = 'volunteering/email_content.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(EmailContentView, self).get_context_data(**kwargs)
+
+        sendable = Sendable.objects.get(id=kwargs['sendable_id'])
+
+        context['body'] = sendable.email_body()
+        return context
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(EmailContentView, self).dispatch(*args, **kwargs)

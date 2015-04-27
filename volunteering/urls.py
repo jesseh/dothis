@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, url
 from django.views.generic import TemplateView
 
-from views import SummaryView, AssignmentView, EventReportView
+from views import SummaryView, AssignmentView, EventReportView, EmailContentView
 
 VOLUNTEER_SLUG = "(?P<volunteer_slug>\w\w\w\w-\w\w\w\w)"
 DUTY_ID = "(?P<duty_id>\d+)"
@@ -18,5 +18,6 @@ urlpatterns = patterns('',
     # url(r'^call_list/$',
     #     TemplateView.as_view(template_name='volunteering/call_list.html')),
 
-    url(r'event_report/(?P<event_id>\d+)/', EventReportView.as_view(), name='event_report')
+    url(r'event_report/(?P<event_id>\d+)/', EventReportView.as_view(), name='event_report'),
+    url(r'email_content/(?P<sendable_id>\d+)/', EmailContentView.as_view(), name='email_content')
 )
