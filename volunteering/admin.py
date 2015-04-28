@@ -102,12 +102,11 @@ admin.site.register(Campaign, CampaignAdmin)
 
 class VolunteerAdmin(admin.ModelAdmin):
     fields = ('title', 'first_name', 'surname', 'family', 'dear_name',
-        'email_address', 'home_phone', 'mobile_phone', 'external_id',
-        'last_summary_view', 'temporary_change', 'note', 'attributes')
-    list_display = ['first_name', 'surname', 'title',
-                    'family_link', 'email_address', 'home_phone',
-                    'mobile_phone', 'attributes_list', 'temporary_change',
-                    'last_summary_view']
+              'email_address', 'home_phone', 'mobile_phone', 'external_id',
+              'last_summary_view', 'temporary_change', 'note', 'attributes')
+    list_display = ['first_name', 'surname', 'title', 'family_link',
+                    'email_address', 'home_phone', 'mobile_phone',
+                    'attributes_list', 'temporary_change', 'last_summary_view']
     readonly_fields = ['attributes_list', 'last_summary_view']
     raw_id_fields = ['family']
     related_lookup_fields = {
@@ -130,12 +129,35 @@ class VolunteerAdded(Volunteer):
         verbose_name_plural = "Recently added volunteers"
 
 
+def _set_attribute(attribute_name, volunteer_queryset):
+    attribute = Attribute.objects.get(name=attribute_name)
+    for volunteer in volunteer_queryset:
+        volunteer.attributes.add(attribute)
+
+
+def add_attribute_adult(modeladmin, request, queryset):
+    _set_attribute('adult', queryset)
+add_attribute_adult.short_description = "Add 'adult' attribute"
+
+
+def add_attribute_stewardable(modeladmin, request, queryset):
+    _set_attribute('steward able', queryset)
+add_attribute_stewardable.short_description = "Add 'steward able' attribute"
+
+
+def add_attribute_securityable(modeladmin, request, queryset):
+    _set_attribute('security able', queryset)
+add_attribute_securityable.short_description = "Add 'security able' attribute"
+
+
 class VolunteerAddedAdmin(VolunteerAdmin):
-    list_display = ['created', 'first_name', 'surname', 'title',
-                    'family_link', 'email_address', 'home_phone',
-                    'mobile_phone', 'attributes_list', 'temporary_change',]
+    list_display = ['created', 'first_name', 'surname', 'title', 'family_link',
+                    'email_address', 'home_phone', 'mobile_phone',
+                    'attributes_list', 'temporary_change']
     ordering = ('-created',)
     date_hierarchy = None
+    actions = [add_attribute_adult, add_attribute_securityable,
+               add_attribute_stewardable]
 admin.site.register(VolunteerAdded, VolunteerAddedAdmin)
 
 
