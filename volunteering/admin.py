@@ -155,9 +155,10 @@ class VolunteerAddedAdmin(VolunteerAdmin):
                     'email_address', 'home_phone', 'mobile_phone',
                     'attributes_list', 'temporary_change']
     ordering = ('-created',)
-    date_hierarchy = None
+    date_hierarchy = 'created'
     actions = [add_attribute_adult, add_attribute_securityable,
                add_attribute_stewardable]
+    list_filter = []
 admin.site.register(VolunteerAdded, VolunteerAddedAdmin)
 
 
@@ -172,7 +173,8 @@ class VolunteerNotModifiedAdmin(VolunteerAdmin):
                     'family_link', 'email_address', 'home_phone',
                     'mobile_phone', 'attributes_list', 'temporary_change']
     ordering = ('modified',)
-    date_hierarchy = None
+    date_hierarchy = 'modified'
+    list_filter = []
 admin.site.register(VolunteerNotModified, VolunteerNotModifiedAdmin)
 
 
