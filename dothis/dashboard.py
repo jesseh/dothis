@@ -34,6 +34,8 @@ class CustomIndexDashboard(Dashboard):
                  'volunteering/volunteer/?temporary_change__exact=1', False],
                 ['Recently added volunteers',
                  'volunteering/volunteeradded/', False],
+                ['Recently (not) modified volunteers',
+                 'volunteering/volunteernotmodified/', False],
                 ['Security supervisors',
                  'volunteering/volunteer/?attributes__id__exact=1', False],
                 ['Security-able volunteers',

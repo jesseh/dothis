@@ -161,6 +161,21 @@ class VolunteerAddedAdmin(VolunteerAdmin):
 admin.site.register(VolunteerAdded, VolunteerAddedAdmin)
 
 
+class VolunteerNotModified(Volunteer):
+    class Meta:
+        proxy = True
+        verbose_name_plural = "Recently (not) modified volunteers"
+
+
+class VolunteerNotModifiedAdmin(VolunteerAdmin):
+    list_display = ['modified', 'first_name', 'surname', 'title',
+                    'family_link', 'email_address', 'home_phone',
+                    'mobile_phone', 'attributes_list', 'temporary_change']
+    ordering = ('modified',)
+    date_hierarchy = None
+admin.site.register(VolunteerNotModified, VolunteerNotModifiedAdmin)
+
+
 class DutyAdmin(admin.ModelAdmin):
     list_display = ['id', 'event_is_active', 'activity', 'event', 'location',
                     'start_time', 'end_time', 'multiple', 'unassigned_count',
