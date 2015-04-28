@@ -46,16 +46,16 @@ def _update_or_create_volunteer(record):
         'home_phone': record['HOME'],
         'mobile_phone': record['MOBILE'],
     }
-    volunteer, updated = Volunteer.objects.update_or_create(
+    volunteer, created = Volunteer.objects.update_or_create(
         params, external_id=record['MEMBER ID'])
-    attribute_names = [a.strip() for a in record['ATTRIBUTES'].split(",")]
-    volunteer.attributes.clear()
-    for attribute_name in attribute_names:
-        attribute = Attribute.objects.get(name=attribute_name)
-        volunteer.attributes.add(attribute)
+    # attribute_names = [a.strip() for a in record['ATTRIBUTES'].split(",")]
+    # volunteer.attributes.clear()
+    # for attribute_name in attribute_names:
+    #     attribute = Attribute.objects.get(name=attribute_name)
+    #     volunteer.attributes.add(attribute)
 
-    volunteer.save()
-    return updated
+    # volunteer.save()
+    return created
 
 
 class SummaryView(TemplateView):
