@@ -256,6 +256,7 @@ class Family(models.Model):
 
     class Meta:
         ordering = ['external_id']
+        verbose_name_plural = "Families"
 
     def __unicode__(self):
         return self.external_id
@@ -408,6 +409,7 @@ class Activity(models.Model):
 
     class Meta:
         ordering = ['name']
+        verbose_name_plural = "Activities"
 
     def __unicode__(self):
         return self.name
