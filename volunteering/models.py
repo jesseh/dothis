@@ -512,7 +512,7 @@ class Duty(models.Model):
         if self.activity:
             name += self.activity.name
         if self.event:
-            name += " on " + self.event.name
+            name += " on " + self.event.name + " (" + str(self.event.date) + ")"
         if self.location:
             name += " at " + self.location.name
         if self.times_string():
