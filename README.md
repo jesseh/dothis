@@ -17,6 +17,7 @@ A simple app to help get volunteers to commit to duties.
 ## Todo
 
 * Install the docutils Python module (http://docutils.sf.net/). For admindocs
+* When in the volunteer detail page and adding an assignment, the list should only show future duties.
 * Action to activate events.
 * Pluralize the model name for familys
 * Output reports.

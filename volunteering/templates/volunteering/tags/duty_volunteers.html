@@ -1,7 +1,7 @@
 {% if duty.has_multiple_volunteers %}
 <ul>
     {% for volunteer in duty.assigned_volunteers %}
-    <li>{{ volunteer.name }}</li>
+    <li>{{ volunteer.name }}: {{ volunteer.contact_methods|join:", " }}</li>
     {% endfor %}
 </ul>
 {% endif %}
