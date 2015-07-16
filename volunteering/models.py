@@ -304,7 +304,7 @@ class Volunteer(TimeStampedModel):
                        kwargs={'volunteer_slug': self.slug})
 
     def name(self):
-        return "%s %s" % (self.dear_name, self.surname)
+        return "%s %s" % (self.dear_name or self.first_name, self.surname)
 
     def formal_name(self):
         if self.title:

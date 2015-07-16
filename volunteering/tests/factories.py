@@ -29,7 +29,6 @@ class VolunteerFactory(DjangoModelFactory):
     title = 'Mr.'
     first_name = 'Zeb'
     surname = factory.Sequence(lambda n: 'Zooler{0}'.format(n))
-    dear_name = 'Zeb'
     external_id = factory.Sequence(lambda n: 'VR{0}/{0}'.format(n))
     family = factory.SubFactory(FamilyFactory)
     email_address = 'zeb@zebra.net'
