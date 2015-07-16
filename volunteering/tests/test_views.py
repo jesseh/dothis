@@ -59,6 +59,16 @@ class testSummaryView(TestCase):
         self.assertContains(response, self.d.location.name, count=1)
         self.assertContains(response, self.d.activity.name, count=1)
 
+    def testSummaryContentOnlyShowsFutureAssignedDuties(self):
+        past_event = f.EventFactory(date=date(2000, 1, 1))
+        self.d.event = past_event
+        self.d.save()
+        f.AssignmentFactory.create(volunteer=self.v, duty=self.d)
+        response = self.client.get(self.url)
+        self.assertNotContains(response, self.d.event.name)
+        self.assertNotContains(response, self.d.location.name)
+        self.assertNotContains(response, self.d.activity.name)
+
     def testSummaryContentIncludesVolunteerInitials(self):
         response = self.client.get(self.url)
         self.assertContains(response, self.v.initials())

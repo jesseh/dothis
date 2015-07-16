@@ -466,6 +466,17 @@ class DutyManager(models.Manager):
             exclude(assignment__volunteer=volunteer)
         )
 
+    def upcoming_assigned_to(self, volunteer, as_of_date=None):
+        if as_of_date is None:
+            as_of_date = date.today()
+
+        return super(DutyManager, self).get_queryset(). \
+            filter(assignment__volunteer=volunteer). \
+            filter(Q(event__is_active=True) |
+                   Q(event__is_active__isnull=True)). \
+            filter(Q(event__date__gte=as_of_date) |
+                   Q(event__date__isnull=True))
+
     def assigned_to(self, volunteer):
         return super(DutyManager, self).get_queryset(). \
             filter(assignment__volunteer=volunteer)

@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
 from volunteering.models import (Assignment, Duty, Volunteer, Family,
-                                 Attribute, Event, Sendable)
+                                 Event, Sendable)
 
 
 def importer(request):
@@ -69,8 +69,7 @@ class SummaryView(TemplateView):
         self.set_volunteer_last_view(volunteer)
 
         context['volunteer'] = volunteer
-        context['assigned'] = Duty.objects.filter(
-            assignment__volunteer=volunteer)
+        context['assigned'] = Duty.objects.upcoming_assigned_to(volunteer)
         context['assignable'] = Duty.objects.assignable_to(volunteer). \
             order_by('event', 'start_time').distinct()
 
