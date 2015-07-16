@@ -512,7 +512,8 @@ class Duty(models.Model):
         if self.activity:
             name += self.activity.name
         if self.event:
-            name += " on " + self.event.name + " (" + str(self.event.date) + ")"
+            name += " on " + self.event.name + \
+                    " (" + str(self.event.date) + ")"
         if self.location:
             name += " at " + self.location.name
         if self.times_string():
@@ -639,7 +640,8 @@ class Sendable(TimeStampedModel):
         return created
 
     @classmethod
-    def collect_from_event_only_assigned_triggers(cls, as_of_date, verbose=False):
+    def collect_from_event_only_assigned_triggers(cls, as_of_date,
+                                                  verbose=False):
         new_sendables_count = 0
         today = date.today()
 
@@ -723,8 +725,8 @@ class Sendable(TimeStampedModel):
             on_datetime = datetime.combine(on_date, time(0, 0, 0, 0, pytz.utc))
             for assignment in Assignment.objects.filter(
                     duty__event__campaign=trigger.campaign
-            ).filter(created__gte=on_datetime,
-                     created__lt=on_datetime+timedelta(1)
+            ).filter(
+                created__gte=on_datetime, created__lt=on_datetime+timedelta(1)
             ).filter(duty__event__date__gte=fixed_date):
                 if Sendable.create_or_ignore(trigger, assignment.volunteer,
                                              assignment, fixed_date):
@@ -746,7 +748,8 @@ class Sendable(TimeStampedModel):
             my_stdout.write("Collected assignment triggers: %d\n" % count)
         total += count
 
-        count = Sendable.collect_from_event_only_assigned_triggers(fixed_date, verbose)
+        count = Sendable.collect_from_event_only_assigned_triggers(fixed_date,
+                                                                   verbose)
         if verbose:
             my_stdout.write("Collected event triggers: %d\n" % count)
         total += count
@@ -765,8 +768,8 @@ class Sendable(TimeStampedModel):
         return sent_count
 
     def _email_context_dict(self):
-        duty     = getattr(self.assignment, 'duty', None)
-        event    = getattr(duty, 'event', None)
+        duty = getattr(self.assignment, 'duty', None)
+        event = getattr(duty, 'event', None)
         activity = getattr(duty, 'activity', None)
         if self.assignment is not None:
             location = self.assignment.actual_location()
@@ -778,8 +781,7 @@ class Sendable(TimeStampedModel):
                 'duty': duty,
                 'event': event,
                 'activity': activity,
-                'location': location,
-               }
+                'location': location, }
 
     def email_body(self):
         return self.trigger.message.rendered_body(self._email_context_dict())
