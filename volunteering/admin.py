@@ -294,6 +294,7 @@ class EventAdmin(admin.ModelAdmin):
                     'assignment_message_description')
     list_display_links = ('name',)
     list_filter = ['is_archived', 'is_active']
+    date_hierarchy = 'date'
     change_list_template = "admin/change_list_filter_sidebar.html"
     inlines = [DutyInline]
     actions = [copy_events, activate_events, deactivate_events, archive_events,
