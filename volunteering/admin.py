@@ -183,7 +183,7 @@ class DutyAdmin(admin.ModelAdmin):
                     'start_time', 'end_time', 'multiple', 'unassigned_count',
                     'coordinator_note', 'details']
     list_filter = ['event__is_active', 'activity', 'event', 'location',
-                   'start_time']
+                   'start_time', 'event__campaign']
     readonly_fields = ['unassigned_count']
     inlines = [AssignmentInline]
 admin.site.register(Duty, DutyAdmin)
