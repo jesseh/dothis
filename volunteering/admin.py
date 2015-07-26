@@ -116,7 +116,6 @@ class VolunteerAdmin(admin.ModelAdmin):
                      'external_id']
     list_filter = ['attributes', 'temporary_change', 'last_summary_view',
                    'attributes__activity', 'assignment__duty']
-    change_list_template = "admin/change_list_filter_sidebar.html"
     filter_horizontal = ['attributes']
     inlines = [AssignmentInline]
     date_hierarchy = 'last_summary_view'
