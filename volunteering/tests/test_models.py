@@ -456,10 +456,11 @@ class TestAssignment(TestCase):
         a = f.AssignmentFactory.build(assigned_location=l)
         self.assertEqual(l, a.actual_location())
 
-    def testActualLocation_withAssignedLocation(self):
+    def testActualLocation_withAssignedDutyLocation(self):
         l = f.LocationFactory()
         a = f.AssignmentFactory.build()
         a.duty.location = l
+        a.duty.save()
         self.assertEqual(l, a.actual_location())
 
     def testActualLocation_withNoLocation(self):
