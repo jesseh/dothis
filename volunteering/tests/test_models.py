@@ -5,6 +5,7 @@ import unittest
 
 from django.db import IntegrityError
 from django.test import TestCase
+from django.test.utils import override_settings
 
 import factories as f
 
@@ -875,6 +876,44 @@ class TestTriggerByDate(TestCase):
     def testTriggerByDateFactory(self):
         t = f.TriggerByDateFactory()
         self.assertTrue(TriggerByDate.objects.filter(id=t.id).exists())
+
+    @override_settings(BCC_ADDRESSES=None)
+    def testTriggerByDateBccList_DeaultIsBlank(self):
+        t = f.TriggerByDateFactory()
+        self.assertItemsEqual(t.bcc(), [])
+
+    @override_settings(BCC_ADDRESSES=['a@a.com', 'b@b.com'])
+    def testTriggerByDateBccList_DeaultIncludesSettingsBcc(self):
+        t = f.TriggerByDateFactory()
+        self.assertItemsEqual(t.bcc(), ['a@a.com', 'b@b.com'])
+
+    @override_settings(BCC_ADDRESSES=['a@a.com', 'b@b.com'])
+    def testTriggerByDateBccList_WithBccIncludesSettingsBcc(self):
+        t = f.TriggerByDateFactory()
+        t.campaign.bcc_address = 'c@c.com'
+        t.save()
+        self.assertItemsEqual(t.bcc(), ['a@a.com', 'b@b.com', 'c@c.com'])
+
+    @override_settings(BCC_ADDRESSES=None)
+    def testTriggerByDateBccList_WithBccAndNoSettingsBcc(self):
+        t = f.TriggerByDateFactory()
+        t.campaign.bcc_address = 'c@c.com'
+        t.save()
+        self.assertItemsEqual(t.bcc(), ['c@c.com'])
+
+    @override_settings(BCC_ADDRESSES=None)
+    def testTriggerByDateBccList_SendToBccAddressIsFalse(self):
+        t = f.TriggerByDateFactory(send_to_bcc_address=False)
+        t.campaign.bcc_address = 'c@c.com'
+        t.save()
+        self.assertItemsEqual(t.bcc(), [])
+
+    @override_settings(BCC_ADDRESSES=['a@a.com', 'b@b.com'])
+    def testTriggerByDateBccList_SendToBccAddressIsFalseWithSettings(self):
+        t = f.TriggerByDateFactory(send_to_bcc_address=False)
+        t.campaign.bcc_address = 'c@c.com'
+        t.save()
+        self.assertItemsEqual(t.bcc(), ['a@a.com', 'b@b.com'])
 
     def testGetSetForADateAllAssignmentStates(self):
         fix_to_date = date(2005, 5, 5)

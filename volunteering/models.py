@@ -39,6 +39,9 @@ class Attribute(models.Model):
 class Campaign(TimeStampedModel):
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField()
+    bcc_address = models.EmailField(
+        null=True, blank=True,
+        help_text="BCC selected campaign emails to this address.")
     events = models.ManyToManyField('Event', null=True, blank=True,
                                     limit_choices_to={'is_archived': False})
     locations = models.ManyToManyField('Location', null=True, blank=True)
@@ -158,6 +161,7 @@ class TriggerBase(models.Model):
 
     campaign = models.ForeignKey(Campaign, null=True, blank=True)
     message = models.ForeignKey(Message, null=True, blank=True)
+    send_to_bcc_address = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['campaign']
@@ -168,6 +172,12 @@ class TriggerBase(models.Model):
 
     def recipients(self):
         raise NotImplementedError
+
+    def bcc(self):
+        base = settings.BCC_ADDRESSES or []
+        if self.campaign.bcc_address and self.send_to_bcc_address:
+            return base + [self.campaign.bcc_address]
+        return base
 
 
 class TriggerWithAssignmentStateMixin(models.Model):
@@ -800,11 +810,12 @@ class Sendable(TimeStampedModel):
     def send_email(self, verbose=False):
         message = self.trigger.message
         body = self.email_body()
+        bcc = self.trigger.bcc()
 
         email_params = {
             'subject': message.rendered_subject(self._email_context_dict()),
             'to': [self.volunteer.email_address],
-            'bcc': settings.BCC_ADDRESSES,
+            'bcc': bcc,
             'from_email': settings.FROM_ADDRESS,
         }
 
