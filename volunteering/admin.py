@@ -77,7 +77,7 @@ class CampaignAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ['name', 'slug']
     filter_horizontal = ['events', 'locations', 'activities']
-    fieldsets = ((None, {'fields': ('name', 'slug', 'bcc_address'), }),
+    fieldsets = ((None, {'fields': ('name', 'slug', 'from_address', 'bcc_address'), }),
                  ('Recipient selection',
                   {'fields': ('events', 'locations', 'activities'), }),
                  ('Trigger By Date Inlines',

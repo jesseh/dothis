@@ -227,8 +227,6 @@ class TestDuty(TestCase):
         self.assertTrue(d.has_multiple_volunteers())
 
 
-
-
 class TestCampaign(TestCase):
     def testHasSlug(self):
         c = Campaign(slug='a slug')
@@ -464,7 +462,6 @@ class TestAssignment(TestCase):
         self.assertEqual(l, a.actual_location())
 
     def testActualLocation_withNoLocation(self):
-        l = f.LocationFactory()
         a = f.AssignmentFactory.build()
         a.duty.location = None
         self.assertIsNone(a.actual_location())
@@ -591,12 +588,10 @@ class TestSendable(TestCase):
         d.event.save()
         return c, d, v, a, fix_to_date
 
-
     def testSendEmail_NoAssignment(self):
         sendable = f.SendableFactory()
         # The email should not send, nor should it raise an exception.
         self.assertTrue(sendable.send_email())
-
 
     def testSendable_DateCollectSendablesAssignable(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
@@ -752,7 +747,7 @@ class TestSendable(TestCase):
 
         f.AssignmentFactory(volunteer=v, duty=d)
 
-        d.event.is_active=False
+        d.event.is_active = False
         d.event.save()
 
         f.TriggerByEventFactory.create_batch(
@@ -872,7 +867,6 @@ class TestSendable(TestCase):
                                  transform=lambda s: s.volunteer)
 
 
-
 class TestTriggerByDate(TestCase):
     def testTriggerByDateFactory(self):
         t = f.TriggerByDateFactory()
@@ -975,6 +969,7 @@ class TestTriggerByDate(TestCase):
             assignment_state=TriggerBase.ASSIGNABLE, campaign=c)
         result = TriggerByDate.objects.triggered(fix_to_date).order_by('id')
         self.assertQuerysetEqual(result, [repr(t) for t in triggers])
+
 
 class TestTriggerByAssignment(TestCase):
     def testTriggerByAssignmentFactory(self):

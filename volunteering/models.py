@@ -39,6 +39,7 @@ class Attribute(models.Model):
 class Campaign(TimeStampedModel):
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField()
+    from_address = models.CharField(default=settings.FROM_ADDRESS, max_length=255)
     bcc_address = models.EmailField(
         null=True, blank=True,
         help_text="BCC selected campaign emails to this address.")
@@ -810,13 +811,12 @@ class Sendable(TimeStampedModel):
     def send_email(self, verbose=False):
         message = self.trigger.message
         body = self.email_body()
-        bcc = self.trigger.bcc()
 
         email_params = {
             'subject': message.rendered_subject(self._email_context_dict()),
             'to': [self.volunteer.email_address],
-            'bcc': bcc,
-            'from_email': settings.FROM_ADDRESS,
+            'bcc': self.trigger.bcc(),
+            'from_email': self.trigger.campaign.from_address,
         }
 
         if message.body_is_html:
