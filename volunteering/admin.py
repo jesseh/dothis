@@ -239,7 +239,6 @@ class AssignmentAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ('id', 'volunteer', 'duty_link', 'assigned_location')
     list_filter = ['duty__activity', 'duty__event', 'duty__location',
                    'assigned_location', 'duty__start_time']
-    change_list_template = "admin/change_list_filter_sidebar.html"
     resource_class = AssignmentResource
     list_select_related = True
 admin.site.register(Assignment, AssignmentAdmin)
