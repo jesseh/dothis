@@ -447,7 +447,7 @@ class TestAssignment(TestCase):
     def testHHServiceLocation(self):
         a = f.AssignmentFactory.create()
         self.assertEqual(a.hh_service_location(),
-                         a.volunteer.family.hh_location_2014.name)
+                         a.volunteer.family.hh_location.name)
 
     def testActualLocation_withAssignedLocation(self):
         l = f.LocationFactory()

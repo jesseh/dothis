@@ -39,7 +39,8 @@ class Attribute(models.Model):
 class Campaign(TimeStampedModel):
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField()
-    from_address = models.CharField(default=settings.FROM_ADDRESS, max_length=255)
+    from_address = models.CharField(default=settings.FROM_ADDRESS,
+                                    max_length=255)
     bcc_address = models.EmailField(
         null=True, blank=True,
         help_text="BCC selected campaign emails to this address.")
@@ -256,14 +257,15 @@ class TriggerByDate(TriggerWithAssignmentStateMixin, TriggerBase):
 
 
 class Family(models.Model):
-    REGENT_SUITE, SHUL = (1, 2)
+    REGENT_SUITE, SHUL, BOTH = (1, 2, 3)
     SERVICE_LOCATIONS = (
         (REGENT_SUITE, 'Regent Suite'),
         (SHUL, 'Shul'),
+        (BOTH, 'Both'),
     )
     external_id = models.CharField(max_length=200, unique=True)
-    hh_location_2014 = models.IntegerField(choices=SERVICE_LOCATIONS,
-                                           null=True, blank=True)
+    hh_location = models.IntegerField(choices=SERVICE_LOCATIONS,
+                                      null=True, blank=True)
 
     class Meta:
         ordering = ['external_id']
@@ -606,7 +608,7 @@ class Assignment(TimeStampedModel):
                     'duty_id': self.duty_id})
 
     def hh_service_location(self):
-        return self.volunteer.family.get_hh_location_2014_display()
+        return self.volunteer.family.get_hh_location_display()
 
     def duty_link(self):
         return '<a href="%s">%s</a>' % (

@@ -57,10 +57,10 @@ class VolunteerInline(admin.StackedInline):
 
 class FamilyAdmin(admin.ModelAdmin):
     inlines = [VolunteerInline]
-    list_display = ['external_id', 'hh_location_2014', 'names']
+    list_display = ['external_id', 'hh_location', 'names']
     fields = (('external_id', 'surnames'),)
     search_fields = ['external_id', 'volunteer__surname']
-    list_filter = ['hh_location_2014']
+    list_filter = ['hh_location']
     change_list_template = "admin/change_list_filter_sidebar.html"
     readonly_fields = ['surnames']
 admin.site.register(Family, FamilyAdmin)
@@ -232,7 +232,7 @@ class AssignmentResource(ModelResource):
         return str(assignment.volunteer)
 
     def dehydrate_hh_service_location(self, assignment):
-        return assignment.volunteer.family.get_hh_location_2014_display()
+        return assignment.volunteer.family.get_hh_location_display()
 
 
 class AssignmentAdmin(ExportMixin, admin.ModelAdmin):
