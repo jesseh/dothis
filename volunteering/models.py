@@ -63,8 +63,9 @@ class Campaign(TimeStampedModel):
         return Duty.objects.in_campaign(self).distinct()
 
     def duties_within_timespan(self, start, end):
-            return self.duties().filter(event__date__gte=start) \
-                                .filter(event__date__lte=end)
+            days_before_event = F('event__add_days_before_event')
+            return self.duties().filter(event__date__gte=start + days_before_event) \
+                                .filter(event__date__lte=end + days_before_event)
 
     def volunteers_needed(self):
         return self.duties().aggregate(Sum('multiple'))['multiple__sum'] or 0
@@ -385,6 +386,7 @@ class Volunteer(TimeStampedModel):
 class Event(models.Model):
     name = models.CharField(max_length=200)
     date = models.DateField(null=True, blank=True)
+    add_days_before_event = models.IntegerField(default=0)
     web_summary_description = models.TextField(blank=True, default="")
     assignment_message_description = models.TextField(blank=True, default="")
     is_active = models.BooleanField(
@@ -811,6 +813,8 @@ class Sendable(TimeStampedModel):
         return self.trigger.message.rendered_body(self._email_context_dict())
 
     def send_email(self, verbose=False):
+        # Return whether or not the sendable was sent.
+
         message = self.trigger.message
         body = self.email_body()
 

@@ -241,20 +241,45 @@ class TestCampaign(TestCase):
         qs = campaign.duties().order_by('id')
         self.assertQuerysetEqual(qs, [repr(d) for d in duties])
 
-    def testDutiesWithinTimespan(self):
-        campaign = f.CampaignFactory()
-        duties = f.FullDutyFactory.create_batch(4)
-        at_date = date(2000, 1, 1)
+    def sequence_of_duties(self, campaign, at_date, count=4, add_days_before_event=0):
+        duties = f.FullDutyFactory.create_batch(count)
         for i, d in enumerate(duties):
             e = d.event
             e.date = at_date + timedelta(i)
+            e.add_days_before_event = add_days_before_event
             e.save()
             campaign.events.add(e)
+        return duties
 
-        start = at_date + timedelta(1)
-        end = at_date + timedelta(2)
+    def testDutiesWithinTimespan_AddDaysBeforeEvent_Is_Zero(self):
+        campaign = f.CampaignFactory()
+        at_date = date(2000, 1, 1)
+        start = at_date + timedelta(days=1)
+        end = at_date + timedelta(days=2)
+        duties = self.sequence_of_duties(campaign, at_date)
+
         qs = campaign.duties_within_timespan(start, end).order_by('id')
         self.assertQuerysetEqual(qs, [repr(d) for d in duties[1:3]])
+
+    def testDutiesWithinTimespan_AddDaysBeforeEvent_Is_One(self):
+        campaign = f.CampaignFactory()
+        at_date = date(2000, 1, 1)
+        start = at_date + timedelta(days=1)
+        end = at_date + timedelta(days=2)
+        duties = self.sequence_of_duties(campaign, at_date, add_days_before_event=1)
+
+        qs = campaign.duties_within_timespan(start, end).order_by('id')
+        self.assertQuerysetEqual(qs, [repr(d) for d in duties[2:4]])
+
+    def testDutiesWithinTimespan_AddDaysBeforeEvent_Is_Two(self):
+        campaign = f.CampaignFactory()
+        at_date = date(2000, 1, 1)
+        start = at_date + timedelta(days=1)
+        end = at_date + timedelta(days=2)
+        duties = self.sequence_of_duties(campaign, at_date, count=8, add_days_before_event=2)
+        
+        qs = campaign.duties_within_timespan(start, end).order_by('id')
+        self.assertQuerysetEqual(qs, [repr(d) for d in duties[3:5]])
 
     def testRecipientsViaAssignable(self):
         campaign = f.CampaignFactory()
@@ -502,6 +527,9 @@ class TestEvent(TestCase):
     def testHasAName(self):
         self.assertEqual(self.a.name, 'the name')
 
+    def testHasAnAddDaysBeforeEvent(self):
+        self.assertEqual(self.a.add_days_before_event, 0)
+
     def testHasAWebSummaryDescription(self):
         self.assertEqual(self.a.web_summary_description,
                          'the web summary description')
@@ -592,6 +620,7 @@ class TestSendable(TestCase):
         sendable = f.SendableFactory()
         # The email should not send, nor should it raise an exception.
         self.assertTrue(sendable.send_email())
+
 
     def testSendable_DateCollectSendablesAssignable(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
