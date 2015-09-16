@@ -24,6 +24,13 @@ class AssignmentInline(admin.TabularInline):
         return False
 
 
+class AssignmentChangeableInline(admin.TabularInline):
+    model = Assignment
+    extra = 0
+
+    def has_add_permission(self, request):
+        return False
+
 TRIGGER_FIELDSETS = (
     (None,
      {'fields': ('message',)}),
@@ -187,7 +194,7 @@ class DutyAdmin(admin.ModelAdmin):
     list_filter = ['event__is_active', 'activity', 'event', 'location',
                    'start_time', 'event__campaign']
     readonly_fields = ['unassigned_count']
-    inlines = [AssignmentInline]
+    inlines = [AssignmentChangeableInline]
 admin.site.register(Duty, DutyAdmin)
 
 
