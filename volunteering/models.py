@@ -64,8 +64,9 @@ class Campaign(TimeStampedModel):
 
     def duties_within_timespan(self, start, end):
             days_before_event = F('event__add_days_before_event')
-            return self.duties().filter(event__date__gte=start + days_before_event) \
-                                .filter(event__date__lte=end + days_before_event)
+            return self.duties() \
+                       .filter(event__date__gte=start + days_before_event) \
+                       .filter(event__date__lte=end + days_before_event)
 
     def volunteers_needed(self):
         return self.duties().aggregate(Sum('multiple'))['multiple__sum'] or 0
@@ -381,6 +382,9 @@ class Volunteer(TimeStampedModel):
     def ordered_assignments(self):
         return self.assignment_set.all().order_by("-duty__event__date",
                                                   "-duty__start_time")
+
+    def assignments_list(self):
+        return 'hello'
 
 
 class Event(models.Model):

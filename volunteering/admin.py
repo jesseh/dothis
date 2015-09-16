@@ -17,8 +17,11 @@ class DutyInline(admin.TabularInline):
 
 class AssignmentInline(admin.TabularInline):
     model = Assignment
-    readonly_fields = ['hh_service_location']
+    readonly_fields = ['duty', 'assigned_location', 'hh_service_location']
     extra = 0
+
+    def has_add_permission(self, request):
+        return False
 
 
 TRIGGER_FIELDSETS = (
