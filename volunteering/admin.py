@@ -26,6 +26,7 @@ class AssignmentInline(admin.TabularInline):
 
 class AssignmentChangeableInline(admin.TabularInline):
     model = Assignment
+    readonly_fields = ['hh_service_location']
     extra = 0
 
     def has_add_permission(self, request):
