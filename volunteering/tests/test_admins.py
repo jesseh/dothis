@@ -83,6 +83,16 @@ class testEventActions(TestCase):
             Event.objects.filter(
                 assignment_message_description=description_text).count(), 2)
 
+    def testCopyingCarriesAddDaysBeforeEvent(self):
+        add_days_before_event = 3
+        e = f.EventFactory.create(
+            add_days_before_event=add_days_before_event)
+        qs = Event.objects.filter(id=e.id)
+        copy_events(None, None, qs)
+        self.assertEqual(
+            Event.objects.filter(
+                add_days_before_event=add_days_before_event).count(), 2)
+
     def testCopyingReplicatesDuties(self):
         e = f.EventFactory.create()
         f.FullDutyFactory.create(event=e)

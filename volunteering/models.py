@@ -410,7 +410,9 @@ class Event(models.Model):
         copy = Event(
             name=self.name,
             web_summary_description=self.web_summary_description,
-            assignment_message_description=self.assignment_message_description)
+            assignment_message_description=self.assignment_message_description,
+            add_days_before_event=self.add_days_before_event
+        )
         copy.save()
         for duty in self.duty_set.all():
             duty.copy_for_event(copy)
