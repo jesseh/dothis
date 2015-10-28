@@ -20,35 +20,28 @@ NNLS Volunteering: Import
     
     <div class="row">
       <div class="large-8 medium-8 columns">
-        <h5>We bet you&rsquo;ll need a form somewhere:</h5>
-        <form action="{% url 'volunteering:import' %}" method="post">
-            {% csrf_token %}
-            <div class="row">
-            <div class="large-12 columns">
-                <label>List of volunteers</label>
-                <textarea name="csv" placeholder="Copy the list of volunteers here." ></textarea>
-            </div>
-            </div>
-            <input type="submit" class="small button" value="Import"></input>
-        </form>
-      </div>     
-    {% comment %} 
-
-      <div class="large-4 medium-4 columns">
-			  <h5>Try one of these buttons:</h5>
-			  <p><a href="#" class="small button">Simple Button</a><br/>
-        <a href="#" class="small radius button">Radius Button</a><br/>
-        <a href="#" class="small round button">Round Button</a><br/>            
-        <a href="#" class="medium success button">Success Btn</a><br/>
-        <a href="#" class="medium alert button">Alert Btn</a><br/>
-        <a href="#" class="medium secondary button">Secondary Btn</a></p>           
-				<div class="panel">
-        	<h5>So many components, girl!</h5>
-        	<p>A whole kitchen sink of goodies comes with Foundation. Checkout the docs to see them all, along with details on making them your own.</p>
-        	<a href="http://foundation.zurb.com/docs/" class="small button">Go to Foundation Docs</a>          
-        </div>
-      </div>
-    </div>
-    {% endcomment %} 
-
+          <h5>Copy and paste excel records</h5>
+          <p>The following fields are used. Order is not important.</p>
+          <ul>
+              <li>'title': record['TITLE'],</li>
+              <li>'first_name': record['FIRSTNAMES'],</li>
+              <li>'surname': record['SURNAME'],</li>
+              <li>'dear_name': record['DEARNAMES'],</li>
+              <li>'external_id': record['MEMBER ID'],</li>
+              <li>'email_address': record['EMAIL'],</li>
+              <li>'home_phone': record['HOME'],</li>
+              <li>'mobile_phone': record['MOBILE'],</li>
+          </ul>
+          
+          <form action="{% url 'volunteering:import' %}" method="post">
+              {% csrf_token %}
+              <div class="row">
+              <div class="large-12 columns">
+                  <label>List of volunteer records</label>
+                  <textarea name="csv" placeholder="Copy the list of volunteers here." ></textarea>
+              </div>
+              </div>
+              <input type="submit" class="small button" value="Import"></input>
+          </form>
+        </div>     
 {% endblock base_body %}
