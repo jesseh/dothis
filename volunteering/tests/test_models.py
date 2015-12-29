@@ -277,7 +277,7 @@ class TestCampaign(TestCase):
         start = at_date + timedelta(days=1)
         end = at_date + timedelta(days=2)
         duties = self.sequence_of_duties(campaign, at_date, count=8, add_days_before_event=2)
-        
+
         qs = campaign.duties_within_timespan(start, end).order_by('id')
         self.assertQuerysetEqual(qs, [repr(d) for d in duties[3:5]])
 
@@ -805,6 +805,7 @@ class TestSendable(TestCase):
 
     def testCollectFromAssignment_NoneAssigned(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
+
         f.TriggerByAssignmentFactory.create(campaign=c)
 
         result = Sendable.collect_from_assignment(fix_to_date)
@@ -818,6 +819,30 @@ class TestSendable(TestCase):
         when = datetime.combine(fix_to_date, time(1, 0, 0, 0, pytz.utc))
         f.AssignmentFactory(volunteer=v, duty=d, created=when)
         f.TriggerByAssignmentFactory.create(campaign=c)
+
+        result = Sendable.collect_from_assignment(fix_to_date)
+
+        self.assertEqual(1, result)
+        all_qs = Sendable.objects.all()
+        self.assertQuerysetEqual(all_qs, [v],
+                                 transform=lambda s: s.volunteer)
+
+    def testCollectFromAssignment_MultipleCampaignsDifferentLocations(self):
+        c, d, v, a, fix_to_date = self.setup_sendable_test()
+        c.locations.add(d.location)
+        when = datetime.combine(fix_to_date, time(1, 0, 0, 0, pytz.utc))
+        f.AssignmentFactory(volunteer=v, duty=d, created=when)
+
+        # Create and assign event at different location
+        d2 = f.FullDutyFactory()
+        l2 = f.LocationFactory()
+        d2.event = d.event
+        d2.location = l2
+        d2.save()
+        f.AssignmentFactory(volunteer=v, duty=d2, created=when)
+
+        f.TriggerByAssignmentFactory.create(campaign=c)
+        # f.TriggerByAssignmentFactory.create(campaign=c2)
 
         result = Sendable.collect_from_assignment(fix_to_date)
 

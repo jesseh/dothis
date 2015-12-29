@@ -753,13 +753,18 @@ class Sendable(TimeStampedModel):
 
         triggers = TriggerByAssignment.objects.all()
         for trigger in triggers:
+            duties = trigger.campaign.duties()
+
             on_date = fixed_date - timedelta(trigger.days_after)
             on_datetime = datetime.combine(on_date, time(0, 0, 0, 0, pytz.utc))
-            for assignment in Assignment.objects.filter(
-                    duty__event__campaign=trigger.campaign
+            assignments = Assignment.objects.filter(
+                duty__in=duties
             ).filter(
                 created__gte=on_datetime, created__lt=on_datetime+timedelta(1)
-            ).filter(duty__event__date__gte=fixed_date):
+            ).filter(
+                duty__event__date__gte=fixed_date
+            )
+            for assignment in assignments:
                 if Sendable.create_or_ignore(trigger, assignment.volunteer,
                                              assignment, fixed_date):
                     new_sendables_count += 1
