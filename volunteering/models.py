@@ -44,10 +44,10 @@ class Campaign(TimeStampedModel):
     bcc_address = models.EmailField(
         null=True, blank=True,
         help_text="BCC selected campaign emails to this address.")
-    events = models.ManyToManyField('Event', null=True, blank=True,
+    events = models.ManyToManyField('Event', blank=True,
                                     limit_choices_to={'is_archived': False})
-    locations = models.ManyToManyField('Location', null=True, blank=True)
-    activities = models.ManyToManyField('Activity', null=True, blank=True)
+    locations = models.ManyToManyField('Location', blank=True)
+    activities = models.ManyToManyField('Activity', blank=True)
 
     class Meta:
         ordering = ('name',)
@@ -301,7 +301,7 @@ class Volunteer(TimeStampedModel):
     email_address = models.EmailField(blank=True)
     home_phone = models.CharField(max_length=200, blank=True)
     mobile_phone = models.CharField(max_length=200, blank=True)
-    attributes = models.ManyToManyField(Attribute, null=True, blank=True)
+    attributes = models.ManyToManyField(Attribute, blank=True)
     slug = models.CharField(max_length=10, unique=True, blank=True)
     last_summary_view = models.DateTimeField(null=True)
     note = models.TextField(blank=True)
@@ -426,7 +426,7 @@ class Activity(models.Model):
     name = models.CharField(max_length=200, unique=True)
     web_summary_description = models.TextField(blank=True, default="")
     assignment_message_description = models.TextField(blank=True, default="")
-    attributes = models.ManyToManyField(Attribute, null=True, blank=True)
+    attributes = models.ManyToManyField(Attribute, blank=True)
 
     class Meta:
         ordering = ['name']
