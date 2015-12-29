@@ -1,3 +1,4 @@
+{% load firstof from future %}
 {{ assignment.duty.event.date|date:"D j M" }}
 ({{ assignment.duty.event.name }}),
 {{ assignment.duty.start_time|time:"g:i A" }} - {{ assignment.duty.end_time|time:"g:i A" }}
