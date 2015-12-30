@@ -234,13 +234,27 @@ class TestCampaign(TestCase):
         c = Campaign(slug='a slug')
         self.assertEqual('a slug', c.slug)
 
-    def testDuties(self):
+    def testDuties_OnlyVisible(self):
         campaign = f.CampaignFactory()
         duties = f.FullDutyFactory.create_batch(4)
         campaign.events.add(*[d.event for d in duties])
-        campaign = f.CampaignFactory()
+        for duty in duties[:2]:
+            duty.event.is_visible_to_volunteers = False
+            duty.event.save()
 
-        qs = campaign.duties().order_by('id')
+        qs = campaign.duties(only_visible=True).order_by('id')
+        self.assertQuerysetEqual(qs, [repr(d) for d in duties[2:]])
+
+    def testDuties_NotOnlyVisible(self):
+        campaign = f.CampaignFactory()
+        duties = f.FullDutyFactory.create_batch(4)
+        campaign.events.add(*[d.event for d in duties])
+        for duty in duties[:2]:
+            duty.event.is_visible_to_volunteers = False
+            duty.event.save()
+
+
+        qs = campaign.duties(only_visible=False).order_by('id')
         self.assertQuerysetEqual(qs, [repr(d) for d in duties])
 
     def sequence_of_duties(self, campaign, at_date, count=4,

@@ -59,20 +59,22 @@ class Campaign(TimeStampedModel):
         self.status = ActivatorModel.INACTIVE_STATUS
         self.deactivate_date = datetime_now()
 
-    def duties(self):
-        return Duty.objects.in_campaign(self).distinct()
+    def duties(self, only_visible):
+        return Duty.objects.in_campaign(self, only_visible).distinct()
 
     def duties_within_timespan(self, start, end):
             days_before_event = F('event__add_days_before_event')
-            return self.duties() \
+            return self.duties(only_visible=True) \
                        .filter(event__date__gte=start + days_before_event) \
                        .filter(event__date__lte=end + days_before_event)
 
     def volunteers_needed(self):
-        return self.duties().aggregate(Sum('multiple'))['multiple__sum'] or 0
+        return self.duties(only_visible=True).aggregate(
+            Sum('multiple'))['multiple__sum'] or 0
 
     def volunteers_assigned(self):
-        return Assignment.objects.filter(duty__in=self.duties()).count()
+        return Assignment.objects.filter(
+            duty__in=self.duties(only_visible=True)).count()
 
     def percent_assigned(self):
         total = self.volunteers_needed()
@@ -83,9 +85,9 @@ class Campaign(TimeStampedModel):
         return "%s%%" % percent
 
     def recipients(self, assigned=False, assignable=False, unassigned=False):
-        duties = self.duties
-        assigned_q = Q(assignment__duty__in=duties)
-        assignable_q = Q(attributes__activity__duty__in=duties)
+        assigned_q = Q(assignment__duty__in=self.duties(only_visible=False))
+        assignable_q = Q(
+            attributes__activity__duty__in=self.duties(only_visible=True))
 
         if unassigned and (assigned or assignable):
             raise ValueError("If unassigned, then neither assigned \
@@ -456,12 +458,13 @@ class Location(models.Model):
 
 class DutyManager(models.Manager):
 
-    def _in_campaign_q(self, campaign):
+    def _in_campaign_q(self, campaign, only_visible):
         q_objects = []
 
         if campaign.events.exists():
             q_objects.append(Q(event__campaign=campaign))
-            q_objects.append(Q(event__is_visible_to_volunteers=True))
+            if only_visible:
+                q_objects.append(Q(event__is_visible_to_volunteers=True))
 
         if campaign.locations.exists():
             q_objects.append(Q(location__campaign=campaign))
@@ -505,17 +508,18 @@ class DutyManager(models.Manager):
         return super(DutyManager, self).get_queryset(). \
             filter(assignment__volunteer=volunteer)
 
-    def assignable_to_in_campaign(self, campaign, volunteer, as_of_date=None):
+    def assignable_to_in_campaign(self, campaign, volunteer, only_visible,
+                                  as_of_date=None):
         return self.assignable_to(volunteer, as_of_date). \
-            filter(self._in_campaign_q(campaign))
+            filter(self._in_campaign_q(campaign, only_visible))
 
-    def assigned_to_in_campaign(self, campaign, volunteer):
+    def assigned_to_in_campaign(self, campaign, volunteer, only_visible):
         return self.assigned_to(volunteer). \
-            filter(self._in_campaign_q(campaign))
+            filter(self._in_campaign_q(campaign, only_visible))
 
-    def in_campaign(self, campaign):
+    def in_campaign(self, campaign, only_visible):
         return super(DutyManager, self).get_queryset(). \
-            filter(self._in_campaign_q(campaign))
+            filter(self._in_campaign_q(campaign, only_visible))
 
 
 class Duty(models.Model):
@@ -704,28 +708,34 @@ class Sendable(TimeStampedModel):
         campaign = trigger.campaign
         if trigger.assignment_state == TriggerBase.ASSIGNED:
             return (Duty.
-                    objects.assigned_to_in_campaign(campaign, volunteer).
+                    objects.assigned_to_in_campaign(
+                        campaign, volunteer, only_visible=True).
                     exists())
         elif trigger.assignment_state == TriggerBase.ASSIGNABLE:
             return (Duty.objects.
-                    assignable_to_in_campaign(campaign, volunteer).
+                    assignable_to_in_campaign(
+                        campaign, volunteer, only_visible=True).
                     exists())
         elif trigger.assignment_state == TriggerBase.ASSIGNED_AND_ASSIGNABLE:
-            return (Duty.objects.assigned_to_in_campaign(campaign, volunteer).
+            return (Duty.objects.assigned_to_in_campaign(
+                campaign, volunteer, only_visible=True).
                     exists()
                     or
                     Duty.
-                    objects.assignable_to_in_campaign(campaign, volunteer).
+                    objects.assignable_to_in_campaign(
+                        campaign, volunteer, only_visible=True).
                     exists()
                     )
         elif trigger.assignment_state == TriggerBase.UNASSIGNED:
             return (
                 (not Duty.objects.
-                    assigned_to_in_campaign(campaign, volunteer).
+                    assigned_to_in_campaign(
+                        campaign, volunteer, only_visible=True).
                     exists())
                 and
                 Duty.objects.
-                assignable_to_in_campaign(campaign, volunteer).
+                assignable_to_in_campaign(
+                    campaign, volunteer, only_visible=True).
                 exists()
             )
         else:
@@ -756,7 +766,7 @@ class Sendable(TimeStampedModel):
 
         triggers = TriggerByAssignment.objects.all()
         for trigger in triggers:
-            duties = trigger.campaign.duties()
+            duties = trigger.campaign.duties(only_visible=True)
 
             on_date = fixed_date - timedelta(trigger.days_after)
             on_datetime = datetime.combine(on_date, time(0, 0, 0, 0, pytz.utc))
