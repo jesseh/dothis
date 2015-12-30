@@ -48,7 +48,7 @@ class EventFactory(DjangoModelFactory):
         model = Event
     name = factory.Sequence(lambda n: 'an event {0}'.format(n))
     date = date(2054, 1, 1)
-    is_active = True
+    is_visible_to_volunteers = True
     is_archived = False
 
 

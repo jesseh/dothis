@@ -10,19 +10,23 @@ import factories as f
 
 class testEventActions(TestCase):
 
-    def testMakeEventsActive(self):
-        f.EventFactory.create_batch(2, is_active=False)
+    def testMakeEventsVisibleToVolunteers(self):
+        f.EventFactory.create_batch(2, is_visible_to_volunteers=False)
         qs = Event.objects.all()
-        self.assertEqual(Event.objects.filter(is_active=False).count(), 2)
+        self.assertEqual(Event.objects.filter(
+            is_visible_to_volunteers=False).count(), 2)
         activate_events(None, None, qs)
-        self.assertEqual(Event.objects.filter(is_active=False).count(), 0)
+        self.assertEqual(Event.objects.filter(
+            is_visible_to_volunteers=False).count(), 0)
 
-    def testMakeEventsNotActive(self):
+    def testMakeEventsNotVisibleToVolunteers(self):
         f.EventFactory.create_batch(2)
         qs = Event.objects.all()
-        self.assertEqual(Event.objects.filter(is_active=False).count(), 0)
+        self.assertEqual(Event.objects.filter(
+            is_visible_to_volunteers=False).count(), 0)
         deactivate_events(None, None, qs)
-        self.assertEqual(Event.objects.filter(is_active=False).count(), 2)
+        self.assertEqual(Event.objects.filter(
+            is_visible_to_volunteers=False).count(), 2)
 
     def testMakeEventsArchived(self):
         f.EventFactory.create_batch(2, is_archived=False)

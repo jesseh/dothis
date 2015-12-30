@@ -547,7 +547,7 @@ class TestEvent(TestCase):
         self.assertEqual(self.a.date, date(2001, 1, 1))
 
     def testDefaultsToNotDone(self):
-        self.assertTrue(self.a.is_active)
+        self.assertTrue(self.a.is_visible_to_volunteers)
 
 
 class TestLocation(TestCase):
@@ -639,10 +639,10 @@ class TestSendable(TestCase):
         self.assertQuerysetEqual(all_qs, [v, v, v],
                                  transform=lambda s: s.volunteer)
 
-    def testSendable_DateCollectSendablesAssignableButEventNotActive(self):
+    def testSendable_DateCollectSendablesAssignableButEventNotVisible(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
 
-        d.event.is_active = False
+        d.event.is_visible_to_volunteers = False
         d.event.save()
 
         f.TriggerByDateFactory.create_batch(
@@ -654,10 +654,10 @@ class TestSendable(TestCase):
         all_qs = Sendable.objects.all()
         self.assertQuerysetEqual(all_qs, [])
 
-    def testSendable_DateCollectSendablesAssignedButEventNotActive(self):
+    def testSendable_DateCollectSendablesAssignedButEventNotVisible(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
 
-        d.event.is_active = False
+        d.event.is_visible_to_volunteers = False
         d.event.save()
         f.AssignmentFactory(volunteer=v, duty=d)
 
@@ -735,7 +735,7 @@ class TestSendable(TestCase):
         self.assertQuerysetEqual(all_qs, [v, v, v],
                                  transform=lambda s: s.volunteer)
 
-    def testSendable_EventCollectSendablesAssignable_ButEventNotActive(self):
+    def testSendable_EventCollectSendablesAssignable_ButEventNotVisible(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
 
         f.TriggerByEventFactory.create_batch(
@@ -777,12 +777,12 @@ class TestSendable(TestCase):
         all_qs = Sendable.objects.all()
         self.assertQuerysetEqual(all_qs, [])
 
-    def testSendable_EventCollectSendablesAssigned_ButEventNotActive(self):
+    def testSendable_EventCollectSendablesAssigned_ButEventNotVisible(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
 
         f.AssignmentFactory(volunteer=v, duty=d)
 
-        d.event.is_active = False
+        d.event.is_visible_to_volunteers = False
         d.event.save()
 
         f.TriggerByEventFactory.create_batch(

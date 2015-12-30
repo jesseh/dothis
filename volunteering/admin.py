@@ -88,7 +88,8 @@ class CampaignAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ['name', 'slug']
     filter_horizontal = ['events', 'locations', 'activities']
-    fieldsets = ((None, {'fields': ('name', 'slug', 'from_address', 'bcc_address'), }),
+    fieldsets = ((None, {'fields': ('name', 'slug', 'from_address',
+                                    'bcc_address'), }),
                  ('Recipient selection',
                   {'fields': ('events', 'locations', 'activities'), }),
                  ('Trigger By Date Inlines',
@@ -189,11 +190,11 @@ admin.site.register(VolunteerNotModified, VolunteerNotModifiedAdmin)
 
 
 class DutyAdmin(admin.ModelAdmin):
-    list_display = ['id', 'event_is_active', 'activity', 'event', 'location',
-                    'start_time', 'end_time', 'multiple', 'unassigned_count',
-                    'coordinator_note', 'details']
-    list_filter = ['event__is_active', 'activity', 'event', 'location',
-                   'start_time', 'event__campaign']
+    list_display = ['id', 'event_is_visible_to_volunteers', 'activity', 'event',
+                    'location', 'start_time', 'end_time', 'multiple',
+                    'unassigned_count', 'coordinator_note', 'details']
+    list_filter = ['event__is_visible_to_volunteers', 'activity', 'event',
+                   'location', 'start_time', 'event__campaign']
     readonly_fields = ['unassigned_count']
     inlines = [AssignmentChangeableInline]
 admin.site.register(Duty, DutyAdmin)
@@ -274,12 +275,12 @@ admin.site.register(Location, LocationAdmin)
 
 
 def activate_events(modeladmin, request, queryset):
-    queryset.update(is_active=True)
+    queryset.update(is_visible_to_volunteers=True)
 activate_events.short_description = "Activate events"
 
 
 def deactivate_events(modeladmin, request, queryset):
-    queryset.update(is_active=False)
+    queryset.update(is_visible_to_volunteers=False)
 deactivate_events.short_description = "Deactivate events"
 
 
@@ -300,10 +301,11 @@ copy_events.short_description = "Copy events"
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('date', 'name', 'is_active', 'web_summary_description',
+    list_display = ('date', 'name', 'is_visible_to_volunteers',
+                    'web_summary_description',
                     'assignment_message_description')
     list_display_links = ('name',)
-    list_filter = ['is_archived', 'is_active']
+    list_filter = ['is_archived', 'is_visible_to_volunteers']
     date_hierarchy = 'date'
     change_list_template = "admin/change_list_filter_sidebar.html"
     inlines = [DutyInline]

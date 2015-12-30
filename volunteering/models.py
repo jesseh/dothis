@@ -393,8 +393,8 @@ class Event(models.Model):
     add_days_before_event = models.IntegerField(default=0)
     web_summary_description = models.TextField(blank=True, default="")
     assignment_message_description = models.TextField(blank=True, default="")
-    is_active = models.BooleanField(
-        default=True, db_index=True, help_text="Not available to volunteers.")
+    is_visible_to_volunteers = models.BooleanField(
+        default=True, db_index=True, help_text="Not visible to volunteers.")
     is_archived = models.BooleanField(
         default=False, db_index=True,
         help_text="Exclude from future campaigns.")
@@ -458,7 +458,7 @@ class DutyManager(models.Manager):
 
         if campaign.events.exists():
             q_objects.append(Q(event__campaign=campaign))
-            q_objects.append(Q(event__is_active=True))
+            q_objects.append(Q(event__is_visible_to_volunteers=True))
 
         if campaign.locations.exists():
             q_objects.append(Q(location__campaign=campaign))
@@ -478,8 +478,8 @@ class DutyManager(models.Manager):
             annotate(num_assignments=Count('assignments')).
             filter(num_assignments__lt=F('multiple')).
             filter(multiple__gt=0).
-            filter(Q(event__is_active=True) |
-                   Q(event__is_active__isnull=True)).
+            filter(Q(event__is_visible_to_volunteers=True) |
+                   Q(event__is_visible_to_volunteers__isnull=True)).
             filter(Q(event__date__gte=as_of_date) |
                    Q(event__date__isnull=True)).
             filter(Q(activity__attributes__volunteer=volunteer) |
@@ -493,8 +493,8 @@ class DutyManager(models.Manager):
 
         return super(DutyManager, self).get_queryset(). \
             filter(assignment__volunteer=volunteer). \
-            filter(Q(event__is_active=True) |
-                   Q(event__is_active__isnull=True)). \
+            filter(Q(event__is_visible_to_volunteers=True) |
+                   Q(event__is_visible_to_volunteers__isnull=True)). \
             filter(Q(event__date__gte=as_of_date) |
                    Q(event__date__isnull=True))
 
@@ -580,9 +580,9 @@ class Duty(models.Model):
              details=self.details,
              coordinator_note=self.coordinator_note).save()
 
-    def event_is_active(self):
-        return self.event and self.event.is_active
-    event_is_active.boolean = True
+    def event_is_visible_to_volunteers(self):
+        return self.event and self.event.is_visible_to_volunteers
+    event_is_visible_to_volunteers.boolean = True
 
 
 class AssignmentManager(models.Manager):
