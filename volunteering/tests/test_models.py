@@ -851,6 +851,30 @@ class TestSendable(TestCase):
         self.assertQuerysetEqual(all_qs, [v],
                                  transform=lambda s: s.volunteer)
 
+    def testCollectFromAssignment_MultipleCampaignsDifferentActivites(self):
+        c, d, v, a, fix_to_date = self.setup_sendable_test()
+        c.locations.add(d.location)
+        when = datetime.combine(fix_to_date, time(1, 0, 0, 0, pytz.utc))
+        f.AssignmentFactory(volunteer=v, duty=d, created=when)
+
+        # Create and assign event at different location
+        d2 = f.FullDutyFactory()
+        a2 = f.ActivityFactory()
+        d2.event = d.event
+        d2.activity = a2
+        d2.save()
+        f.AssignmentFactory(volunteer=v, duty=d2, created=when)
+
+        f.TriggerByAssignmentFactory.create(campaign=c)
+
+        result = Sendable.collect_from_assignment(fix_to_date)
+
+        self.assertEqual(1, result)
+        all_qs = Sendable.objects.all()
+        self.assertQuerysetEqual(all_qs, [v],
+                                 transform=lambda s: s.volunteer)
+
+
     def testCollectFromAssignment_OneAssignedButEventInPast(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
         when = datetime.combine(fix_to_date, time(1, 0, 0, 0, pytz.utc))
