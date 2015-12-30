@@ -104,7 +104,7 @@ class Campaign(TimeStampedModel):
 
         return Volunteer.objects.filter(q_def).distinct()
 
-    def recipient_count(self):
+    def assignable_recipient_count(self):
         return self.recipients(assignable=True, assigned=True).count()
 
     def recipient_names(self):

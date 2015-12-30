@@ -372,7 +372,7 @@ class TestCampaign(TestCase):
         qs = campaign.recipients(unassigned=True).order_by('id')
         self.assertQuerysetEqual(qs, [repr(volunteer1)])
 
-    def testRecipientsCount(self):
+    def testAssignableRecipientsCount(self):
         campaign = f.CampaignFactory()
         duty = f.FullDutyFactory()
         campaign.events.add(duty.event)
@@ -380,7 +380,7 @@ class TestCampaign(TestCase):
         volunteer = f.VolunteerFactory()
         f.AssignmentFactory(duty=duty, volunteer=volunteer)
 
-        self.assertEqual(1, campaign.recipient_count())
+        self.assertEqual(1, campaign.assignable_recipient_count())
 
     def testRecipientNames(self):
         campaign = f.CampaignFactory()
