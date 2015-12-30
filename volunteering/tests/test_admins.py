@@ -1,8 +1,8 @@
 from django.test import TestCase
 
-from volunteering.admin import (copy_events, activate_events,
-                                deactivate_events, archive_events,
-                                unarchive_events)
+from volunteering.admin import (copy_events, visible_to_volunteers_events,
+                                not_visible_to_volunteers_events,
+                                archive_events, unarchive_events)
 from volunteering.models import Event
 
 import factories as f
@@ -15,7 +15,7 @@ class testEventActions(TestCase):
         qs = Event.objects.all()
         self.assertEqual(Event.objects.filter(
             is_visible_to_volunteers=False).count(), 2)
-        activate_events(None, None, qs)
+        visible_to_volunteers_events(None, None, qs)
         self.assertEqual(Event.objects.filter(
             is_visible_to_volunteers=False).count(), 0)
 
@@ -24,7 +24,7 @@ class testEventActions(TestCase):
         qs = Event.objects.all()
         self.assertEqual(Event.objects.filter(
             is_visible_to_volunteers=False).count(), 0)
-        deactivate_events(None, None, qs)
+        not_visible_to_volunteers_events(None, None, qs)
         self.assertEqual(Event.objects.filter(
             is_visible_to_volunteers=False).count(), 2)
 

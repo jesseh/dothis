@@ -310,7 +310,8 @@ class EventAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     change_list_template = "admin/change_list_filter_sidebar.html"
     inlines = [DutyInline]
-    actions = [copy_events, activate_events, deactivate_events, archive_events,
+    actions = [copy_events, visible_to_volunteers_events,
+               not_visible_to_volunteers_events, archive_events,
                unarchive_events]
 admin.site.register(Event, EventAdmin)
 
