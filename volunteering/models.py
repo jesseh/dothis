@@ -102,14 +102,18 @@ class Campaign(TimeStampedModel):
             raise ValueError("At least assigned, assignable, or unassigned "
                              "must be true.")
 
-        return Volunteer.objects.filter(q_def).distinct()
+        return Volunteer.objects.filter(q_def).distinct('id').order_by()
 
     def assignable_recipient_count(self):
         return self.recipients(assignable=True, assigned=True).count()
 
+    def unassigned_recipient_count(self):
+        return self.recipients(assignable=False, assigned=False,
+                               unassigned=True).count()
+
     def recipient_names(self):
-        recipients = self.recipients(assigned=True,
-                                     assignable=True).order_by('first_name')
+        recipients = self.recipients(assignable=True, assigned=True)
+        recipients = sorted(recipients, key=lambda r: r.first_name)
         names = ("%s - %s" % (v.name(), v.email_address) for v in recipients)
         if names:
             return "<ul><li>%s</li></ul>" % "</li><li>".join(names)
@@ -389,12 +393,11 @@ class Volunteer(TimeStampedModel):
 
 class Event(models.Model):
     name = models.CharField(max_length=200)
-    date = models.DateField(null=True, blank=True)
+    date = models.DateField(null=True, blank=True, db_index=True)
     add_days_before_event = models.IntegerField(default=0)
     web_summary_description = models.TextField(blank=True, default="")
     assignment_message_description = models.TextField(blank=True, default="")
-    is_visible_to_volunteers = models.BooleanField(
-        default=True, db_index=True, help_text="Not visible to volunteers.")
+    is_visible_to_volunteers = models.BooleanField(default=True, db_index=True)
     is_archived = models.BooleanField(
         default=False, db_index=True,
         help_text="Exclude from future campaigns.")

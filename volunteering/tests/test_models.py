@@ -382,6 +382,27 @@ class TestCampaign(TestCase):
 
         self.assertEqual(1, campaign.assignable_recipient_count())
 
+    def testUnassignedRecipientsCount(self):
+        attribute = f.AttributeFactory()
+
+        duty = f.FullDutyFactory()
+        duty.activity.attributes.add(attribute)
+        duty2 = f.FullDutyFactory()
+        duty2.activity.attributes.add(attribute)
+
+        campaign = f.CampaignFactory()
+        campaign.activities.add(duty.activity)
+
+        volunteer = f.VolunteerFactory()
+        volunteer.attributes.add(attribute)
+        volunteer2 = f.VolunteerFactory()
+        volunteer2.attributes.add(attribute)
+
+        f.AssignmentFactory(duty=duty, volunteer=volunteer)
+
+        self.assertEqual(2, campaign.assignable_recipient_count())
+        self.assertEqual(1, campaign.unassigned_recipient_count())
+
     def testRecipientNames(self):
         campaign = f.CampaignFactory()
         duty = f.FullDutyFactory()

@@ -83,7 +83,8 @@ admin.site.register(Attribute, AttributeAdmin)
 
 
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ['name', 'assignable_recipient_count', 'volunteers_needed',
+    list_display = ['name', 'assignable_recipient_count',
+                    'unassigned_recipient_count', 'volunteers_needed',
                     'volunteers_assigned', 'percent_assigned']
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ['name', 'slug']
