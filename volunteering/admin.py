@@ -275,14 +275,14 @@ class LocationAdmin(admin.ModelAdmin):
 admin.site.register(Location, LocationAdmin)
 
 
-def activate_events(modeladmin, request, queryset):
+def visible_to_volunteers_events(modeladmin, request, queryset):
     queryset.update(is_visible_to_volunteers=True)
-activate_events.short_description = "Activate events"
+visible_to_volunteers_events.short_description = "Make events visible to volunteers"
 
 
-def deactivate_events(modeladmin, request, queryset):
+def not_visible_to_volunteers_events(modeladmin, request, queryset):
     queryset.update(is_visible_to_volunteers=False)
-deactivate_events.short_description = "Deactivate events"
+not_visible_to_volunteers_events.short_description = "Make events not visible to volunteers"
 
 
 def archive_events(modeladmin, request, queryset):
