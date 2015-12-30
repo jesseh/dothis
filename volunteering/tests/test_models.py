@@ -103,7 +103,8 @@ class TestVolunteer(TestCase):
     def testContactMethods_all(self):
         volunteer = f.VolunteerFactory(mobile_phone='123', home_phone='456',
                                        email_address='a@b.c')
-        self.assertEqual(['home: 456', 'mobile: 123', 'a@b.c'], volunteer.contact_methods())
+        self.assertEqual(['home: 456', 'mobile: 123', 'a@b.c'],
+                         volunteer.contact_methods())
 
     def testContactMethods_only_two(self):
         volunteer = f.VolunteerFactory(home_phone='456', mobile_phone="",
@@ -155,15 +156,16 @@ class TestDuty(TestCase):
         volunteer = f.VolunteerFactory()
         past_event = f.EventFactory(date=date(2111, 1, 1))
         f.DutyFactory.create(event=past_event)
-        self.assertEqual(1, Duty.objects.assignable_to(volunteer,
-            as_of_date=date(2111, 1, 1)).count())
+        self.assertEqual(1, Duty.objects.assignable_to(
+            volunteer, as_of_date=date(2111, 1, 1)).count())
 
     def testOneInThePastIsNotAssignable(self):
         volunteer = f.VolunteerFactory()
         past_event = f.EventFactory(date=date(2000, 1, 1))
         f.DutyFactory.create(event=past_event)
-        self.assertEqual(0, Duty.objects.assignable_to(volunteer,
-            as_of_date=date(2000, 1, 2)).count())
+        self.assertEqual(
+            0, Duty.objects.assignable_to(
+                volunteer, as_of_date=date(2000, 1, 2)).count())
 
     def testOneOfOneIsAssignable(self):
         volunteer = f.VolunteerFactory()
@@ -241,7 +243,8 @@ class TestCampaign(TestCase):
         qs = campaign.duties().order_by('id')
         self.assertQuerysetEqual(qs, [repr(d) for d in duties])
 
-    def sequence_of_duties(self, campaign, at_date, count=4, add_days_before_event=0):
+    def sequence_of_duties(self, campaign, at_date, count=4,
+                           add_days_before_event=0):
         duties = f.FullDutyFactory.create_batch(count)
         for i, d in enumerate(duties):
             e = d.event
@@ -266,7 +269,8 @@ class TestCampaign(TestCase):
         at_date = date(2000, 1, 1)
         start = at_date + timedelta(days=1)
         end = at_date + timedelta(days=2)
-        duties = self.sequence_of_duties(campaign, at_date, add_days_before_event=1)
+        duties = self.sequence_of_duties(campaign, at_date,
+                                         add_days_before_event=1)
 
         qs = campaign.duties_within_timespan(start, end).order_by('id')
         self.assertQuerysetEqual(qs, [repr(d) for d in duties[2:4]])
@@ -276,7 +280,8 @@ class TestCampaign(TestCase):
         at_date = date(2000, 1, 1)
         start = at_date + timedelta(days=1)
         end = at_date + timedelta(days=2)
-        duties = self.sequence_of_duties(campaign, at_date, count=8, add_days_before_event=2)
+        duties = self.sequence_of_duties(campaign, at_date, count=8,
+                                         add_days_before_event=2)
 
         qs = campaign.duties_within_timespan(start, end).order_by('id')
         self.assertQuerysetEqual(qs, [repr(d) for d in duties[3:5]])
@@ -621,7 +626,6 @@ class TestSendable(TestCase):
         # The email should not send, nor should it raise an exception.
         self.assertTrue(sendable.send_email())
 
-
     def testSendable_DateCollectSendablesAssignable(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
 
@@ -751,7 +755,8 @@ class TestSendable(TestCase):
         f.TriggerByEventFactory.create_batch(
             3, assignment_state=TriggerBase.ASSIGNED, campaign=c)
 
-        result = Sendable.collect_from_event_only_assigned_triggers(fix_to_date)
+        result = Sendable.collect_from_event_only_assigned_triggers(
+            fix_to_date)
 
         self.assertEqual(3, result)
         all_qs = Sendable.objects.all().order_by('id')
@@ -765,7 +770,8 @@ class TestSendable(TestCase):
             3, assignment_state=TriggerBase.ASSIGNED,
             campaign=c)
 
-        result = Sendable.collect_from_event_only_assigned_triggers(fix_to_date)
+        result = Sendable.collect_from_event_only_assigned_triggers(
+            fix_to_date)
 
         self.assertEqual(0, result)
         all_qs = Sendable.objects.all()
@@ -782,7 +788,8 @@ class TestSendable(TestCase):
         f.TriggerByEventFactory.create_batch(
             3, assignment_state=TriggerBase.ASSIGNED,
             campaign=c)
-        result = Sendable.collect_from_event_only_assigned_triggers(fix_to_date)
+        result = Sendable.collect_from_event_only_assigned_triggers(
+            fix_to_date)
         self.assertEqual(0, result)
         all_qs = Sendable.objects.all()
         self.assertQuerysetEqual(all_qs, [])
@@ -798,7 +805,8 @@ class TestSendable(TestCase):
         f.TriggerByEventFactory.create_batch(
             3, assignment_state=TriggerBase.ASSIGNED,
             campaign=c)
-        result = Sendable.collect_from_event_only_assigned_triggers(fix_to_date)
+        result = Sendable.collect_from_event_only_assigned_triggers(
+            fix_to_date)
         self.assertEqual(0, result)
         all_qs = Sendable.objects.all()
         self.assertQuerysetEqual(all_qs, [])
@@ -874,7 +882,6 @@ class TestSendable(TestCase):
         self.assertQuerysetEqual(all_qs, [v],
                                  transform=lambda s: s.volunteer)
 
-
     def testCollectFromAssignment_OneAssignedButEventInPast(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
         when = datetime.combine(fix_to_date, time(1, 0, 0, 0, pytz.utc))
@@ -927,13 +934,15 @@ class TestSendable(TestCase):
 
     def testCollectAll_OneToCollectFromEachTrigger(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
-        fix_to_datetime = datetime.combine(fix_to_date, time(1, 0, 0, 0, pytz.utc))
+        fix_to_datetime = datetime.combine(
+            fix_to_date, time(1, 0, 0, 0, pytz.utc))
 
         f.TriggerByAssignmentFactory.create(campaign=c, days_after=0)
         f.TriggerByEventFactory.create(assignment_state=TriggerBase.ASSIGNED,
                                        campaign=c)
         f.TriggerByDateFactory.create(fixed_date=fix_to_date,
-            assignment_state=TriggerBase.ASSIGNED, campaign=c)
+                                      assignment_state=TriggerBase.ASSIGNED,
+                                      campaign=c)
 
         f.AssignmentFactory(volunteer=v, duty=d, created=fix_to_datetime)
 
