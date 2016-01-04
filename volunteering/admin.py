@@ -249,9 +249,10 @@ class AssignmentResource(ModelResource):
 
 
 class AssignmentAdmin(ExportMixin, admin.ModelAdmin):
-    list_display = ('id', 'volunteer', 'duty_link', 'assigned_location')
+    list_display = ('id', 'modified', 'volunteer', 'duty_link', 'assigned_location')
     list_filter = ['duty__activity', 'duty__event', 'duty__location',
                    'assigned_location', 'duty__start_time']
+    date_hierarchy = 'modified'
     search_fields = ['volunteer__first_name', 'volunteer__surname']
     resource_class = AssignmentResource
     list_select_related = True
