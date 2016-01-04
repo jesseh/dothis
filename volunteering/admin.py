@@ -190,12 +190,37 @@ class VolunteerNotModifiedAdmin(VolunteerAdmin):
 admin.site.register(VolunteerNotModified, VolunteerNotModifiedAdmin)
 
 
+class DutyEventFilter(admin.SimpleListFilter):
+    title = 'event (not archived)'
+    parameter_name = 'event'
+
+    def events(self):
+        return Event.objects.filter(is_archived=False)
+
+    def lookups(self, request, model_admin):
+        return [(event.id, event.date_and_name()) for event in self.events()]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(event__exact=self.value())
+        else:
+            return queryset
+
+
+class DutyVisibleEventFilter(DutyEventFilter):
+    title = 'event (visible only)'
+
+    def events(self):
+        return Event.objects.filter(is_visible_to_volunteers=True)
+
+
 class DutyAdmin(admin.ModelAdmin):
     list_display = ['id', 'event_is_visible_to_volunteers', 'activity',
-                    'event', 'location', 'start_time', 'end_time', 'multiple',
+                    'location', 'start_time', 'end_time', 'multiple',
                     'unassigned_count', 'coordinator_note', 'details']
-    list_filter = ['event__is_visible_to_volunteers', 'activity', 'event',
-                   'location', 'start_time', 'event__campaign']
+    list_filter = ['event__is_visible_to_volunteers', DutyVisibleEventFilter,
+                   DutyEventFilter, 'activity', 'location', 'start_time',
+                   'event__campaign']
     readonly_fields = ['unassigned_count']
     inlines = [AssignmentChangeableInline]
 admin.site.register(Duty, DutyAdmin)
@@ -249,12 +274,14 @@ class AssignmentResource(ModelResource):
 
 
 class AssignmentEventFilter(admin.SimpleListFilter):
-    title = 'event'
+    title = 'event (not archived)'
     parameter_name = 'event'
 
+    def events(self):
+        return Event.objects.filter(is_archived=False)
+
     def lookups(self, request, model_admin):
-        events = Event.objects.filter(is_archived=False)
-        return [(event.id, event.date_and_name()) for event in events]
+        return [(event.id, event.date_and_name()) for event in self.events()]
 
     def queryset(self, request, queryset):
         if self.value():
@@ -262,13 +289,21 @@ class AssignmentEventFilter(admin.SimpleListFilter):
         else:
             return queryset
 
+class AssignmentVisibleEventFilter(AssignmentEventFilter):
+    title = 'event (visible only)'
+
+    def events(self):
+        return Event.objects.filter(is_visible_to_volunteers=True)
+
+
 
 class AssignmentAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ('id', 'modified', 'volunteer', 'duty_link',
                     'assigned_location')
     list_filter = ['duty__event__is_visible_to_volunteers',
-                   AssignmentEventFilter, 'duty__activity', 'duty__event',
-                   'duty__location', 'assigned_location', 'duty__start_time', ]
+                   AssignmentVisibleEventFilter, AssignmentEventFilter,
+                   'duty__activity', 'duty__event', 'duty__location',
+                   'assigned_location', 'duty__start_time', ]
     date_hierarchy = 'modified'
     search_fields = ['volunteer__first_name', 'volunteer__surname']
     resource_class = AssignmentResource
