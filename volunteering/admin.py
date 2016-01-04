@@ -191,8 +191,8 @@ admin.site.register(VolunteerNotModified, VolunteerNotModifiedAdmin)
 
 
 class DutyAdmin(admin.ModelAdmin):
-    list_display = ['id', 'event_is_visible_to_volunteers', 'activity', 'event',
-                    'location', 'start_time', 'end_time', 'multiple',
+    list_display = ['id', 'event_is_visible_to_volunteers', 'activity',
+                    'event', 'location', 'start_time', 'end_time', 'multiple',
                     'unassigned_count', 'coordinator_note', 'details']
     list_filter = ['event__is_visible_to_volunteers', 'activity', 'event',
                    'location', 'start_time', 'event__campaign']
@@ -249,7 +249,8 @@ class AssignmentResource(ModelResource):
 
 
 class AssignmentAdmin(ExportMixin, admin.ModelAdmin):
-    list_display = ('id', 'modified', 'volunteer', 'duty_link', 'assigned_location')
+    list_display = ('id', 'modified', 'volunteer', 'duty_link',
+                    'assigned_location')
     list_filter = ['duty__activity', 'duty__event', 'duty__location',
                    'assigned_location', 'duty__start_time']
     date_hierarchy = 'modified'
@@ -278,12 +279,14 @@ admin.site.register(Location, LocationAdmin)
 
 def visible_to_volunteers_events(modeladmin, request, queryset):
     queryset.update(is_visible_to_volunteers=True)
-visible_to_volunteers_events.short_description = "Make events visible to volunteers"
+visible_to_volunteers_events.short_description = \
+    "Make events visible to volunteers"
 
 
 def not_visible_to_volunteers_events(modeladmin, request, queryset):
     queryset.update(is_visible_to_volunteers=False)
-not_visible_to_volunteers_events.short_description = "Make events not visible to volunteers"
+not_visible_to_volunteers_events.short_description = \
+    "Make events not visible to volunteers"
 
 
 def archive_events(modeladmin, request, queryset):
