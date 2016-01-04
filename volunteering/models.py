@@ -411,6 +411,9 @@ class Event(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.date)
 
+    def date_and_name(self):
+        return "%s : %s" % (self.date, self.name)
+
     def create_deep_copy(self):
         copy = Event(
             name=self.name,

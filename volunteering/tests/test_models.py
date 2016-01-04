@@ -253,7 +253,6 @@ class TestCampaign(TestCase):
             duty.event.is_visible_to_volunteers = False
             duty.event.save()
 
-
         qs = campaign.duties(only_visible=False).order_by('id')
         self.assertQuerysetEqual(qs, [repr(d) for d in duties])
 
@@ -566,6 +565,9 @@ class TestEvent(TestCase):
 
     def testHasAName(self):
         self.assertEqual(self.a.name, 'the name')
+
+    def testHasADateAndName(self):
+        self.assertEqual(self.a.date_and_name(), '2001-01-01 : the name')
 
     def testHasAnAddDaysBeforeEvent(self):
         self.assertEqual(self.a.add_days_before_event, 0)

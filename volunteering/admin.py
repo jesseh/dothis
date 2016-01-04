@@ -248,11 +248,27 @@ class AssignmentResource(ModelResource):
         return assignment.volunteer.family.get_hh_location_display()
 
 
+class AssignmentEventFilter(admin.SimpleListFilter):
+    title = 'event'
+    parameter_name = 'event'
+
+    def lookups(self, request, model_admin):
+        events = Event.objects.filter(is_archived=False)
+        return [(event.id, event.date_and_name()) for event in events]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(duty__event__exact=self.value())
+        else:
+            return queryset
+
+
 class AssignmentAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ('id', 'modified', 'volunteer', 'duty_link',
                     'assigned_location')
-    list_filter = ['duty__activity', 'duty__event', 'duty__location',
-                   'assigned_location', 'duty__start_time']
+    list_filter = ['duty__event__is_visible_to_volunteers',
+                   AssignmentEventFilter, 'duty__activity', 'duty__event',
+                   'duty__location', 'assigned_location', 'duty__start_time', ]
     date_hierarchy = 'modified'
     search_fields = ['volunteer__first_name', 'volunteer__surname']
     resource_class = AssignmentResource
