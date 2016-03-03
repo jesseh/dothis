@@ -358,7 +358,7 @@ copy_events.short_description = "Copy events"
 
 class EventAdmin(admin.ModelAdmin):
     list_display = ('date', 'name', 'is_visible_to_volunteers',
-                    'web_summary_description',
+                    'is_archived', 'web_summary_description',
                     'assignment_message_description')
     list_display_links = ('name',)
     list_filter = ['is_archived', 'is_visible_to_volunteers']
