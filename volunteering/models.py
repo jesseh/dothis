@@ -528,7 +528,8 @@ class DutyManager(models.Manager):
 class Duty(models.Model):
     activity = models.ForeignKey(Activity, null=True, blank=True,
                                  db_index=True)
-    event = models.ForeignKey(Event, null=True, blank=True, db_index=True)
+    event = models.ForeignKey(Event, null=True, blank=True, db_index=True,
+                              limit_choices_to={'is_archived': False})
     location = models.ForeignKey(Location, null=True, blank=True,
                                  db_index=True)
     start_time = models.TimeField(null=True, blank=True)
@@ -607,7 +608,8 @@ class AssignmentManager(models.Manager):
 
 class Assignment(TimeStampedModel):
     volunteer = models.ForeignKey(Volunteer, db_index=True)
-    duty = models.ForeignKey(Duty, db_index=True)
+    duty = models.ForeignKey(Duty, db_index=True,
+                             limit_choices_to={'event__is_archived': False})
     assigned_location = models.ForeignKey(Location, null=True, blank=True,
                                           db_index=True)
 
