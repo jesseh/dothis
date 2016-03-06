@@ -215,7 +215,7 @@ class DutyVisibleEventFilter(DutyEventFilter):
 
 
 class DutyAdmin(admin.ModelAdmin):
-    list_display = ['id', 'event_is_visible_to_volunteers', 'activity',
+    list_display = ['id', 'event_is_visible_to_volunteers', 'event', 'activity',
                     'location', 'start_time', 'end_time', 'multiple',
                     'unassigned_count', 'coordinator_note', 'details']
     list_filter = ['event__is_visible_to_volunteers', DutyVisibleEventFilter,
