@@ -152,9 +152,9 @@ def add_attribute_adult(modeladmin, request, queryset):
 add_attribute_adult.short_description = "Add 'adult' attribute"
 
 
-def add_attribute_stewardable(modeladmin, request, queryset):
-    _set_attribute('steward able', queryset)
-add_attribute_stewardable.short_description = "Add 'steward able' attribute"
+def add_attribute_greeterable(modeladmin, request, queryset):
+    _set_attribute('greeter able', queryset)
+add_attribute_greeterable.short_description = "Add 'greeter able' attribute"
 
 
 def add_attribute_securityable(modeladmin, request, queryset):
@@ -169,7 +169,7 @@ class VolunteerAddedAdmin(VolunteerAdmin):
     ordering = ('-created',)
     date_hierarchy = 'created'
     actions = [add_attribute_adult, add_attribute_securityable,
-               add_attribute_stewardable]
+               add_attribute_greeterable]
     list_filter = []
 admin.site.register(VolunteerAdded, VolunteerAddedAdmin)
 
@@ -215,9 +215,10 @@ class DutyVisibleEventFilter(DutyEventFilter):
 
 
 class DutyAdmin(admin.ModelAdmin):
-    list_display = ['id', 'event_is_visible_to_volunteers', 'event', 'activity',
-                    'location', 'start_time', 'end_time', 'multiple',
-                    'unassigned_count', 'coordinator_note', 'details']
+    list_display = ['id', 'event_is_visible_to_volunteers', 'event',
+                    'activity', 'location', 'start_time', 'end_time',
+                    'multiple', 'unassigned_count', 'coordinator_note',
+                    'details']
     list_filter = ['event__is_visible_to_volunteers', DutyVisibleEventFilter,
                    DutyEventFilter, 'activity', 'location', 'start_time',
                    'event__campaign']
@@ -289,12 +290,12 @@ class AssignmentEventFilter(admin.SimpleListFilter):
         else:
             return queryset
 
+
 class AssignmentVisibleEventFilter(AssignmentEventFilter):
     title = 'event (visible only)'
 
     def events(self):
         return Event.objects.filter(is_visible_to_volunteers=True)
-
 
 
 class AssignmentAdmin(ExportMixin, admin.ModelAdmin):
