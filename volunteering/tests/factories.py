@@ -61,6 +61,7 @@ class LocationFactory(DjangoModelFactory):
 class DutyFactory(DjangoModelFactory):
     class Meta:
         model = Duty
+    activity = factory.SubFactory(ActivityFactory)
 
 
 class FullDutyFactory(DjangoModelFactory):
@@ -123,6 +124,18 @@ class TriggerByEventFactory(DjangoModelFactory):
     campaign = factory.SubFactory(CampaignFactory)
     message = factory.SubFactory(MessageFactory)
     days_before = 0
+
+    @factory.post_generation
+    def activities(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, create an activity
+            self.activities.add(factory.SubFactory(ActivityFactory))
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for activity in extracted:
+                self.activities.add(activity)
 
 
 class TriggerByAssignmentFactory(DjangoModelFactory):

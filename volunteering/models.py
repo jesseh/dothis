@@ -249,6 +249,7 @@ class TriggerByEvent(TriggerWithAssignmentStateMixin, TriggerBase):
     assignment_state = models.IntegerField(
         choices=((TriggerBase.ASSIGNED, 'With an assigned duty'),),
         default=TriggerBase.ASSIGNED)
+    activities = models.ManyToManyField('Activity', blank=True)
 
 
 class TriggerByDate(TriggerWithAssignmentStateMixin, TriggerBase):
@@ -526,8 +527,7 @@ class DutyManager(models.Manager):
 
 
 class Duty(models.Model):
-    activity = models.ForeignKey(Activity, null=True, blank=True,
-                                 db_index=True)
+    activity = models.ForeignKey(Activity, db_index=True)
     event = models.ForeignKey(Event, null=True, blank=True, db_index=True,
                               limit_choices_to={'is_archived': False})
     location = models.ForeignKey(Location, null=True, blank=True,
@@ -696,9 +696,11 @@ class Sendable(TimeStampedModel):
             trigger_content_type = ContentType.objects.get_for_model(t)
             campaign_duties = t.campaign.duties_within_timespan(
                 today, applicable_event_date)
+            activities = t.activities.all()
             assignments = Assignment.objects.to_send_for_duties(
-                campaign_duties, t.id, trigger_content_type
-                ).filter(duty__event__date__gte=as_of_date)
+                campaign_duties, t.id, trigger_content_type).filter(
+                    duty__event__date__gte=as_of_date).filter(
+                        duty__activity__id__in=activities)
 
             for assignment in assignments:
                 if verbose:

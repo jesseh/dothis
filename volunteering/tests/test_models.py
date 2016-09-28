@@ -11,8 +11,8 @@ import factories as f
 
 from volunteering.models import (Activity, Assignment, Attribute, Campaign,
                                  Duty, Event, Location, Sendable, TriggerBase,
-                                 TriggerByDate, TriggerByAssignment, Message,
-                                 Volunteer)
+                                 TriggerByDate, TriggerByAssignment,
+                                 TriggerByEvent, Message, Volunteer)
 
 
 class TestAttribute(TestCase):
@@ -521,7 +521,9 @@ class TestAssignment(TestCase):
     def testActualLocation_withAssignedDutyLocation(self):
         l = f.LocationFactory()
         a = f.AssignmentFactory.build()
+        act = f.ActivityFactory.create()
         a.duty.location = l
+        a.duty.activity = act
         a.duty.save()
         self.assertEqual(l, a.actual_location())
 
@@ -763,7 +765,8 @@ class TestSendable(TestCase):
         f.AssignmentFactory(volunteer=v, duty=d)
 
         f.TriggerByEventFactory.create_batch(
-            3, assignment_state=TriggerBase.ASSIGNED, campaign=c)
+            3, assignment_state=TriggerBase.ASSIGNED, campaign=c,
+            activities=[d.activity])
 
         result = Sendable.collect_from_event_only_assigned_triggers(
             fix_to_date)
@@ -784,13 +787,30 @@ class TestSendable(TestCase):
         all_qs = Sendable.objects.all()
         self.assertQuerysetEqual(all_qs, [])
 
+    def testSendable_EventCollectSendablesAssignedDifferentActivity(self):
+        c, d, v, a, fix_to_date = self.setup_sendable_test()
+
+        f.AssignmentFactory(volunteer=v, duty=d)
+
+        f.TriggerByEventFactory.create_batch(
+            3, assignment_state=TriggerBase.ASSIGNED, campaign=c,
+            activities=[])
+
+        TriggerByEvent.objects.first().activities.add(d.activity)
+
+        result = Sendable.collect_from_event_only_assigned_triggers(
+            fix_to_date)
+
+        self.assertEqual(1, result)
+
     def testSendable_EventCollectSendablesAssigned(self):
         c, d, v, a, fix_to_date = self.setup_sendable_test()
 
         f.AssignmentFactory(volunteer=v, duty=d)
 
         f.TriggerByEventFactory.create_batch(
-            3, assignment_state=TriggerBase.ASSIGNED, campaign=c)
+            3, assignment_state=TriggerBase.ASSIGNED, campaign=c,
+            activities=[d.activity])
 
         result = Sendable.collect_from_event_only_assigned_triggers(
             fix_to_date)
@@ -805,7 +825,7 @@ class TestSendable(TestCase):
 
         f.TriggerByEventFactory.create_batch(
             3, assignment_state=TriggerBase.ASSIGNED,
-            campaign=c)
+            campaign=c, activities=[d.activity])
 
         result = Sendable.collect_from_event_only_assigned_triggers(
             fix_to_date)
@@ -976,7 +996,7 @@ class TestSendable(TestCase):
 
         f.TriggerByAssignmentFactory.create(campaign=c, days_after=0)
         f.TriggerByEventFactory.create(assignment_state=TriggerBase.ASSIGNED,
-                                       campaign=c)
+                                       campaign=c, activities=[d.activity])
         f.TriggerByDateFactory.create(fixed_date=fix_to_date,
                                       assignment_state=TriggerBase.ASSIGNED,
                                       campaign=c)
