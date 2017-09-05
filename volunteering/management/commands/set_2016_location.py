@@ -775,7 +775,7 @@ class Command(BaseCommand):
 	GU75,
 	GU80,
 	HA10,
-	HA10`,
+	HA10,
 	HA19,
 	HA20,
 	HA22,
