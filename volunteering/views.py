@@ -17,21 +17,26 @@ def importer(request):
     if request.method == 'POST':
         data_file = StringIO(request.POST['csv'])
         data_csv = csv.DictReader(data_file, dialect=csv.excel_tab)
-
-        created_count = 0
-        updated_count = 0
-        for record in data_csv:
-            created = _update_or_create_volunteer(record)
-            if created:
-                created_count += 1
-            else:
-                updated_count += 1
-        messages.success(request, '%s volunteers created and %s updated.' %
-                         (created_count, updated_count))
-        return redirect('/admin/volunteering/volunteer/')
+        return StreamingHttpResponse(import_records(data_csv))
     else:
         return render(request, 'volunteering/import.html')
 
+
+def import_records(data_csv):
+    created_count = 0
+    updated_count = 0
+    for record in data_csv:
+        created = _update_or_create_volunteer(record)
+        if created:
+            created_count += 1
+            yield(".")
+        else:
+            updated_count += 1
+            yield("-")
+    message = '%s volunteers created and %s updated.' %
+                     (created_count, updated_count))
+    messages.success(request, message)
+    yield(message)
 
 def _update_or_create_volunteer(record):
     family, _ = Family.objects.get_or_create(external_id=record['FAMILY ID'])
