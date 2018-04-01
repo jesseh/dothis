@@ -18,12 +18,12 @@ def importer(request):
     if request.method == 'POST':
         data_file = StringIO(request.POST['csv'])
         data_csv = csv.DictReader(data_file, dialect=csv.excel_tab)
-        return StreamingHttpResponse(import_records(data_csv))
+        return StreamingHttpResponse(import_records(data_csv, request))
     else:
         return render(request, 'volunteering/import.html')
 
 
-def import_records(data_csv):
+def import_records(data_csv, request):
     created_count = 0
     updated_count = 0
     for record in data_csv:
@@ -34,8 +34,7 @@ def import_records(data_csv):
         else:
             updated_count += 1
             yield("-")
-    message = '%s volunteers created and %s updated.' %
-                     (created_count, updated_count))
+    message = '%s volunteers created and %s updated.' % (created_count, updated_count)
     messages.success(request, message)
     yield(message)
 
