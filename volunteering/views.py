@@ -8,6 +8,7 @@ from django.views.generic.base import TemplateView
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.http import StreamingHttpResponse
 
 from volunteering.models import (Assignment, Duty, Volunteer, Family,
                                  Event, Sendable)
