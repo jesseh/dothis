@@ -112,6 +112,21 @@ class CampaignAdmin(admin.ModelAdmin):
                TriggerByEventInline]
 admin.site.register(Campaign, CampaignAdmin)
 
+class VolunteerSecurityAbleFilter(admin.SimpleListFilter):
+    title = 'security able'
+    parameter_name = 'security_able'
+
+    def lookups(self, request, model_admin):
+        return [('yes', 'yes'), ('no', 'no')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(attributes__name='security able')
+        elif self.value() == 'no':
+            return queryset.exclude(attributes__name='security able')
+        else:
+            return queryset
+
 
 class VolunteerAdmin(admin.ModelAdmin):
     fields = ('title', 'first_name', 'surname', 'family', 'dear_name',
@@ -128,7 +143,8 @@ class VolunteerAdmin(admin.ModelAdmin):
     search_fields = ['slug', 'first_name', 'surname', 'family__external_id',
                      'external_id']
     list_filter = ['attributes', 'temporary_change', 'last_summary_view',
-                   'attributes__activity', 'assignment__duty']
+                   'attributes__activity', 'assignment__duty',
+                   VolunteerSecurityAbleFilter]
     filter_horizontal = ['attributes']
     inlines = [AssignmentInline]
     date_hierarchy = 'last_summary_view'
